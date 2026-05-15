@@ -47,7 +47,7 @@ if (!repoRoot) {
   die(
     `Could not find monorepo root (no package.json with "workspaces" above ${__dirname}). ` +
       `Railway **Root Directory** must be the repository root (\`/\`), not \`apps/dashboard\`, ` +
-      `so \`packages/*\` and workspace deps resolve.`,
+      `so \`packages/*\` and workspace deps resolve. See apps/dashboard/scripts/railway-build.mjs.`,
   );
 }
 
@@ -79,4 +79,4 @@ function run(cmd, args) {
  */
 run("bun", ["install", "--ignore-scripts"]);
 /** Intentionally inline turbo + filter so a mistaken root script (`b` / `build`) is never used. */
-run("bun", ["x", "turbo", "run", "build", "--filter=dashboard"]);
+run("bun", ["x", "turbo", "run", "build", "--filter=@copperlineai/dashboard"]);
