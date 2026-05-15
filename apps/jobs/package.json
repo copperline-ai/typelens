@@ -1,17 +1,26 @@
 {
-  "name": "jobs",
+  "name": "@copperlineai/typesense-jobs",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "trigger dev",
-    "deploy": "trigger deploy",
-    "lint": "tsc --noEmit"
+    "dev:local": "trigger dev",
+    "deploy": "trigger deploy --skip-update-check",
+    "deploy:ci": "trigger deploy --skip-update-check",
+    "lint": "oxlint . --deny-warnings && oxfmt --check trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\"",
+    "format": "oxfmt --check trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\"",
+    "format:fix": "oxfmt --write trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\""
   },
   "dependencies": {
-    "@trigger.dev/sdk": "^3.3.17"
+    "@trigger.dev/sdk": "4.4.5"
   },
   "devDependencies": {
+    "@copperlineai/tsconfig": "workspace:*",
+    "@trigger.dev/build": "4.4.5",
     "@types/node": "^22.0.0",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
+    "trigger.dev": "4.4.5",
     "typescript": "^5.8.3"
   }
 }

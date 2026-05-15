@@ -23,6 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 .bun/
 
+# TypeScript
+*.tsbuildinfo
+
 # Turbo
 .turbo/
 

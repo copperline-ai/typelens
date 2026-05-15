@@ -1,5 +1,5 @@
 {
-  "extends": "@copperlineai/tsconfig/next.json",
+  "extends": "../../packages/tsconfig/next.json",
   "compilerOptions": {
     "paths": {
       "@/*": ["./*"]

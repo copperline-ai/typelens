@@ -10,11 +10,7 @@ export const metadata: Metadata = {
   description: "Manage your Typesense instances",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-background font-sans antialiased">

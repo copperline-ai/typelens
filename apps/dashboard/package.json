@@ -1,12 +1,16 @@
 {
-  "name": "dashboard",
+  "name": "@copperlineai/dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit"
+    "lint": "oxlint . --deny-warnings && oxfmt --check .",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -18,7 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
-    "next": "^15.3.2",
+    "next": "^16.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.0",
@@ -28,12 +32,16 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@copperlineai/tsconfig": "workspace:*",
     "@tailwindcss/postcss": "^4.1.6",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.0"
   }
 }

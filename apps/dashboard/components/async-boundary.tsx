@@ -11,12 +11,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
-      aria-hidden
-    />
-  );
+  return <div className={cn("animate-pulse rounded-md bg-muted", className)} aria-hidden />;
 }
 
 export function PageSkeleton() {
@@ -79,13 +74,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               "rounded-lg border px-4 py-3 shadow-lg text-sm max-w-sm",
               t.variant === "destructive"
                 ? "border-destructive bg-destructive text-destructive-foreground"
-                : "border-border bg-background text-foreground"
+                : "border-border bg-background text-foreground",
             )}
           >
             <p className="font-medium">{t.title}</p>
-            {t.description && (
-              <p className="text-xs opacity-90 mt-0.5">{t.description}</p>
-            )}
+            {t.description && <p className="text-xs opacity-90 mt-0.5">{t.description}</p>}
           </div>
         ))}
       </div>
@@ -121,12 +114,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
       return (
         <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-destructive/20 bg-destructive/5 p-8 text-center">
-          <p className="text-sm font-medium text-destructive">
-            Something went wrong
-          </p>
-          <p className="text-xs text-muted-foreground max-w-sm">
-            {error.message}
-          </p>
+          <p className="text-sm font-medium text-destructive">Something went wrong</p>
+          <p className="text-xs text-muted-foreground max-w-sm">{error.message}</p>
           <Button variant="outline" size="sm" onClick={this.reset}>
             Try again
           </Button>
