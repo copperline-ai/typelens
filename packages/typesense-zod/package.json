@@ -1,0 +1,31 @@
+{
+  "name": "@copperlineai/typesense-zod",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Converts Typesense collection field schemas to Zod schemas",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --declaration --outDir dist",
+    "lint": "oxlint . --deny-warnings && oxfmt --check .",
+    "format": "oxfmt --check .",
+    "format:fix": "oxfmt --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@copperlineai/tsconfig": "workspace:*",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0",
+    "typescript": "^5.8.3",
+    "typesense": "^1.8.2",
+    "vitest": "^3.1.0"
+  },
+  "peerDependencies": {
+    "typesense": ">=1.8.0"
+  }
+}

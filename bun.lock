@@ -20,6 +20,7 @@
       "name": "@copperlineai/dashboard",
       "version": "0.1.0",
       "dependencies": {
+        "@copperlineai/typesense-zod": "workspace:*",
         "@hookform/resolvers": "^3.9.0",
         "@radix-ui/react-alert-dialog": "^1.1.4",
         "@radix-ui/react-dialog": "^1.1.4",
@@ -71,6 +72,24 @@
     "packages/tsconfig": {
       "name": "@copperlineai/tsconfig",
       "version": "0.0.0",
+    },
+    "packages/typesense-zod": {
+      "name": "@copperlineai/typesense-zod",
+      "version": "0.0.0",
+      "dependencies": {
+        "zod": "^3.23.8",
+      },
+      "devDependencies": {
+        "@copperlineai/tsconfig": "workspace:*",
+        "oxfmt": "^0.42.0",
+        "oxlint": "^1.57.0",
+        "typescript": "^5.8.3",
+        "typesense": "^1.8.2",
+        "vitest": "^3.1.0",
+      },
+      "peerDependencies": {
+        "typesense": ">=1.8.0",
+      },
     },
   },
   "packages": {
@@ -139,6 +158,8 @@
     "@copperlineai/tsconfig": ["@copperlineai/tsconfig@workspace:packages/tsconfig"],
 
     "@copperlineai/typesense-jobs": ["@copperlineai/typesense-jobs@workspace:apps/jobs"],
+
+    "@copperlineai/typesense-zod": ["@copperlineai/typesense-zod@workspace:packages/typesense-zod"],
 
     "@depot/cli": ["@depot/cli@0.0.1-cli.2.80.0", "", { "optionalDependencies": { "@depot/cli-darwin-arm64": "0.0.1-cli.2.80.0", "@depot/cli-darwin-x64": "0.0.1-cli.2.80.0", "@depot/cli-linux-arm": "0.0.1-cli.2.80.0", "@depot/cli-linux-arm64": "0.0.1-cli.2.80.0", "@depot/cli-linux-ia32": "0.0.1-cli.2.80.0", "@depot/cli-linux-x64": "0.0.1-cli.2.80.0", "@depot/cli-win32-arm64": "0.0.1-cli.2.80.0", "@depot/cli-win32-ia32": "0.0.1-cli.2.80.0", "@depot/cli-win32-x64": "0.0.1-cli.2.80.0" }, "bin": { "depot": "bin/depot" } }, "sha512-KvmOiQdpbamFziqnzzgqBm6RjfGhLJimBBYEOVriTxCPtVJuBIFm34xZllM36OQzPZIWpWBP+2/UnOyRG5smUg=="],
 
