@@ -66,7 +66,12 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
 
   actions: {
     hydrateFromStorage() {
-      set(readStorage());
+      const saved = readStorage();
+      set(saved);
+      if (saved.activeProfileId) {
+        const profile = saved.profiles.find((p) => p.id === saved.activeProfileId);
+        if (profile) useConnectionStore.getState().actions.testConnection(profile);
+      }
     },
 
     addProfile(data) {
@@ -109,9 +114,16 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         writeStorage(next);
         return next;
       });
+      if (id) {
+        const profile = useConnectionStore.getState().profiles.find((p) => p.id === id);
+        if (profile) useConnectionStore.getState().actions.testConnection(profile);
+      } else {
+        set({ status: "idle" });
+      }
     },
 
     async testConnection(profile) {
+      set({ status: "connecting" });
       const start = performance.now();
       try {
         const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
@@ -122,10 +134,13 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         const latencyMs = Math.round(performance.now() - start);
         if (!res.ok) {
           const text = await res.text().catch(() => `HTTP ${res.status}`);
+          set({ status: "error" });
           return { ok: false, error: text || `HTTP ${res.status}` };
         }
+        set({ status: "connected" });
         return { ok: true, latencyMs };
       } catch (err) {
+        set({ status: "error" });
         // TypeError from fetch usually indicates a CORS block or network failure.
         // CORS is the most common reason when Typesense is running but unreachable from the browser.
         if (err instanceof TypeError) {
