@@ -5,9 +5,13 @@ import { defineConfig } from "vitest/config";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  esbuild: {
+    jsx: "automatic",
+    jsxImportSource: "react",
+  },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "**/*.test.ts", "**/*.spec.ts"],
+    include: ["lib/**/*.test.ts", "lib/**/*.test.tsx", "app/**/*.test.ts", "app/**/*.test.tsx"],
     passWithNoTests: true,
   },
   resolve: {
