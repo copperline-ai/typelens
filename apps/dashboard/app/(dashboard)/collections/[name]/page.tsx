@@ -57,7 +57,7 @@ function CollapsibleSection({
           )}
         />
         <span className="text-sm font-medium">{title}</span>
-        {!open && summary && <span className="text-xs text-muted-foreground ml-1">{summary}</span>}
+        {summary && <span className="text-xs text-muted-foreground ml-1">{summary}</span>}
       </button>
       {open && <div className="border-t">{children}</div>}
     </div>
@@ -99,15 +99,130 @@ function FieldsTable({ fields }: { fields: Collection["fields"] }) {
   );
 }
 
-// ── DocumentPreview ───────────────────────────────────────────────────────────
+// ── DocumentCard ─────────────────────────────────────────────────────────────
 
-function DocumentPreview({ hit }: { hit: SearchHit }) {
+function FieldValue({ value }: { value: unknown }) {
+  if (value === null || value === undefined) {
+    return <span className="text-xs text-muted-foreground italic">null</span>;
+  }
+  if (typeof value === "boolean") {
+    return (
+      <Badge variant={value ? "default" : "outline"} className="text-xs">
+        {String(value)}
+      </Badge>
+    );
+  }
+  if (typeof value === "number") {
+    return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
+  }
+  if (typeof value === "string") {
+    const display = value.length > 120 ? value.slice(0, 120) + "…" : value;
+    return (
+      <span className="text-xs font-mono break-all" title={value.length > 120 ? value : undefined}>
+        {display}
+      </span>
+    );
+  }
+  if (Array.isArray(value)) {
+    if (value.length === 0)
+      return <span className="text-xs text-muted-foreground italic">[ ]</span>;
+    if (value.every((v) => typeof v === "string" || typeof v === "number")) {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {(value as (string | number)[]).slice(0, 8).map((v, i) => (
+            <Badge key={i} variant="secondary" className="text-xs font-mono">
+              {String(v)}
+            </Badge>
+          ))}
+          {value.length > 8 && (
+            <span className="text-xs text-muted-foreground">+{value.length - 8} more</span>
+          )}
+        </div>
+      );
+    }
+    return <span className="text-xs text-muted-foreground italic">[{value.length} items]</span>;
+  }
+  if (typeof value === "object") {
+    return <span className="text-xs text-muted-foreground italic">{"{ … }"}</span>;
+  }
+  return <span className="text-xs font-mono">{String(value)}</span>;
+}
+
+function DocumentCard({ hit, fields }: { hit: SearchHit; fields: Collection["fields"] }) {
+  const [expanded, setExpanded] = useState(false);
+  const doc = hit.document;
+  const fieldMap = new Map(fields.map((f) => [f.name, f]));
+
+  const entries = Object.entries(doc);
+  const ordered: [string, unknown][] = [
+    ...entries.filter(([k]) => k === "id"),
+    ...fields
+      .filter((f) => f.name !== "id" && f.name in doc)
+      .map((f) => [f.name, doc[f.name]] as [string, unknown]),
+    ...entries.filter(([k]) => k !== "id" && !fieldMap.has(k)),
+  ];
+
+  const docId = doc["id"] as string | undefined;
+  const bodyFields = ordered.filter(([k]) => k !== "id");
+
+  // Pick first non-empty string field value for the collapsed preview snippet
+  const previewSnippet = bodyFields
+    .map(([, v]) => v)
+    .find((v): v is string => typeof v === "string" && v.length > 0);
+
   return (
-    <pre className="overflow-x-auto rounded-md bg-muted/50 px-4 py-3 text-xs leading-relaxed">
-      {JSON.stringify(hit.document, null, 2)}
-    </pre>
+    <div className="rounded-lg border overflow-hidden text-sm">
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-muted/30 transition-colors"
+      >
+        <ChevronRight
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform",
+            expanded && "rotate-90",
+          )}
+        />
+        <span className="text-xs text-muted-foreground font-mono shrink-0">id</span>
+        <span className="text-xs font-mono font-medium truncate">{docId ?? "—"}</span>
+        {!expanded && previewSnippet && (
+          <span className="text-xs text-muted-foreground truncate ml-2 opacity-60">
+            {previewSnippet.length > 80 ? previewSnippet.slice(0, 80) + "…" : previewSnippet}
+          </span>
+        )}
+        <span className="text-xs text-muted-foreground shrink-0 ml-auto">
+          {bodyFields.length} fields
+        </span>
+      </button>
+      {expanded && (
+        <div className="border-t divide-y">
+          {bodyFields.map(([key, value]) => {
+            const fieldDef = fieldMap.get(key);
+            return (
+              <div
+                key={key}
+                className="flex items-start gap-3 px-4 py-2 hover:bg-muted/20 transition-colors"
+              >
+                <div className="w-36 shrink-0 pt-px">
+                  <span className="text-xs font-mono text-muted-foreground">{key}</span>
+                  {fieldDef && (
+                    <span className="block text-[10px] text-muted-foreground/50 leading-none mt-0.5">
+                      {fieldDef.type}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 pt-px">
+                  <FieldValue value={value} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
+
+const PER_PAGE = 10;
 
 function DocumentsSection({
   profile,
@@ -120,58 +235,107 @@ function DocumentsSection({
 }) {
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [found, setFound] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
-  async function load() {
+  async function load(p: number) {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
-      const result = await sampleDocuments(profile, collectionName, fields);
+      const result = await sampleDocuments(
+        profile,
+        collectionName,
+        fields,
+        p,
+        PER_PAGE,
+        controller.signal,
+      );
       setFound(result.found);
       setHits(result.hits ?? []);
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   }
 
+  function goTo(p: number) {
+    setPage(p);
+    load(p);
+  }
+
+  const totalPages = found !== null ? Math.ceil(found / PER_PAGE) : null;
+  const start = (page - 1) * PER_PAGE + 1;
+  const end = hits !== null ? (page - 1) * PER_PAGE + hits.length : 0;
+
   return (
     <div className="p-4 space-y-3">
       {loading && (
         <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
       )}
       {error && (
         <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center">
           <p className="text-xs text-destructive">{error}</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={load}>
+          <Button variant="outline" size="sm" className="mt-2" onClick={() => load(page)}>
             Retry
           </Button>
         </div>
       )}
       {!loading && !error && hits !== null && (
         <>
-          <p className="text-xs text-muted-foreground">
-            Showing {hits.length} of {fmt.format(found ?? 0)} documents
-          </p>
           {hits.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">No documents yet.</p>
           ) : (
             <div className="space-y-2">
               {hits.map((hit, i) => (
-                <DocumentPreview key={i} hit={hit} />
+                <DocumentCard key={i} hit={hit} fields={fields} />
               ))}
+            </div>
+          )}
+          {found !== null && found > 0 && (
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-xs text-muted-foreground">
+                {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} documents
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2"
+                  disabled={page <= 1}
+                  onClick={() => goTo(page - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs text-muted-foreground px-2">
+                  {page} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2"
+                  disabled={totalPages === null || page >= totalPages}
+                  onClick={() => goTo(page + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
         </>
       )}
-      {/* Trigger load on mount */}
-      <LoadOnMount onLoad={load} />
+      <LoadOnMount onLoad={() => load(1)} />
     </div>
   );
 }
@@ -284,7 +448,11 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           </CollapsibleSection>
 
           {activeProfile && (
-            <CollapsibleSection title="Documents" summary="click to preview" onFirstOpen={() => {}}>
+            <CollapsibleSection
+              title="Documents"
+              summary={`${fmt.format(collection.num_documents)} ${collection.num_documents === 1 ? "document" : "documents"}`}
+              onFirstOpen={() => {}}
+            >
               <DocumentsSection
                 profile={activeProfile}
                 collectionName={collection.name}

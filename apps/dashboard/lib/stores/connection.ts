@@ -96,33 +96,45 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnection(profile) {
       set({ status: "connecting" });
       const start = performance.now();
-      try {
-        const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
-        const res = await fetch(url, {
-          headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-          signal: AbortSignal.timeout(5_000),
-        });
-        const latencyMs = Math.round(performance.now() - start);
-        if (!res.ok) {
-          const text = await res.text().catch(() => `HTTP ${res.status}`);
+      const retryDelays = [3_000, 5_000, 8_000, 12_000];
+
+      for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
+        if (attempt > 0) {
+          await new Promise<void>((r) => setTimeout(r, retryDelays[attempt - 1]!));
+        }
+
+        try {
+          const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
+          const res = await fetch(url, {
+            headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
+            signal: AbortSignal.timeout(10_000),
+          });
+
+          if (res.status === 503 && attempt < retryDelays.length) continue;
+
+          const latencyMs = Math.round(performance.now() - start);
+          if (!res.ok) {
+            const text = await res.text().catch(() => `HTTP ${res.status}`);
+            set({ status: "error" });
+            return { ok: false, error: text || `HTTP ${res.status}` };
+          }
+          set({ status: "connected" });
+          return { ok: true, latencyMs };
+        } catch (err) {
           set({ status: "error" });
-          return { ok: false, error: text || `HTTP ${res.status}` };
+          if (err instanceof TypeError) {
+            return {
+              ok: false,
+              error: "Enable CORS on your Typesense instance with --enable-cors",
+            };
+          }
+          const error = err instanceof Error ? err.message : String(err);
+          return { ok: false, error };
         }
-        set({ status: "connected" });
-        return { ok: true, latencyMs };
-      } catch (err) {
-        set({ status: "error" });
-        // TypeError from fetch usually indicates a CORS block or network failure.
-        // CORS is the most common reason when Typesense is running but unreachable from the browser.
-        if (err instanceof TypeError) {
-          return {
-            ok: false,
-            error: "Enable CORS on your Typesense instance with --enable-cors",
-          };
-        }
-        const error = err instanceof Error ? err.message : String(err);
-        return { ok: false, error };
       }
+
+      set({ status: "error" });
+      return { ok: false, error: "Typesense server unavailable after retries" };
     },
   },
 }));
