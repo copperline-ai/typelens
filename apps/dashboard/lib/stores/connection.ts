@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { readProfiles, writeProfiles } from "../storage/profile-storage";
 
 export type ConnectionStatus = "connected" | "connecting" | "error" | "idle";
 
@@ -26,38 +27,8 @@ type Actions = {
   setActiveProfile: (id: string | null) => void;
   testConnection: (profile: Profile) => Promise<TestConnectionResult>;
   /** Call inside a useEffect on mount to hydrate from localStorage (avoids SSR mismatch). */
-  hydrateFromStorage: () => void;
+  hydrateFromStorage: () => Promise<void>;
 };
-
-const STORAGE_KEY = "typesense:connection-profiles";
-
-function readStorage(): Omit<State, "status"> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { profiles: [], activeProfileId: null };
-    const parsed = JSON.parse(raw) as Partial<State>;
-    return {
-      profiles: Array.isArray(parsed.profiles) ? parsed.profiles : [],
-      activeProfileId: parsed.activeProfileId ?? null,
-    };
-  } catch {
-    return { profiles: [], activeProfileId: null };
-  }
-}
-
-function writeStorage(state: Omit<State, "status">) {
-  try {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        profiles: state.profiles,
-        activeProfileId: state.activeProfileId,
-      }),
-    );
-  } catch {
-    // Silently ignore (private browsing quota exceeded, etc.)
-  }
-}
 
 export const useConnectionStore = create<State & { actions: Actions }>((set) => ({
   profiles: [],
@@ -65,8 +36,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
   status: "idle",
 
   actions: {
-    hydrateFromStorage() {
-      const saved = readStorage();
+    async hydrateFromStorage() {
+      const saved = await readProfiles();
       set(saved);
       if (saved.activeProfileId) {
         const profile = saved.profiles.find((p) => p.id === saved.activeProfileId);
@@ -81,7 +52,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           profiles: [...prev.profiles, profile],
           activeProfileId: prev.activeProfileId,
         };
-        writeStorage(next);
+        writeProfiles(next);
         return next;
       });
     },
@@ -92,7 +63,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           ...prev,
           profiles: prev.profiles.map((p) => (p.id === id ? { ...p, ...updates } : p)),
         };
-        writeStorage(next);
+        writeProfiles(next);
         return next;
       });
     },
@@ -103,7 +74,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           profiles: prev.profiles.filter((p) => p.id !== id),
           activeProfileId: prev.activeProfileId === id ? null : prev.activeProfileId,
         };
-        writeStorage(next);
+        writeProfiles(next);
         return next;
       });
     },
@@ -111,7 +82,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     setActiveProfile(id) {
       set((prev) => {
         const next = { ...prev, activeProfileId: id };
-        writeStorage(next);
+        writeProfiles(next);
         return next;
       });
       if (id) {
