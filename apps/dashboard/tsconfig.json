@@ -1,5 +1,5 @@
 {
-  "extends": "@typesense-dashboard/tsconfig/base.json",
+  "extends": "@copperlineai/tsconfig/base.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "paths": {

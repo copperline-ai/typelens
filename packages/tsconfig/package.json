@@ -1,6 +1,13 @@
 {
-  "name": "@typesense-dashboard/tsconfig",
-  "version": "0.0.1",
+  "name": "@copperlineai/tsconfig",
+  "version": "0.0.0",
   "private": true,
-  "files": ["*.json"]
+  "description": "Shared TypeScript config presets for the monorepo",
+  "files": [
+    "*.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./next.json": "./next.json"
+  }
 }
