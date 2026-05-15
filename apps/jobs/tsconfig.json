@@ -1,0 +1,9 @@
+{
+  "extends": "@typesense-dashboard/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
