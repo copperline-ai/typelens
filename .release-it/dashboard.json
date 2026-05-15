@@ -1,0 +1,29 @@
+{
+  "$schema": "https://unpkg.com/release-it@19.2.4/schema/release-it.json",
+  "git": {
+    "requireBranch": "main",
+    "requireUpstream": true,
+    "changelog": false,
+    "commitMessage": "chore(dashboard): release ${version} [skip ci]",
+    "tagName": "dashboard-v${version}",
+    "tagMatch": "dashboard-v*"
+  },
+  "npm": {
+    "publish": false
+  },
+  "github": {
+    "release": true,
+    "releaseName": "dashboard v${version}",
+    "tokenRef": "GITHUB_TOKEN"
+  },
+  "plugins": {
+    "@copperlineai/release-it-ai-gateway": {
+      "paths": ["apps/dashboard"],
+      "infile": "CHANGELOG.md",
+      "model": "openai/gpt-4.1-mini"
+    }
+  },
+  "hooks": {
+    "before:git:beforeRelease": "git fetch origin main && git pull --rebase --autostash origin main"
+  }
+}

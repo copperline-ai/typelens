@@ -1,0 +1,79 @@
+# After merges to main: AI (Vercel Gateway) classifies bump + writes release notes, then release-it tags and publishes a GitHub Release.
+# Add repo secret: AI_GATEWAY_API_KEY. Optional: override model via RELEASE_AI_MODEL in the workflow env.
+name: Release (dashboard)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/dashboard/**"
+      - ".release-it/dashboard.json"
+      - "packages/release-it-ai-gateway/**"
+      - ".github/workflows/release-dashboard.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-dashboard
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Ensure GitHub CLI
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            sudo apt-get update -y
+            sudo apt-get install -y gh
+          fi
+          gh --version
+
+      # release-it commits version bumps; runners have no default Git author.
+      - name: Configure Git user for release commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # Other merges can land on main while this job runs (install + AI); rebase so push succeeds.
+      - name: Sync branch with latest main
+        run: |
+          git fetch origin main
+          git pull --rebase origin main
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.13"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # `main` can move during install + AI changelog; re-sync again so release-it's push is not rejected.
+      - name: Re-sync main before release-it
+        run: |
+          git fetch origin main
+          git pull --rebase origin main
+
+      - name: release-it (AI bump + GitHub release)
+        working-directory: apps/dashboard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+          RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
+        run: ../../node_modules/.bin/release-it --ci -c ../../.release-it/dashboard.json
+
+      - name: Read new version from package.json
+        id: version
+        working-directory: apps/dashboard
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "new_version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=dashboard-v$version" >> "$GITHUB_OUTPUT"

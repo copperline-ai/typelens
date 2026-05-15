@@ -12,7 +12,8 @@
     "test": "turbo run test",
     "format": "turbo run format",
     "format:fix": "turbo run format:fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "start:dashboard": "bun run --cwd apps/dashboard start"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
