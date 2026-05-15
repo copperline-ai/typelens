@@ -2,7 +2,14 @@
 
 declare namespace NodeJS {
   interface ProcessEnv {
-    readonly NODE_ENV: 'development' | 'test' | 'production';
+    readonly NODE_ENV: "development" | "test" | "production";
+
+    // ── Authentication ───────────────────────────────────────────────────────
+    /** Dashboard login username (required). */
+    readonly BASIC_AUTH_USERNAME: string;
+
+    /** Dashboard login password — also used as the session-signing secret (required). */
+    readonly BASIC_AUTH_PASSWORD: string;
 
     // ── Server-side (never exposed to the browser) ──────────────────────────
     /**
@@ -29,7 +36,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_TYPESENSE_PORT?: string;
 
     /** Transport protocol for the Typesense connection. */
-    readonly NEXT_PUBLIC_TYPESENSE_PROTOCOL?: 'http' | 'https';
+    readonly NEXT_PUBLIC_TYPESENSE_PROTOCOL?: "http" | "https";
 
     /**
      * Typesense search-only API key for browser use.
