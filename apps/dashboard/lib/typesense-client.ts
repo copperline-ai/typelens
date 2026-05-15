@@ -32,3 +32,7 @@ export async function typesenseFetch<T>(profile: Profile, path: string): Promise
 export function listCollections(profile: Profile) {
   return typesenseFetch<Collection[]>(profile, "/collections");
 }
+
+export function getCollection(profile: Profile, name: string) {
+  return typesenseFetch<Collection>(profile, `/collections/${encodeURIComponent(name)}`);
+}
