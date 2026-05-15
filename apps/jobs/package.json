@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "trigger dev",
+    "dev": "TYPESENSE_DASHBOARD_CONFIG_SLUG=dev INFISICAL_API_URL=https://vault.copperline.io infisical run --project-config-dir=../.. -- trigger dev",
     "dev:local": "trigger dev",
-    "deploy": "trigger deploy --skip-update-check",
+    "deploy": "TYPESENSE_DASHBOARD_CONFIG_SLUG=prod infisical run --project-config-dir=../.. --env prod -- trigger deploy --skip-update-check",
     "deploy:ci": "trigger deploy --skip-update-check",
     "lint": "oxlint . --deny-warnings && oxfmt --check trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\"",
     "format": "oxfmt --check trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\"",

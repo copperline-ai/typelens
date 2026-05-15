@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "TYPESENSE_DASHBOARD_CONFIG_SLUG=dev infisical run --project-config-dir=../.. -- next dev --turbopack",
+    "dev:local": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "oxlint . --deny-warnings && oxfmt --check .",
