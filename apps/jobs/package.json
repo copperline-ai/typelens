@@ -12,15 +12,15 @@
     "format:fix": "oxfmt --write trigger.config.ts \"trigger/**/*.ts\" \"src/**/*.ts\""
   },
   "dependencies": {
-    "@trigger.dev/sdk": "4.4.5"
+    "@trigger.dev/sdk": "4.4.6"
   },
   "devDependencies": {
     "@copperlineai/tsconfig": "workspace:*",
-    "@trigger.dev/build": "4.4.5",
+    "@trigger.dev/build": "4.4.6",
     "@types/node": "^22.0.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
-    "trigger.dev": "4.4.5",
+    "trigger.dev": "4.4.6",
     "typescript": "^5.8.3"
   }
 }
