@@ -1,5 +1,5 @@
 {
-  "name": "typesense-dashboard",
+  "name": "typelens",
   "private": true,
   "license": "MIT",
   "workspaces": [
@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --filter=@copperlineai/dashboard --filter=@copperlineai/typesense-jobs",
+    "dev": "turbo run dev --filter=@copperlineai/dashboard --filter=@copperlineai/typelens-jobs",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "turbo run format",

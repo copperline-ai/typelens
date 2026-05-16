@@ -1,5 +1,5 @@
 {
-  "name": "@copperlineai/typesense-jobs",
+  "name": "@copperlineai/typelens-jobs",
   "version": "0.2.0",
   "private": true,
   "scripts": {

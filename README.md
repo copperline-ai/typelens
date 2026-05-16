@@ -1,6 +1,6 @@
-# Typesense Dashboard
+# TypeLens
 
-A dashboard for exploring and managing Typesense collections.
+A Typesense collection explorer and manager.
 
 ---
 
