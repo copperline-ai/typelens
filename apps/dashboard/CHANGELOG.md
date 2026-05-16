@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0] - 2026-05-16
+
+### Features
+- Rename profiles to connections, remove port field, add test button (`a51a730`, `a87982d`)
+
+### Bug Fixes
+- Replace vi.stubGlobal with globalThis assignment for Bun compatibility in tests (`9dc96cf`)
+
+### Other
+- Remove CI check pipeline (`c52643e`, `f1bef1e`)
+
 ## [0.2.0] - 2026-05-16
 
 ### Features
