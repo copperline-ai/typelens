@@ -38,9 +38,28 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
   actions: {
     async hydrateFromStorage() {
       const saved = await readProfiles();
-      set(saved);
-      if (saved.activeProfileId) {
-        const profile = saved.profiles.find((p) => p.id === saved.activeProfileId);
+      let { profiles, activeProfileId } = saved;
+
+      const envHost = process.env.NEXT_PUBLIC_TYPESENSE_HOST;
+      if (envHost && !profiles.some((p) => p.id === "env-config")) {
+        const envProfile: Profile = {
+          id: "env-config",
+          name: "Pre-configured (env)",
+          host: envHost,
+          port: Number(process.env.NEXT_PUBLIC_TYPESENSE_PORT ?? 443),
+          protocol: (process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL as "http" | "https") ?? "https",
+          apiKey: process.env.NEXT_PUBLIC_TYPESENSE_SEARCH_KEY ?? "",
+        };
+        profiles = [envProfile, ...profiles];
+        if (activeProfileId === null) {
+          activeProfileId = "env-config";
+        }
+      }
+
+      set({ profiles, activeProfileId });
+
+      if (activeProfileId) {
+        const profile = profiles.find((p) => p.id === activeProfileId);
         if (profile) useConnectionStore.getState().actions.testConnection(profile);
       }
     },
