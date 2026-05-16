@@ -20,7 +20,7 @@
     },
     "apps/dashboard": {
       "name": "@copperlineai/dashboard",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@copperlineai/typesense-zod": "workspace:*",
         "@hookform/resolvers": "^3.9.0",
@@ -62,8 +62,8 @@
       },
     },
     "apps/jobs": {
-      "name": "@copperlineai/typesense-jobs",
-      "version": "0.1.0",
+      "name": "@copperlineai/typelens-jobs",
+      "version": "0.2.0",
       "dependencies": {
         "@trigger.dev/sdk": "4.4.6",
       },
@@ -220,7 +220,7 @@
 
     "@copperlineai/tsconfig": ["@copperlineai/tsconfig@workspace:packages/tsconfig"],
 
-    "@copperlineai/typesense-jobs": ["@copperlineai/typesense-jobs@workspace:apps/jobs"],
+    "@copperlineai/typelens-jobs": ["@copperlineai/typelens-jobs@workspace:apps/jobs"],
 
     "@copperlineai/typesense-zod": ["@copperlineai/typesense-zod@workspace:packages/typesense-zod"],
 
