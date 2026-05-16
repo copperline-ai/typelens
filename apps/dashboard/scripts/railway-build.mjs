@@ -2,8 +2,7 @@
 /**
  * Railway / RAILPACK: find monorepo root (`package.json` with `workspaces`), then
  * `bun install` and **only** `turbo run build --filter=dashboard`.
- * Never use the root `turbo run build` (full monorepo sweep). Does not build
- * `apps/jobs` (Trigger.dev) — that deploys separately. Cwd can be repo root or a
+ * Never use the root `turbo run build` (full monorepo sweep). Cwd can be repo root or a
  * subdirectory as long as this file exists in the checkout.
  */
 import { spawnSync } from "node:child_process";
