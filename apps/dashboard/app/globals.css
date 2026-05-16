@@ -116,3 +116,11 @@ pre,
 samp {
   font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
 }
+
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
