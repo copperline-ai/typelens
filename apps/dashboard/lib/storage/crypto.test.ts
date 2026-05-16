@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { decryptField, encryptField, getOrCreateDeviceKey } from "./crypto";
 
 function makeLocalStorageMock() {
@@ -49,15 +49,12 @@ describe("encryptField / decryptField", () => {
 });
 
 describe("getOrCreateDeviceKey", () => {
-  let _origLocalStorage: Storage | undefined;
-
   beforeEach(() => {
-    _origLocalStorage = globalThis.localStorage;
-    (globalThis as unknown as Record<string, unknown>).localStorage = makeLocalStorageMock();
+    vi.stubGlobal("localStorage", makeLocalStorageMock());
   });
 
   afterEach(() => {
-    (globalThis as unknown as Record<string, unknown>).localStorage = _origLocalStorage;
+    vi.unstubAllGlobals();
   });
 
   it("returns the same key on repeated calls (localStorage persistence)", async () => {
