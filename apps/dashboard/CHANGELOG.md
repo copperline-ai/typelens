@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0] - 2026-05-16
+
+### Features
+
+- Implement mobile responsiveness fixes for the dashboard app (`5cf7d0e`) (COP-385)
+
 ## [1.1.0] - 2026-05-16
 
 ### Features

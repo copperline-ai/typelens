@@ -1,6 +1,6 @@
 {
   "name": "@copperlineai/dashboard",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "TYPESENSE_DASHBOARD_CONFIG_SLUG=dev infisical run --project-config-dir=../.. -- next dev --turbopack",
