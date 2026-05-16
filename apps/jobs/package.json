@@ -1,6 +1,6 @@
 {
   "name": "@copperlineai/typesense-jobs",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "TYPESENSE_DASHBOARD_CONFIG_SLUG=dev INFISICAL_API_URL=https://vault.copperline.io infisical run --project-config-dir=../.. -- trigger dev",

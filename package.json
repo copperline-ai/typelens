@@ -19,10 +19,12 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@commitlint/types": "^20.5.0",
+    "@copperlineai/release-it-ai-gateway": "workspace:*",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
+    "release-it": "19.2.4",
     "turbo": "^2.5.0",
     "typescript": "^5.8.3"
   },
