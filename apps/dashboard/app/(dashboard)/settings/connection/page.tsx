@@ -44,22 +44,22 @@ export default function ConnectionSettingsPage() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Connection Settings</h1>
+          <h1 className="text-2xl font-semibold">Connections</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Add and manage your Typesense connection profiles.
+            Add and manage your Typesense connections.
           </p>
         </div>
         <Button onClick={handleAddOpen}>
           <Plus className="h-4 w-4" />
-          Add Profile
+          Add Connection
         </Button>
       </div>
 
       {profiles.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
-          <p className="text-sm text-muted-foreground">No connection profiles yet.</p>
+          <p className="text-sm text-muted-foreground">No connections yet.</p>
           <Button variant="outline" className="mt-4" onClick={handleAddOpen}>
-            Add your first profile
+            Add your first connection
           </Button>
         </div>
       ) : (
