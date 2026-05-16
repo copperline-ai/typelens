@@ -17,8 +17,8 @@
     "tokenRef": "GITHUB_TOKEN"
   },
   "plugins": {
-    "@copperlineai/release-it-ai-gateway": {
-      "paths": ["apps/dashboard"],
+    "./scripts/release-it-plugin.js": {
+      "paths": ["."],
       "infile": "CHANGELOG.md",
       "model": "openai/gpt-4.1-mini"
     }

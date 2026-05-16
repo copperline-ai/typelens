@@ -2,10 +2,10 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "RAILPACK",
-    "buildCommand": "node apps/dashboard/scripts/railway-build.mjs"
+    "buildCommand": "bun install --frozen-lockfile && bun run build"
   },
   "deploy": {
-    "startCommand": "bun run start:dashboard",
+    "startCommand": "bun run start",
     "healthcheckPath": "/api/healthz"
   }
 }
