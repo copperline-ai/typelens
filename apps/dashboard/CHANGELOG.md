@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] - 2026-05-16
+
+### Features
+
+- Introduced Typelens visual brand identity system (COP-379) (`1866279`)
+
 ## [1.0.0] - 2026-05-16
 
 ### Features
