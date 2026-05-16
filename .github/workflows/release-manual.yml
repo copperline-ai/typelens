@@ -40,12 +40,11 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Map product to paths
+      - name: Map product to config
         id: map
         run: |
           case "${{ inputs.product }}" in
             dashboard)
-              echo "workdir=apps/dashboard" >> "$GITHUB_OUTPUT"
               echo "config=dashboard.json" >> "$GITHUB_OUTPUT"
               ;;
             *)
@@ -85,18 +84,16 @@ jobs:
           git pull --rebase origin main
 
       - name: release-it (manual increment + AI changelog)
-        working-directory: ${{ steps.map.outputs.workdir }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
           RELEASE_BUMP_OVERRIDE: ${{ inputs.release_level }}
           RELEASE_MESSAGE_PREFIX: ${{ inputs.release_message }}
-        run: ../../node_modules/.bin/release-it --ci -c ../../.release-it/${{ steps.map.outputs.config }} "${{ inputs.release_level }}"
+        run: ./node_modules/.bin/release-it --ci -c .release-it/${{ steps.map.outputs.config }} "${{ inputs.release_level }}"
 
       - name: Read new version from package.json
         id: version
-        working-directory: ${{ steps.map.outputs.workdir }}
         run: |
           version="$(node -p "require('./package.json').version")"
           echo "new_version=$version" >> "$GITHUB_OUTPUT"

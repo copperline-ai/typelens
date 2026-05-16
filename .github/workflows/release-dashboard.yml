@@ -7,9 +7,11 @@ on:
     branches:
       - main
     paths:
-      - "apps/dashboard/**"
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "scripts/release-it-plugin.js"
       - ".release-it/dashboard.json"
-      - "packages/release-it-ai-gateway/**"
       - ".github/workflows/release-dashboard.yml"
 
 permissions:
@@ -63,16 +65,14 @@ jobs:
           git pull --rebase origin main
 
       - name: release-it (AI bump + GitHub release)
-        working-directory: apps/dashboard
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
-        run: ../../node_modules/.bin/release-it --ci -c ../../.release-it/dashboard.json
+        run: ./node_modules/.bin/release-it --ci -c .release-it/dashboard.json
 
       - name: Read new version from package.json
         id: version
-        working-directory: apps/dashboard
         run: |
           version="$(node -p "require('./package.json').version")"
           echo "new_version=$version" >> "$GITHUB_OUTPUT"
