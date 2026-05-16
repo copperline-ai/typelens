@@ -19,24 +19,23 @@ declare namespace NodeJS {
      */
     readonly TYPESENSE_ADMIN_KEY?: string;
 
-    // ── Public (NEXT_PUBLIC_* — safe to expose to the browser) ──────────────
     /**
      * Pre-configure the Typesense host for team deployments.
-     * Leave unset to use the in-app Connection Settings (localStorage model).
+     * Exposed to the browser only via /api/typesense/config — never bundled.
      */
-    readonly NEXT_PUBLIC_TYPESENSE_HOST?: string;
+    readonly TYPESENSE_HOST?: string;
 
     /** Typesense HTTP/HTTPS port (default: 8108). */
-    readonly NEXT_PUBLIC_TYPESENSE_PORT?: string;
+    readonly TYPESENSE_PORT?: string;
 
     /** Transport protocol for the Typesense connection. */
-    readonly NEXT_PUBLIC_TYPESENSE_PROTOCOL?: "http" | "https";
+    readonly TYPESENSE_PROTOCOL?: "http" | "https";
 
     /**
-     * Typesense search-only API key for browser use.
-     * Never set the admin key here — it would be leaked to every visitor.
+     * Typesense search-only API key.
+     * Exposed to the browser only via /api/typesense/config — never bundled.
      */
-    readonly NEXT_PUBLIC_TYPESENSE_SEARCH_KEY?: string;
+    readonly TYPESENSE_SEARCH_KEY?: string;
 
     /** Canonical URL of this app (used in server-to-browser CORS headers). */
     readonly NEXT_PUBLIC_APP_URL?: string;
