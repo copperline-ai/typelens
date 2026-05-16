@@ -1,5 +1,5 @@
 {
-  "name": "typesense-dashboard",
+  "name": "typelens",
   "private": true,
   "license": "MIT",
   "workspaces": [

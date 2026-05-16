@@ -29,9 +29,7 @@ export function Sidebar() {
           collapsed ? "justify-center px-3" : "justify-between px-4",
         )}
       >
-        {!collapsed && (
-          <span className="text-sm font-semibold tracking-tight">Typesense Dashboard</span>
-        )}
+        {!collapsed && <span className="text-sm font-semibold tracking-tight">TypeLens</span>}
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="text-muted-foreground transition-colors hover:text-foreground"
