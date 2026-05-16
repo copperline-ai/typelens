@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-05-16
+
+### Features
+
+- Install brand guide and refactor Tailwind tokens (COP-378) (`1e6445f`)
+
+### Other
+
+- Add MIT license (`fbd85fa`)
+
 ## [0.3.0] - 2026-05-16
 
 ### Features
