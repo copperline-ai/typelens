@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import type { Profile } from "@/lib/stores/connection";
 import { readProfiles, writeProfiles } from "./profile-storage";
 
@@ -34,14 +34,16 @@ function makeProfile(overrides?: Partial<Profile>): Profile {
 
 describe("readProfiles", () => {
   let storage: ReturnType<typeof makeLocalStorageMock>;
+  let _origLocalStorage: Storage | undefined;
 
   beforeEach(() => {
     storage = makeLocalStorageMock();
-    vi.stubGlobal("localStorage", storage);
+    _origLocalStorage = globalThis.localStorage;
+    (globalThis as unknown as Record<string, unknown>).localStorage = storage;
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    (globalThis as unknown as Record<string, unknown>).localStorage = _origLocalStorage;
   });
 
   it("returns empty state when localStorage is empty", async () => {
