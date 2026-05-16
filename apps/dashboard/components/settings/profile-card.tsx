@@ -122,7 +122,7 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Profile</AlertDialogTitle>
+            <AlertDialogTitle>Delete Connection</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &ldquo;{profile.name}&rdquo;? This action cannot be
               undone.
