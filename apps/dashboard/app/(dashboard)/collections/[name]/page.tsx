@@ -408,7 +408,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
 
       {!loading && !error && collection && (
         <>
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl font-semibold font-mono">{collection.name}</h1>
               <p className="text-sm text-muted-foreground mt-1">
@@ -444,7 +444,9 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               .filter(Boolean)
               .join(" · ")}
           >
-            <FieldsTable fields={collection.fields} />
+            <div className="overflow-x-auto">
+              <FieldsTable fields={collection.fields} />
+            </div>
           </CollapsibleSection>
 
           {activeProfile && (

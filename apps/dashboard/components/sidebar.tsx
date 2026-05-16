@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Database, PanelLeftClose, PanelLeftOpen, Search, Settings } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -15,6 +15,13 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      if (window.innerWidth < 768) setCollapsed(true);
+    };
+    check();
+  }, []);
 
   return (
     <aside
