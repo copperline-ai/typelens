@@ -4,7 +4,7 @@
 
 ### Features
 
-- Implement mobile responsiveness fixes for the dashboard app (`5cf7d0e`) (COP-385)
+- Implement mobile responsiveness fixes for the typelens app (`5cf7d0e`) (COP-385)
 
 ## [1.1.0] - 2026-05-16
 
@@ -16,7 +16,7 @@
 
 ### Features
 
-- Remove trigger.dev apps/jobs and all references ([`f1dd251`](https://github.com/copperlineai/dashboard/commit/f1dd251))
+- Remove trigger.dev apps/jobs and all references ([`f1dd251`](https://github.com/copperline-ai/typelens/commit/f1dd251))
 
 ## [0.4.0] - 2026-05-16
 
