@@ -1,5 +1,4 @@
 # Manually cut a release on `main` (same release-it + AI changelog as path-triggered workflows).
-# Choose **dashboard** (Next app) or **jobs** (Trigger.dev); post-steps match those workflows.
 name: Release (manual)
 
 on:
@@ -11,7 +10,6 @@ on:
         type: choice
         options:
           - dashboard
-          - jobs
       release_level:
         description: "Semver increment"
         required: true
@@ -49,10 +47,6 @@ jobs:
             dashboard)
               echo "workdir=apps/dashboard" >> "$GITHUB_OUTPUT"
               echo "config=dashboard.json" >> "$GITHUB_OUTPUT"
-              ;;
-            jobs)
-              echo "workdir=apps/jobs" >> "$GITHUB_OUTPUT"
-              echo "config=jobs.json" >> "$GITHUB_OUTPUT"
               ;;
             *)
               echo "Unknown product: ${{ inputs.product }}"
@@ -106,13 +100,3 @@ jobs:
         run: |
           version="$(node -p "require('./package.json').version")"
           echo "new_version=$version" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy to Trigger.dev (CLI)
-        if: ${{ inputs.product == 'jobs' }}
-        working-directory: apps/jobs
-        env:
-          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
-          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
-          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
-          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
-        run: bun run deploy:ci

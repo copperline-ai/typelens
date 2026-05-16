@@ -19,12 +19,6 @@ declare namespace NodeJS {
      */
     readonly TYPESENSE_ADMIN_KEY?: string;
 
-    /** Trigger.dev project secret key (apps/jobs). */
-    readonly TRIGGER_SECRET_KEY?: string;
-
-    /** Override Trigger.dev API URL — only needed when self-hosting Trigger.dev. */
-    readonly TRIGGER_API_URL?: string;
-
     // ── Public (NEXT_PUBLIC_* — safe to expose to the browser) ──────────────
     /**
      * Pre-configure the Typesense host for team deployments.

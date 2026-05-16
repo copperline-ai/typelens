@@ -1,8 +1,36 @@
 # Changelog
 
+## [1.0.0] - 2026-05-16
+
+### Features
+
+- Remove trigger.dev apps/jobs and all references ([`f1dd251`](https://github.com/copperlineai/dashboard/commit/f1dd251))
+
+## [0.4.0] - 2026-05-16
+
+### Features
+
+- Install brand guide and refactor Tailwind tokens (COP-378) (`1e6445f`)
+
+### Other
+
+- Add MIT license (`fbd85fa`)
+
+## [0.3.0] - 2026-05-16
+
+### Features
+- Rename profiles to connections, remove port field, add test button (`a51a730`, `a87982d`)
+
+### Bug Fixes
+- Replace vi.stubGlobal with globalThis assignment for Bun compatibility in tests (`9dc96cf`)
+
+### Other
+- Remove CI check pipeline (`c52643e`, `f1bef1e`)
+
 ## [0.2.0] - 2026-05-16
 
 ### Features
+
 - Initialize Bun+Turborepo monorepo, scaffold dashboard and jobs, add app shell (`6fd94ca`)
 - Add docker-compose local Typesense and seed script (`9d1a003`)
 - Add environment schema and API key security model (`0b05110`)
@@ -26,6 +54,7 @@
 - Add tsconfig/next.json preset and use it in dashboard (`b0febfc`)
 
 ### Bug Fixes
+
 - Update tsconfig package name to @copperlineai/tsconfig (`033dd66`)
 - Update jobs tsconfig with proper node types and includes (`8d10408`)
 - Use ConnectionStatus type in store and header; wire live status from store (`afb584e`)
@@ -33,13 +62,14 @@
 - Update status dot when testing/activating a profile (`7f503c8`)
 
 ### Documentation
+
 - Add API key security model section to README (`e54b469`)
 
 ### Chores
+
 - Add tooling (husky, oxlint, oxfmt, vitest, commitlint), update monorepo config (`adc14b7`)
 - Sync bun.lock after dependency updates (`50b8a7e`)
-- Bump @trigger.dev/* to 4.4.6 (`a988249`)
+- Bump @trigger.dev/\* to 4.4.6 (`a988249`)
 - Ignore .trigger/ directory (`a419411`)
 - Ignore next-env.d.ts (Next.js auto-generated) (`16a93ca`)
 - Add search page coming soon placeholder (`4187556`)
-
