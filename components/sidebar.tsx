@@ -79,6 +79,11 @@ export function Sidebar() {
           );
         })}
       </nav>
+      {!collapsed && (
+        <div className="border-t px-4 py-3 text-center text-xs text-muted-foreground">
+          v{process.env.NEXT_PUBLIC_APP_VERSION}
+        </div>
+      )}
     </aside>
   );
 }
