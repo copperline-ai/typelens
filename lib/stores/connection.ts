@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { readProfiles, writeProfiles } from "../storage/profile-storage";
 
-export type ConnectionStatus = "connected" | "connecting" | "waking" | "error" | "idle";
+export type ConnectionStatus = "connected" | "connecting" | "error" | "idle";
 
 export type Profile = {
   id: string;
@@ -126,19 +126,17 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnection(profile) {
       set({ status: "connecting" });
       const start = performance.now();
-      // Extended delays to cover Railway 90-second cold starts (~140 s cumulative, 8 attempts)
       const retryDelays = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
       for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
         if (attempt > 0) {
-          set({ status: "waking" });
           await new Promise<void>((r) => setTimeout(r, retryDelays[attempt - 1]!));
         }
 
         try {
-          const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
-          // No auth header on /health — avoids CORS preflight on the wake-detection call
+          const url = `${profile.protocol}://${profile.host}:${profile.port}/collections`;
           const res = await fetch(url, {
+            headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
             signal: AbortSignal.timeout(20_000),
           });
 

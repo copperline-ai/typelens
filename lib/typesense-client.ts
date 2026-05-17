@@ -16,7 +16,6 @@ export type Collection = {
   created_at?: number;
 };
 
-// Extended delays to cover Railway 90-second cold starts (~140 s cumulative, 8 attempts)
 const RETRY_DELAYS_MS = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {

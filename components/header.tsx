@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 const statusDot: Record<ConnectionStatus, string> = {
   connected: "bg-green-500",
   connecting: "bg-yellow-500 animate-pulse",
-  waking: "bg-yellow-500 animate-pulse",
   error: "bg-red-500",
   idle: "bg-muted-foreground/50",
 };
