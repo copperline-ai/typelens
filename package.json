@@ -54,6 +54,7 @@
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "postcss": "^8.5.3",
+    "potrace": "^2.1.8",
     "release-it": "19.2.4",
     "tailwindcss": "^4.1.6",
     "typescript": "^5.8.3",

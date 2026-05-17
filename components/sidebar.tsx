@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Database,
-  Moon,
-  Monitor,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Settings,
-  Sun,
-} from "lucide-react";
+import { Database, Moon, Monitor, PanelLeftClose, Search, Settings, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
@@ -64,14 +55,38 @@ export function Sidebar() {
           collapsed ? "justify-center px-3" : "justify-between px-4",
         )}
       >
-        {!collapsed && <span className="text-sm font-semibold tracking-tight">TypeLens</span>}
+        {!collapsed && (
+          <div className="flex items-center gap-2">
+            <img
+              src="/favicon.svg"
+              alt=""
+              width={30}
+              height={30}
+              className="h-[30px] w-[30px] shrink-0"
+              aria-hidden="true"
+            />
+            <span
+              className="text-xl font-semibold leading-none tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+            >
+              <span style={{ color: "#0067a3" }}>type</span>
+              <span style={{ color: "#00d2da" }}>lens</span>
+            </span>
+          </div>
+        )}
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="text-muted-foreground transition-colors hover:text-foreground"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <PanelLeftOpen className="h-4 w-4" />
+            <img
+              src="/favicon.svg"
+              alt="TypeLens icon"
+              width={36}
+              height={36}
+              className="h-9 w-9"
+            />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}
