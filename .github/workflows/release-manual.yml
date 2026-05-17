@@ -9,7 +9,7 @@ on:
         required: true
         type: choice
         options:
-          - dashboard
+          - typelens
       release_level:
         description: "Semver increment"
         required: true
@@ -44,8 +44,8 @@ jobs:
         id: map
         run: |
           case "${{ inputs.product }}" in
-            dashboard)
-              echo "config=dashboard.json" >> "$GITHUB_OUTPUT"
+            typelens)
+              echo "config=typelens.json" >> "$GITHUB_OUTPUT"
               ;;
             *)
               echo "Unknown product: ${{ inputs.product }}"
