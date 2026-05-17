@@ -56,7 +56,12 @@ export function Sidebar() {
         )}
       >
         {!collapsed && (
-          <img src="/wordmark-sm.png" alt="TypeLens" height={26} className="h-[26px] w-auto" />
+          <img
+            src="/wordmark-sm.png"
+            alt="TypeLens"
+            height={40}
+            className="h-10 w-auto max-w-[140px]"
+          />
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}
