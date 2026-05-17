@@ -77,12 +77,10 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && (status === "connecting" || status === "waking") && (
+      {activeProfile && status === "connecting" && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-          <p className="text-sm font-medium">Waking up server…</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            This may take up to 2 minutes for Railway serverless instances.
-          </p>
+          <p className="text-sm font-medium">Connecting to server…</p>
+          <p className="text-xs text-muted-foreground mt-1">This may take a moment.</p>
         </div>
       )}
 
@@ -113,7 +111,7 @@ export default function CollectionsPage() {
           <p className="text-sm font-medium text-destructive">Failed to load collections</p>
           <p className="text-xs text-muted-foreground mt-1">
             {error.includes("Not Ready or Lagging") || error.includes("unavailable after retries")
-              ? "Server timed out while waking. Click Try again to retry."
+              ? "Server unavailable. Click Try again to retry."
               : error}
           </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={fetchCollections}>

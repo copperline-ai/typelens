@@ -13,7 +13,7 @@ export function KeepAlive() {
     const profile = activeProfile;
 
     function ping() {
-      const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
+      const url = `${profile.protocol}://${profile.host}:${profile.port}/collections`;
       fetch(url, {
         headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
         signal: AbortSignal.timeout(10_000),
