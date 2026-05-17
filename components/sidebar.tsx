@@ -83,9 +83,9 @@ export function Sidebar() {
             <img
               src="/favicon.svg"
               alt="TypeLens icon"
-              width={24}
-              height={24}
-              className="h-6 w-6"
+              width={36}
+              height={36}
+              className="h-9 w-9"
             />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
