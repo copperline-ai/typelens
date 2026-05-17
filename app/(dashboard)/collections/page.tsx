@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { RefreshCw } from "lucide-react";
-import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
+import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { listCollections, type Collection } from "@/lib/typesense-client";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { Skeleton } from "@/components/async-boundary";
@@ -22,6 +22,7 @@ function CollectionsSkeleton() {
 export default function CollectionsPage() {
   const activeProfile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore((s) => s.status);
+  const actions = useConnectionStore(selectActions);
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,8 +81,28 @@ export default function CollectionsPage() {
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <p className="text-sm font-medium">Waking up server…</p>
           <p className="text-xs text-muted-foreground mt-1">
-            This may take up to a minute for serverless instances.
+            This may take up to 2 minutes for Railway serverless instances.
           </p>
+        </div>
+      )}
+
+      {activeProfile && status === "error" && (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-12 text-center">
+          <p className="text-sm font-medium text-destructive">Connection failed</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Could not reach the Typesense server. It may still be starting — click Retry to try
+            again.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => {
+              if (activeProfile) actions.testConnection(activeProfile);
+            }}
+          >
+            Retry connection
+          </Button>
         </div>
       )}
 
