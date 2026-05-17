@@ -40,19 +40,30 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
       const saved = await readProfiles();
       let { profiles, activeProfileId } = saved;
 
-      const envHost = process.env.NEXT_PUBLIC_TYPESENSE_HOST;
-      if (envHost && !profiles.some((p) => p.id === "env-config")) {
-        const envProfile: Profile = {
-          id: "env-config",
-          name: "Pre-configured (env)",
-          host: envHost,
-          port: Number(process.env.NEXT_PUBLIC_TYPESENSE_PORT ?? 443),
-          protocol: (process.env.NEXT_PUBLIC_TYPESENSE_PROTOCOL as "http" | "https") ?? "https",
-          apiKey: process.env.NEXT_PUBLIC_TYPESENSE_SEARCH_KEY ?? "",
-        };
-        profiles = [envProfile, ...profiles];
-        if (activeProfileId === null) {
-          activeProfileId = "env-config";
+      if (!profiles.some((p) => p.id === "env-config")) {
+        try {
+          const res = await fetch("/api/typesense/config");
+          if (res.ok) {
+            const data = (await res.json()) as
+              | { configured: false }
+              | { host: string; port: number; protocol: "http" | "https"; searchKey: string };
+            if ("host" in data) {
+              const envProfile: Profile = {
+                id: "env-config",
+                name: "Pre-configured (env)",
+                host: data.host,
+                port: data.port,
+                protocol: data.protocol,
+                apiKey: data.searchKey,
+              };
+              profiles = [envProfile, ...profiles];
+              if (activeProfileId === null) {
+                activeProfileId = "env-config";
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to fetch /api/typesense/config:", err);
         }
       }
 

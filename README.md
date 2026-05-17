@@ -81,7 +81,7 @@ Connection profiles (host, port, API key) are stored in the **browser's localSto
 | Server env vars required | None — leave `TYPESENSE_ADMIN_KEY` blank |
 | Risk profile | Keys are tied to one browser; clearing localStorage removes them |
 
-**How to use:** leave `TYPESENSE_ADMIN_KEY` and `NEXT_PUBLIC_TYPESENSE_*` blank in `.env.local`. Open the app → Connection Settings → add a profile with your Typesense host and admin key.
+**How to use:** leave `TYPESENSE_ADMIN_KEY` and `TYPESENSE_HOST` blank in `.env.local`. Open the app → Connection Settings → add a profile with your Typesense host and admin key.
 
 > **Note:** Typesense must have CORS enabled. The local Docker Compose setup enables it automatically (`TYPESENSE_ENABLE_CORS=true`). For remote instances, pass `--enable-cors` to the Typesense process. The Connection Settings page surfaces a CORS error hint when it is missing.
 
@@ -93,10 +93,10 @@ The admin key lives in a **server-side environment variable** and is never sent 
 |----------|-------|
 | Who it's for | Teams sharing a single dashboard deployment |
 | Where keys live | Server process environment (Railway / Vercel secret) |
-| Server env vars required | `TYPESENSE_ADMIN_KEY` (required), `NEXT_PUBLIC_TYPESENSE_HOST`, `NEXT_PUBLIC_TYPESENSE_PORT`, `NEXT_PUBLIC_TYPESENSE_PROTOCOL` |
+| Server env vars required | `TYPESENSE_ADMIN_KEY` (required), `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL` |
 | Risk profile | Key is invisible to browser; rotate in the hosting provider's secrets panel |
 
-**How to use:** set `TYPESENSE_ADMIN_KEY` as a secret in your hosting provider and configure the `NEXT_PUBLIC_TYPESENSE_*` vars to pre-populate the connection for all users.
+**How to use:** set `TYPESENSE_ADMIN_KEY` as a secret in your hosting provider and configure the `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`, and `TYPESENSE_SEARCH_KEY` vars to pre-populate the connection for all users. These are served to the browser only via `/api/typesense/config` — they are never baked into the JS bundle.
 
 > **Never** put the admin key in a `NEXT_PUBLIC_*` variable — those are bundled into the client JS and visible to anyone who opens DevTools.
 
@@ -107,12 +107,12 @@ Full typed declarations live in [`env.d.ts`](./env.d.ts). Copy [`.env.example`](
 | Variable | Scope | Required | Description |
 |----------|-------|----------|-------------|
 | `TYPESENSE_ADMIN_KEY` | Server only | Mode 2 | Admin API key for Next.js API routes |
+| `TYPESENSE_HOST` | Server only | Mode 2 | Pre-configured Typesense host (served via `/api/typesense/config`) |
+| `TYPESENSE_PORT` | Server only | Mode 2 | Typesense port (default `8108`) |
+| `TYPESENSE_PROTOCOL` | Server only | Mode 2 | `http` or `https` |
+| `TYPESENSE_SEARCH_KEY` | Server only | Optional | Search-only key (served via `/api/typesense/config`) |
 | `TRIGGER_SECRET_KEY` | Server only | If using jobs | Trigger.dev project secret |
 | `TRIGGER_API_URL` | Server only | Optional | Override Trigger.dev API URL (self-hosting) |
-| `NEXT_PUBLIC_TYPESENSE_HOST` | Browser + server | Mode 2 | Pre-configured Typesense host |
-| `NEXT_PUBLIC_TYPESENSE_PORT` | Browser + server | Mode 2 | Typesense port (default `8108`) |
-| `NEXT_PUBLIC_TYPESENSE_PROTOCOL` | Browser + server | Mode 2 | `http` or `https` |
-| `NEXT_PUBLIC_TYPESENSE_SEARCH_KEY` | Browser + server | Optional | Search-only key (safe for browser use) |
 | `NEXT_PUBLIC_APP_URL` | Browser + server | Recommended | Canonical app URL for CORS headers |
 | `TYPESENSE_API_KEY` | Docker Compose | Local dev | Admin key for the local Typesense container |
 | `TYPESENSE_DATA_DIR` | Docker Compose | Local dev | Host path for data volume (default `./typesense-data`) |
