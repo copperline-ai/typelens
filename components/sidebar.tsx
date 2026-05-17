@@ -50,23 +50,34 @@ export function Sidebar() {
         </button>
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-2">
-        {navItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            title={collapsed ? label : undefined}
-            className={cn(
-              "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              collapsed ? "justify-center" : "gap-3",
-              pathname === href || pathname.startsWith(href + "/")
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {!collapsed && label}
-          </Link>
-        ))}
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href || pathname.startsWith(href + "/");
+          return (
+            <Link
+              key={href}
+              href={href}
+              title={collapsed ? label : undefined}
+              className={cn(
+                "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                collapsed ? "justify-center" : "gap-3",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                collapsed && isActive && "border-b-2 border-primary rounded-b-none pb-[6px]",
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {!collapsed && (
+                <span
+                  className={cn(
+                    "flex-1",
+                    isActive && "underline underline-offset-2 decoration-primary",
+                  )}
+                >
+                  {label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );
