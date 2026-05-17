@@ -1,6 +1,6 @@
 # After merges to main: AI (Vercel Gateway) classifies bump + writes release notes, then release-it tags and publishes a GitHub Release.
 # Add repo secret: AI_GATEWAY_API_KEY. Optional: override model via RELEASE_AI_MODEL in the workflow env.
-name: Release (dashboard)
+name: Release (typelens)
 
 on:
   push:
@@ -12,13 +12,13 @@ on:
       - "lib/**"
       - "scripts/release-it-plugin.js"
       - ".release-it/typelens.json"
-      - ".github/workflows/release-dashboard.yml"
+      - ".github/workflows/release-typelens.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-dashboard
+  group: release-typelens
   cancel-in-progress: false
 
 jobs:
