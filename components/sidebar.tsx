@@ -60,21 +60,13 @@ export function Sidebar() {
               className={cn(
                 "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 collapsed ? "justify-center" : "gap-3",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
-                collapsed && isActive && "border-b-2 border-primary rounded-b-none pb-[6px]",
+                isActive
+                  ? "bg-muted text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {!collapsed && (
-                <span
-                  className={cn(
-                    "flex-1",
-                    isActive && "underline underline-offset-2 decoration-primary",
-                  )}
-                >
-                  {label}
-                </span>
-              )}
+              {!collapsed && <span className="flex-1">{label}</span>}
             </Link>
           );
         })}
