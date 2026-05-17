@@ -96,7 +96,7 @@ The admin key lives in a **server-side environment variable** and is never sent 
 | Server env vars required | `TYPESENSE_ADMIN_KEY` (required), `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL` |
 | Risk profile | Key is invisible to browser; rotate in the hosting provider's secrets panel |
 
-**How to use:** set `TYPESENSE_ADMIN_KEY` as a secret in your hosting provider and configure the `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`, and `TYPESENSE_SEARCH_KEY` vars to pre-populate the connection for all users. These are served to the browser only via `/api/typesense/config` — they are never baked into the JS bundle.
+**How to use:** set `TYPESENSE_ADMIN_KEY` as a secret in your hosting provider and configure the `TYPESENSE_HOST`, `TYPESENSE_PORT`, `TYPESENSE_PROTOCOL`, and `TYPESENSE_API_KEY` vars to pre-populate the connection for all users. These are served to the browser only via `/api/typesense/config` — they are never baked into the JS bundle.
 
 > **Never** put the admin key in a `NEXT_PUBLIC_*` variable — those are bundled into the client JS and visible to anyone who opens DevTools.
 
@@ -110,9 +110,7 @@ Full typed declarations live in [`env.d.ts`](./env.d.ts). Copy [`.env.example`](
 | `TYPESENSE_HOST` | Server only | Mode 2 | Pre-configured Typesense host (served via `/api/typesense/config`) |
 | `TYPESENSE_PORT` | Server only | Mode 2 | Typesense port (default `8108`) |
 | `TYPESENSE_PROTOCOL` | Server only | Mode 2 | `http` or `https` |
-| `TYPESENSE_SEARCH_KEY` | Server only | Optional | Search-only key (served via `/api/typesense/config`) |
+| `TYPESENSE_API_KEY` | Server only | Optional | API key (served via `/api/typesense/config` for auto-connect) |
 | `TRIGGER_SECRET_KEY` | Server only | If using jobs | Trigger.dev project secret |
 | `TRIGGER_API_URL` | Server only | Optional | Override Trigger.dev API URL (self-hosting) |
 | `NEXT_PUBLIC_APP_URL` | Browser + server | Recommended | Canonical app URL for CORS headers |
-| `TYPESENSE_API_KEY` | Docker Compose | Local dev | Admin key for the local Typesense container |
-| `TYPESENSE_DATA_DIR` | Docker Compose | Local dev | Host path for data volume (default `./typesense-data`) |

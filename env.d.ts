@@ -32,10 +32,10 @@ declare namespace NodeJS {
     readonly TYPESENSE_PROTOCOL?: "http" | "https";
 
     /**
-     * Typesense search-only API key.
+     * Typesense API key.
      * Exposed to the browser only via /api/typesense/config — never bundled.
      */
-    readonly TYPESENSE_SEARCH_KEY?: string;
+    readonly TYPESENSE_API_KEY?: string;
 
     /** Canonical URL of this app (used in server-to-browser CORS headers). */
     readonly NEXT_PUBLIC_APP_URL?: string;
