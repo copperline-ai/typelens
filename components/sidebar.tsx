@@ -2,9 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Database, PanelLeftClose, PanelLeftOpen, Search, Settings } from "lucide-react";
+import {
+  Database,
+  Moon,
+  Monitor,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Settings,
+  Sun,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
+import type { Theme } from "@/lib/store";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
@@ -12,9 +23,19 @@ const navItems = [
   { href: "/settings/connection", label: "Settings", icon: Settings },
 ];
 
+const themeIcons: Record<Theme, React.ElementType> = {
+  system: Monitor,
+  light: Sun,
+  dark: Moon,
+};
+
+const themeOrder: Theme[] = ["system", "light", "dark"];
+
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const theme = useThemeStore(selectTheme);
+  const { setTheme } = useThemeStore(selectThemeActions);
 
   useEffect(() => {
     const check = () => {
@@ -22,6 +43,13 @@ export function Sidebar() {
     };
     check();
   }, []);
+
+  function cycleTheme() {
+    const idx = themeOrder.indexOf(theme);
+    setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
+  }
+
+  const ThemeIcon = themeIcons[theme];
 
   return (
     <aside
@@ -71,11 +99,26 @@ export function Sidebar() {
           );
         })}
       </nav>
-      {!collapsed && (
-        <div className="border-t px-4 py-3 text-center text-xs text-muted-foreground">
-          v{process.env.NEXT_PUBLIC_APP_VERSION}
-        </div>
-      )}
+      <div
+        className={cn(
+          "border-t py-3",
+          collapsed ? "flex justify-center px-2" : "flex items-center justify-between px-4",
+        )}
+      >
+        {!collapsed && (
+          <span className="text-xs text-muted-foreground">
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+          </span>
+        )}
+        <button
+          onClick={cycleTheme}
+          title={theme}
+          className="text-muted-foreground transition-colors hover:text-foreground"
+          aria-label={`Theme: ${theme}`}
+        >
+          <ThemeIcon className="h-4 w-4" />
+        </button>
+      </div>
     </aside>
   );
 }
