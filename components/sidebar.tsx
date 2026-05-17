@@ -60,12 +60,15 @@ export function Sidebar() {
             <img
               src="/favicon.svg"
               alt=""
-              width={24}
-              height={24}
-              className="h-6 w-6"
+              width={30}
+              height={30}
+              className="h-[30px] w-[30px] shrink-0"
               aria-hidden="true"
             />
-            <span className="text-sm font-semibold tracking-tight">
+            <span
+              className="text-xl font-semibold leading-none tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+            >
               <span style={{ color: "#0067a3" }}>type</span>
               <span style={{ color: "#00d2da" }}>lens</span>
             </span>
