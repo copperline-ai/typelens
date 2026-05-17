@@ -33,6 +33,7 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
   const { removeProfile, setActiveProfile, testConnection } = useConnectionStore(selectActions);
   const [testState, setTestState] = useState<TestState>({ status: "idle" });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const isReadOnly = profile.id === "env-config";
 
   async function handleTest() {
     setTestState({ status: "testing" });
@@ -103,42 +104,48 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
               Set Active
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={onEdit}>
-            <Edit2 className="h-3.5 w-3.5" />
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-destructive hover:text-destructive"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete
-          </Button>
+          {!isReadOnly && (
+            <Button size="sm" variant="ghost" onClick={onEdit}>
+              <Edit2 className="h-3.5 w-3.5" />
+              Edit
+            </Button>
+          )}
+          {!isReadOnly && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          )}
         </CardFooter>
       </Card>
 
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Connection</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &ldquo;{profile.name}&rdquo;? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => removeProfile(profile.id)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {!isReadOnly && (
+        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Connection</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete &ldquo;{profile.name}&rdquo;? This action cannot be
+                undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => removeProfile(profile.id)}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </>
   );
 }

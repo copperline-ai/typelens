@@ -50,7 +50,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
             if ("host" in data) {
               const envProfile: Profile = {
                 id: "env-config",
-                name: "Pre-configured (env)",
+                name: data.host,
                 host: data.host,
                 port: data.port,
                 protocol: data.protocol,
