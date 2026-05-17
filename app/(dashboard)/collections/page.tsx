@@ -21,6 +21,7 @@ function CollectionsSkeleton() {
 
 export default function CollectionsPage() {
   const activeProfile = useConnectionStore(selectActiveProfile);
+  const status = useConnectionStore((s) => s.status);
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,8 +41,8 @@ export default function CollectionsPage() {
   }
 
   useEffect(() => {
-    fetchCollections();
-  }, [activeProfile?.id]);
+    if (status === "connected" && activeProfile) fetchCollections();
+  }, [activeProfile?.id, status]);
 
   return (
     <div className="space-y-6">
@@ -75,12 +76,25 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && loading && <CollectionsSkeleton />}
+      {activeProfile && (status === "connecting" || status === "waking") && (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+          <p className="text-sm font-medium">Waking up server…</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            This may take up to a minute for serverless instances.
+          </p>
+        </div>
+      )}
 
-      {activeProfile && error && (
+      {activeProfile && status === "connected" && loading && <CollectionsSkeleton />}
+
+      {activeProfile && status === "connected" && error && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load collections</p>
-          <p className="text-xs text-muted-foreground mt-1">{error}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {error.includes("Not Ready or Lagging") || error.includes("unavailable after retries")
+              ? "Server timed out while waking. Click Try again to retry."
+              : error}
+          </p>
           <Button variant="outline" size="sm" className="mt-4" onClick={fetchCollections}>
             Try again
           </Button>

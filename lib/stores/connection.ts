@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { readProfiles, writeProfiles } from "../storage/profile-storage";
 
-export type ConnectionStatus = "connected" | "connecting" | "error" | "idle";
+export type ConnectionStatus = "connected" | "connecting" | "waking" | "error" | "idle";
 
 export type Profile = {
   id: string;
@@ -126,10 +126,11 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnection(profile) {
       set({ status: "connecting" });
       const start = performance.now();
-      const retryDelays = [3_000, 5_000, 8_000, 12_000];
+      const retryDelays = [3_000, 5_000, 8_000, 12_000, 15_000, 20_000];
 
       for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
         if (attempt > 0) {
+          set({ status: "waking" });
           await new Promise<void>((r) => setTimeout(r, retryDelays[attempt - 1]!));
         }
 
@@ -137,7 +138,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
           const res = await fetch(url, {
             headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-            signal: AbortSignal.timeout(10_000),
+            signal: AbortSignal.timeout(15_000),
           });
 
           if (res.status === 503 && attempt < retryDelays.length) continue;
@@ -151,13 +152,25 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           set({ status: "connected" });
           return { ok: true, latencyMs };
         } catch (err) {
-          set({ status: "error" });
           if (err instanceof TypeError) {
-            return {
-              ok: false,
-              error: "Enable CORS on your Typesense instance with --enable-cors",
-            };
+            const isCors = err.message.toLowerCase().includes("cors");
+            if (isCors) {
+              set({ status: "error" });
+              return {
+                ok: false,
+                error: "Enable CORS on your Typesense instance with --enable-cors",
+              };
+            }
+            // Network error (connection refused, etc.) — retry
+            if (attempt < retryDelays.length) continue;
+          } else if (err instanceof DOMException && err.name === "AbortError") {
+            // Timeout — retry
+            if (attempt < retryDelays.length) continue;
+          } else if (attempt < retryDelays.length) {
+            // Unknown error — retry
+            continue;
           }
+          set({ status: "error" });
           const error = err instanceof Error ? err.message : String(err);
           return { ok: false, error };
         }
