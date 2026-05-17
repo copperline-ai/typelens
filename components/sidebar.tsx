@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronRight,
-  Database,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Settings,
-} from "lucide-react";
+import { Database, PanelLeftClose, PanelLeftOpen, Search, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +61,7 @@ export function Sidebar() {
                 "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 collapsed ? "justify-center" : "gap-3",
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                collapsed && isActive && "border-b-2 border-primary rounded-b-none pb-[6px]",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -81,7 +75,6 @@ export function Sidebar() {
                   {label}
                 </span>
               )}
-              {!collapsed && isActive && <ChevronRight className="ml-auto h-3.5 w-3.5 shrink-0" />}
             </Link>
           );
         })}
