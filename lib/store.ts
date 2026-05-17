@@ -8,6 +8,9 @@ export {
   selectActions,
 } from "./stores/connection";
 
+export type { Theme } from "./stores/theme";
+export { useThemeStore, selectTheme, selectThemeActions } from "./stores/theme";
+
 import { useConnectionStore, selectActiveProfile } from "./stores/connection";
 
 export function useActiveProfile() {
