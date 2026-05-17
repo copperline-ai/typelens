@@ -18,6 +18,9 @@ type State = {
   profiles: Profile[];
   activeProfileId: string | null;
   status: ConnectionStatus;
+  lastLatencyMs: number | null;
+  lastCollectionCount: number | null;
+  lastTestedAt: Date | null;
 };
 
 type Actions = {
@@ -26,6 +29,8 @@ type Actions = {
   removeProfile: (id: string) => void;
   setActiveProfile: (id: string | null) => void;
   testConnection: (profile: Profile) => Promise<TestConnectionResult>;
+  /** Single-shot connection test for the popover button — no long retry loop. */
+  testConnectionOnce: (profile: Profile) => Promise<TestConnectionResult>;
   /** Call inside a useEffect on mount to hydrate from localStorage (avoids SSR mismatch). */
   hydrateFromStorage: () => Promise<void>;
 };
@@ -34,6 +39,9 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
   profiles: [],
   activeProfileId: null,
   status: "idle",
+  lastLatencyMs: null,
+  lastCollectionCount: null,
+  lastTestedAt: null,
 
   actions: {
     async hydrateFromStorage() {
@@ -148,7 +156,19 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
             set({ status: "error" });
             return { ok: false, error: text || `HTTP ${res.status}` };
           }
-          set({ status: "connected" });
+          let collectionCount: number | null = null;
+          try {
+            const data = await res.json();
+            if (Array.isArray(data)) collectionCount = data.length;
+          } catch {
+            // ignore parse errors
+          }
+          set({
+            status: "connected",
+            lastLatencyMs: latencyMs,
+            lastCollectionCount: collectionCount,
+            lastTestedAt: new Date(),
+          });
           return { ok: true, latencyMs };
         } catch (err) {
           if (err instanceof TypeError) {
@@ -181,6 +201,42 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
       set({ status: "error" });
       return { ok: false, error: "Typesense server unavailable after retries" };
     },
+
+    async testConnectionOnce(profile) {
+      set({ status: "connecting" });
+      const start = performance.now();
+      try {
+        const url = `${profile.protocol}://${profile.host}:${profile.port}/collections`;
+        const res = await fetch(url, {
+          headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
+          signal: AbortSignal.timeout(10_000),
+        });
+        const latencyMs = Math.round(performance.now() - start);
+        if (!res.ok) {
+          const text = await res.text().catch(() => `HTTP ${res.status}`);
+          set({ status: "error", lastTestedAt: new Date() });
+          return { ok: false, error: text || `HTTP ${res.status}` };
+        }
+        let collectionCount: number | null = null;
+        try {
+          const data = await res.json();
+          if (Array.isArray(data)) collectionCount = data.length;
+        } catch {
+          // ignore parse errors
+        }
+        set({
+          status: "connected",
+          lastLatencyMs: latencyMs,
+          lastCollectionCount: collectionCount,
+          lastTestedAt: new Date(),
+        });
+        return { ok: true, latencyMs };
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err);
+        set({ status: "error", lastTestedAt: new Date() });
+        return { ok: false, error };
+      }
+    },
   },
 }));
 
@@ -191,3 +247,9 @@ export const selectActiveProfileId = (s: ReturnType<typeof useConnectionStore.ge
 export const selectActiveProfile = (s: ReturnType<typeof useConnectionStore.getState>) =>
   s.profiles.find((p) => p.id === s.activeProfileId) ?? null;
 export const selectActions = (s: ReturnType<typeof useConnectionStore.getState>) => s.actions;
+export const selectLastLatencyMs = (s: ReturnType<typeof useConnectionStore.getState>) =>
+  s.lastLatencyMs;
+export const selectLastCollectionCount = (s: ReturnType<typeof useConnectionStore.getState>) =>
+  s.lastCollectionCount;
+export const selectLastTestedAt = (s: ReturnType<typeof useConnectionStore.getState>) =>
+  s.lastTestedAt;
