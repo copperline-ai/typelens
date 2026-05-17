@@ -5,9 +5,15 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "typelens",
   description: "Typesense dashboard — search and manage your collections",
+  manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+    apple: "/icons/icon-152.png",
   },
 };
 
