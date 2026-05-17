@@ -5,10 +5,12 @@
  * Instead we wrap each PNG as a base64-encoded <image> element inside a valid SVG
  * so consumers can reference .svg paths with perfect brand fidelity.
  *
+ * The wordmark is rendered as styled text in the sidebar (not as an image),
+ * so no wordmark SVG is produced here.
+ *
  * Outputs:
- *   public/favicon.svg  ← wraps public/favicon.png      (32×32)
+ *   public/favicon.svg  ← wraps public/favicon.png        (32×32)
  *   public/icon.svg     ← wraps public/icons/icon-192.png (192×192)
- *   public/logo.svg     ← wraps public/wordmark-sm.png   (600×327)
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -45,13 +47,6 @@ const assets = [
     width: 192,
     height: 192,
     label: "TypeLens icon",
-  },
-  {
-    src: join(PUBLIC, "wordmark-sm.png"),
-    dst: join(PUBLIC, "logo.svg"),
-    width: 600,
-    height: 327,
-    label: "TypeLens logo",
   },
 ];
 

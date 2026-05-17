@@ -56,12 +56,20 @@ export function Sidebar() {
         )}
       >
         {!collapsed && (
-          <img
-            src="/wordmark-sm.png"
-            alt="TypeLens"
-            height={40}
-            className="h-10 w-auto max-w-[140px]"
-          />
+          <div className="flex items-center gap-2">
+            <img
+              src="/favicon.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="h-6 w-6"
+              aria-hidden="true"
+            />
+            <span className="text-sm font-semibold tracking-tight">
+              <span style={{ color: "#0067a3" }}>type</span>
+              <span style={{ color: "#00d2da" }}>lens</span>
+            </span>
+          </div>
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}
