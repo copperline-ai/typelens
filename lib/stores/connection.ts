@@ -126,7 +126,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnection(profile) {
       set({ status: "connecting" });
       const start = performance.now();
-      const retryDelays = [3_000, 5_000, 8_000, 12_000, 15_000, 20_000];
+      // Extended delays to cover Railway 90-second cold starts (~140 s cumulative, 8 attempts)
+      const retryDelays = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
       for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
         if (attempt > 0) {
@@ -136,9 +137,9 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
 
         try {
           const url = `${profile.protocol}://${profile.host}:${profile.port}/health`;
+          // No auth header on /health — avoids CORS preflight on the wake-detection call
           const res = await fetch(url, {
-            headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-            signal: AbortSignal.timeout(15_000),
+            signal: AbortSignal.timeout(20_000),
           });
 
           if (res.status === 503 && attempt < retryDelays.length) continue;
@@ -163,7 +164,10 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
             }
             // Network error (connection refused, etc.) — retry
             if (attempt < retryDelays.length) continue;
-          } else if (err instanceof DOMException && err.name === "AbortError") {
+          } else if (
+            err instanceof DOMException &&
+            (err.name === "AbortError" || err.name === "TimeoutError")
+          ) {
             // Timeout — retry
             if (attempt < retryDelays.length) continue;
           } else if (attempt < retryDelays.length) {

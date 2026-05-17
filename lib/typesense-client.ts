@@ -16,8 +16,8 @@ export type Collection = {
   created_at?: number;
 };
 
-// Delays between 503 retries: 3 s, 5 s, 8 s, 12 s, 15 s, 20 s (~63 s total before giving up)
-const RETRY_DELAYS_MS = [3_000, 5_000, 8_000, 12_000, 15_000, 20_000];
+// Extended delays to cover Railway 90-second cold starts (~140 s cumulative, 8 attempts)
+const RETRY_DELAYS_MS = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
