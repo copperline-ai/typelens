@@ -2,16 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Database,
-  Moon,
-  Monitor,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Settings,
-  Sun,
-} from "lucide-react";
+import { Database, Moon, Monitor, PanelLeftClose, Search, Settings, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
@@ -64,14 +55,22 @@ export function Sidebar() {
           collapsed ? "justify-center px-3" : "justify-between px-4",
         )}
       >
-        {!collapsed && <span className="text-sm font-semibold tracking-tight">TypeLens</span>}
+        {!collapsed && (
+          <img src="/wordmark-sm.png" alt="TypeLens" height={26} className="h-[26px] w-auto" />
+        )}
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="text-muted-foreground transition-colors hover:text-foreground"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <PanelLeftOpen className="h-4 w-4" />
+            <img
+              src="/favicon.svg"
+              alt="TypeLens icon"
+              width={24}
+              height={24}
+              className="h-6 w-6"
+            />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}
