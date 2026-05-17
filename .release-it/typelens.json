@@ -4,7 +4,7 @@
     "requireBranch": "main",
     "requireUpstream": true,
     "changelog": false,
-    "commitMessage": "chore(typelens): release ${version} [skip ci]",
+    "commitMessage": "chore(typelens): release ${version} [skip ci]\n\n${changelog}",
     "tagName": "typelens-v${version}",
     "tagMatch": "typelens-v*"
   },

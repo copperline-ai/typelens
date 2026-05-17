@@ -11,7 +11,7 @@ on:
       - "components/**"
       - "lib/**"
       - "scripts/release-it-plugin.js"
-      - ".release-it/dashboard.json"
+      - ".release-it/typelens.json"
       - ".github/workflows/release-dashboard.yml"
 
 permissions:
@@ -69,7 +69,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
-        run: ./node_modules/.bin/release-it --ci -c .release-it/dashboard.json
+        run: ./node_modules/.bin/release-it --ci -c .release-it/typelens.json
 
       - name: Read new version from package.json
         id: version
