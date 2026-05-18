@@ -142,19 +142,29 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         }
 
         try {
-          const url = `${profile.protocol}://${profile.host}:${profile.port}/collections`;
-          const res = await fetch(url, {
-            headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-            signal: AbortSignal.timeout(20_000),
+          const res = await fetch("/api/typesense/collections", {
+            headers: {
+              "X-Ts-Host": profile.host,
+              "X-Ts-Port": String(profile.port),
+              "X-Ts-Protocol": profile.protocol,
+              "X-Ts-Api-Key": profile.apiKey,
+            },
+            signal: AbortSignal.timeout(25_000),
           });
 
-          if (res.status === 503 && attempt < retryDelays.length) continue;
+          // 503 from Typesense or 502/504 from proxy (server can't reach Typesense) — retry
+          if (
+            (res.status === 503 || res.status === 502 || res.status === 504) &&
+            attempt < retryDelays.length
+          )
+            continue;
 
           const latencyMs = Math.round(performance.now() - start);
           if (!res.ok) {
-            const text = await res.text().catch(() => `HTTP ${res.status}`);
+            const data = await res.json().catch(() => null);
+            const text = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
             set({ status: "error" });
-            return { ok: false, error: text || `HTTP ${res.status}` };
+            return { ok: false, error: text };
           }
           let collectionCount: number | null = null;
           try {
@@ -171,27 +181,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           });
           return { ok: true, latencyMs };
         } catch (err) {
-          if (err instanceof TypeError) {
-            const isCors = err.message.toLowerCase().includes("cors");
-            if (isCors) {
-              set({ status: "error" });
-              return {
-                ok: false,
-                error: "Enable CORS on your Typesense instance with --enable-cors",
-              };
-            }
-            // Network error (connection refused, etc.) — retry
-            if (attempt < retryDelays.length) continue;
-          } else if (
-            err instanceof DOMException &&
-            (err.name === "AbortError" || err.name === "TimeoutError")
-          ) {
-            // Timeout — retry
-            if (attempt < retryDelays.length) continue;
-          } else if (attempt < retryDelays.length) {
-            // Unknown error — retry
-            continue;
-          }
+          // fetch() itself threw (timeout, network error to the Next.js server) — retry
+          if (attempt < retryDelays.length) continue;
           set({ status: "error" });
           const error = err instanceof Error ? err.message : String(err);
           return { ok: false, error };
@@ -206,16 +197,21 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
       set({ status: "connecting" });
       const start = performance.now();
       try {
-        const url = `${profile.protocol}://${profile.host}:${profile.port}/collections`;
-        const res = await fetch(url, {
-          headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
+        const res = await fetch("/api/typesense/collections", {
+          headers: {
+            "X-Ts-Host": profile.host,
+            "X-Ts-Port": String(profile.port),
+            "X-Ts-Protocol": profile.protocol,
+            "X-Ts-Api-Key": profile.apiKey,
+          },
           signal: AbortSignal.timeout(10_000),
         });
         const latencyMs = Math.round(performance.now() - start);
         if (!res.ok) {
-          const text = await res.text().catch(() => `HTTP ${res.status}`);
+          const data = await res.json().catch(() => null);
+          const text = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
           set({ status: "error", lastTestedAt: new Date() });
-          return { ok: false, error: text || `HTTP ${res.status}` };
+          return { ok: false, error: text };
         }
         let collectionCount: number | null = null;
         try {

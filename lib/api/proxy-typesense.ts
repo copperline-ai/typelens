@@ -33,13 +33,21 @@ export async function proxyToTypesense(
 ): Promise<NextResponse> {
   const fullPath = searchParams?.size ? `${path}?${searchParams.toString()}` : path;
   const url = buildTypesenseUrl(profile, fullPath);
-  const res = await fetch(url, {
-    headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-    signal: AbortSignal.timeout(10_000),
-  });
-  const body = await res.text();
-  return new NextResponse(body, {
-    status: res.status,
-    headers: { "Content-Type": "application/json" },
-  });
+  try {
+    const res = await fetch(url, {
+      headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const body = await res.text();
+    return new NextResponse(body, {
+      status: res.status,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    if (err instanceof DOMException && (err.name === "AbortError" || err.name === "TimeoutError")) {
+      return NextResponse.json({ error: "Typesense connection timed out" }, { status: 504 });
+    }
+    const message = err instanceof Error ? err.message : "Connection failed";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }
