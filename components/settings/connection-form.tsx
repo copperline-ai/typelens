@@ -35,6 +35,11 @@ const schema = z.object({
   name: z.string().min(1, "Name is required"),
   host: z.string().min(1, "Host is required"),
   protocol: z.enum(["http", "https"]),
+  port: z.coerce
+    .number({ invalid_type_error: "Port is required" })
+    .int("Port must be a whole number")
+    .min(1, "Must be 1–65535")
+    .max(65535, "Must be 1–65535"),
   apiKey: z.string().min(1, "API Key is required"),
 });
 
@@ -52,16 +57,13 @@ interface Props {
   profile?: Profile;
 }
 
-const defaultValues: FormValues = {
+const defaultValues = {
   name: "",
   host: "localhost",
-  protocol: "http",
+  protocol: "http" as const,
+  port: "" as unknown as number,
   apiKey: "",
 };
-
-function getPort(protocol: "http" | "https"): number {
-  return protocol === "http" ? 80 : 443;
-}
 
 export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
   const { addProfile, updateProfile, testConnection } = useConnectionStore(selectActions);
@@ -70,7 +72,7 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues,
+    defaultValues: defaultValues as FormValues,
   });
 
   useEffect(() => {
@@ -81,16 +83,17 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
               name: profile.name,
               host: profile.host,
               protocol: profile.protocol,
+              port: profile.port,
               apiKey: profile.apiKey,
             }
-          : defaultValues,
+          : (defaultValues as FormValues),
       );
       setTestState({ status: "idle" });
     }
   }, [open, profile, form]);
 
   async function handleTest() {
-    const isValid = await form.trigger(["host", "protocol", "apiKey"]);
+    const isValid = await form.trigger(["host", "protocol", "port", "apiKey"]);
     if (!isValid) return;
     const values = form.getValues();
     setTestState({ status: "testing" });
@@ -98,7 +101,7 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
       id: "__test__",
       name: values.name,
       host: values.host,
-      port: getPort(values.protocol),
+      port: values.port,
       protocol: values.protocol,
       apiKey: values.apiKey,
     });
@@ -110,11 +113,10 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
   }
 
   function onSubmit(data: FormValues) {
-    const fullData = { ...data, port: getPort(data.protocol) };
     if (isEdit && profile) {
-      updateProfile(profile.id, fullData);
+      updateProfile(profile.id, data);
     } else {
-      addProfile(fullData);
+      addProfile(data);
     }
     onOpenChange(false);
   }
@@ -142,14 +144,22 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
               )}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <FormField
                 control={form.control}
                 name="protocol"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
                     <FormLabel>Protocol</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(value: "http" | "https") => {
+                        field.onChange(value);
+                        form.setValue("port", value === "https" ? 443 : ("" as unknown as number), {
+                          shouldValidate: false,
+                        });
+                      }}
+                      value={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue />
@@ -172,6 +182,31 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                     <FormLabel>Host</FormLabel>
                     <FormControl>
                       <Input placeholder="localhost" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="port"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Port</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="8108"
+                        {...field}
+                        value={field.value === ("" as unknown as number) ? "" : field.value}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? ("" as unknown as number)
+                              : e.target.valueAsNumber,
+                          )
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
