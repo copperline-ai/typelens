@@ -30,12 +30,18 @@ export async function proxyToTypesense(
   profile: TypesenseProxyProfile,
   path: string,
   searchParams?: URLSearchParams,
+  options?: { method?: string; body?: string; contentType?: string },
 ): Promise<NextResponse> {
   const fullPath = searchParams?.size ? `${path}?${searchParams.toString()}` : path;
   const url = buildTypesenseUrl(profile, fullPath);
+  const contentType = options?.contentType ?? (options?.body ? "application/json" : undefined);
+  const reqHeaders: Record<string, string> = { "X-TYPESENSE-API-KEY": profile.apiKey };
+  if (contentType) reqHeaders["Content-Type"] = contentType;
   try {
     const res = await fetch(url, {
-      headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
+      method: options?.method ?? "GET",
+      headers: reqHeaders,
+      body: options?.body,
       signal: AbortSignal.timeout(10_000),
     });
     const body = await res.text();

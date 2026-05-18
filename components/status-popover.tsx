@@ -68,6 +68,13 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
         </p>
 
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-sm">
+          {activeProfile?.name && (
+            <>
+              <dt className="text-muted-foreground">Server</dt>
+              <dd className="truncate font-medium">{activeProfile.name}</dd>
+            </>
+          )}
+
           <dt className="text-muted-foreground">Host</dt>
           <dd className="font-mono text-xs truncate">
             {activeProfile ? `${activeProfile.host}:${activeProfile.port}` : "—"}

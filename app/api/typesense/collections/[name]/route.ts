@@ -14,3 +14,16 @@ export async function GET(request: NextRequest, { params }: Params) {
   const { name } = await params;
   return proxyToTypesense(profile, `/collections/${encodeURIComponent(name)}`);
 }
+
+export async function DELETE(request: NextRequest, { params }: Params) {
+  const authError = await requireAuth(request);
+  if (authError) return authError;
+
+  const profile = extractProfile(request);
+  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
+
+  const { name } = await params;
+  return proxyToTypesense(profile, `/collections/${encodeURIComponent(name)}`, undefined, {
+    method: "DELETE",
+  });
+}

@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Database, LogOut, Moon, Monitor, PanelLeftClose, Settings, Sun } from "lucide-react";
+import {
+  Cable,
+  Database,
+  LogOut,
+  Moon,
+  Monitor,
+  PanelLeftClose,
+  Settings,
+  Sun,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
@@ -11,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
-  { href: "/settings/connection", label: "Settings", icon: Settings },
+  { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 
 const themeIcons: Record<Theme, React.ElementType> = {

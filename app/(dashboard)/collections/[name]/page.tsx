@@ -2,16 +2,29 @@
 
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ChevronRight, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
+  deleteCollection,
   sampleDocuments,
   type Collection,
   type SearchHit,
 } from "@/lib/typesense-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { cn } from "@/lib/utils";
 
@@ -353,9 +366,25 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const { name } = use(params);
   const collectionName = decodeURIComponent(name);
   const activeProfile = useConnectionStore(selectActiveProfile);
+  const router = useRouter();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    if (!activeProfile) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteCollection(activeProfile, collectionName);
+      router.push("/collections");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : String(err));
+      setDeleting(false);
+    }
+  }
 
   async function fetchCollection() {
     if (!activeProfile) return;
@@ -381,9 +410,8 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/collections">
-          <Button variant="ghost" size="sm" className="gap-1.5">
+          <Button variant="ghost" size="icon" title="Back to Collections">
             <ArrowLeft className="h-4 w-4" />
-            Collections
           </Button>
         </Link>
       </div>
@@ -415,14 +443,60 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 {fmt.format(collection.num_documents)}{" "}
                 {collection.num_documents === 1 ? "document" : "documents"}
                 {collection.created_at && (
-                  <> · created {new Date(collection.created_at * 1000).toLocaleDateString()}</>
+                  <> · created {new Date(collection.created_at * 1000).toLocaleString()}</>
                 )}
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchCollection} disabled={loading}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchCollection}
+                disabled={loading}
+                title="Refresh"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30"
+                    disabled={deleting}
+                    title="Delete collection"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete collection?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete{" "}
+                      <span className="font-mono font-medium text-foreground">
+                        {collection.name}
+                      </span>{" "}
+                      and all {fmt.format(collection.num_documents)}{" "}
+                      {collection.num_documents === 1 ? "document" : "documents"}. This action
+                      cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  {deleteError && <p className="text-xs text-destructive">{deleteError}</p>}
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
 
           {collection.default_sorting_field && (
@@ -435,7 +509,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           )}
 
           <CollapsibleSection
-            title={`Fields (${collection.fields.length})`}
+            title="Schema"
             summary={[
               `${collection.fields.length} fields`,
               facetCount > 0 && `${facetCount} faceted`,

@@ -54,11 +54,17 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           if (res.ok) {
             const data = (await res.json()) as
               | { configured: false }
-              | { host: string; port: number; protocol: "http" | "https"; apiKey: string };
+              | {
+                  host: string;
+                  port: number;
+                  protocol: "http" | "https";
+                  apiKey: string;
+                  name?: string;
+                };
             if ("host" in data) {
               const envProfile: Profile = {
                 id: "env-config",
-                name: data.host,
+                name: data.name ?? data.host,
                 host: data.host,
                 port: data.port,
                 protocol: data.protocol,

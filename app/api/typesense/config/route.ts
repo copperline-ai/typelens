@@ -15,5 +15,6 @@ export async function GET(request: NextRequest) {
     port: Number(process.env.TYPESENSE_PORT ?? 8108),
     protocol: (process.env.TYPESENSE_PROTOCOL as "http" | "https") ?? "https",
     apiKey: process.env.TYPESENSE_API_KEY ?? "",
+    ...(process.env.TYPESENSE_SERVER_NAME ? { name: process.env.TYPESENSE_SERVER_NAME } : {}),
   });
 }

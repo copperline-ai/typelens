@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
-import { listCollections, type Collection } from "@/lib/typesense-client";
+import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
 import { CollectionCard } from "@/components/collections/collection-card";
+import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { Button } from "@/components/ui/button";
 
-function CollectionsSkeleton() {
+function CollectionsSkeleton({ count }: { count: number }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className="h-32" />
       ))}
     </div>
@@ -26,13 +27,21 @@ export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [skeletonCount, setSkeletonCount] = useState(3);
+  const [createOpen, setCreateOpen] = useState(false);
 
   async function fetchCollections() {
     if (!activeProfile) return;
     setLoading(true);
     setError(null);
+
+    const fetchPromise = listCollections(activeProfile);
+    const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 1000));
+    const quick = await Promise.race([fetchPromise.catch(() => null), timeoutPromise]);
+    if (quick !== null && quick.length > 0) setSkeletonCount(quick.length);
+
     try {
-      const data = await listCollections(activeProfile);
+      const data = await fetchPromise;
       setCollections(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -56,12 +65,24 @@ export default function CollectionsPage() {
             </p>
           )}
         </div>
-        {activeProfile && (
-          <Button variant="outline" size="sm" onClick={fetchCollections} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {activeProfile && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={fetchCollections}
+              disabled={loading}
+              title="Refresh"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </Button>
+          )}
+          {activeProfile && (
+            <Button size="icon" onClick={() => setCreateOpen(true)} title="New Collection">
+              <Plus className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {!activeProfile && (
@@ -104,7 +125,9 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && status === "connected" && loading && <CollectionsSkeleton />}
+      {activeProfile && status === "connected" && loading && (
+        <CollectionsSkeleton count={skeletonCount} />
+      )}
 
       {activeProfile && status === "connected" && error && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
@@ -132,10 +155,23 @@ export default function CollectionsPage() {
       {activeProfile && !loading && !error && collections && collections.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {collections.map((c) => (
-            <CollectionCard key={c.name} collection={c} />
+            <CollectionCard
+              key={c.name}
+              collection={c}
+              onDelete={async () => {
+                await deleteCollection(activeProfile!, c.name);
+                setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
+              }}
+            />
           ))}
         </div>
       )}
+
+      <CreateCollectionDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={fetchCollections}
+      />
     </div>
   );
 }

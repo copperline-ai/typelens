@@ -40,14 +40,16 @@ export async function typesenseFetch<T>(
   profile: Profile,
   path: string,
   signal?: AbortSignal,
+  options?: { method?: string; body?: string; contentType?: string },
 ): Promise<T> {
   const url = `/api/typesense${path}`;
-  const headers = {
+  const headers: Record<string, string> = {
     "X-Ts-Host": profile.host,
     "X-Ts-Port": String(profile.port),
     "X-Ts-Protocol": profile.protocol,
     "X-Ts-Api-Key": profile.apiKey,
   };
+  if (options?.body) headers["Content-Type"] = options?.contentType ?? "application/json";
 
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
     if (attempt > 0) await sleep(RETRY_DELAYS_MS[attempt - 1]!, signal);
@@ -56,7 +58,12 @@ export async function typesenseFetch<T>(
       ? AbortSignal.any([signal, AbortSignal.timeout(30_000)])
       : AbortSignal.timeout(30_000);
 
-    const res = await fetch(url, { headers, signal: combined });
+    const res = await fetch(url, {
+      method: options?.method ?? "GET",
+      headers,
+      body: options?.body,
+      signal: combined,
+    });
 
     // 503 from Typesense or 502/504 from proxy (can't reach Typesense) — retry
     if (
@@ -83,6 +90,98 @@ export function listCollections(profile: Profile) {
 
 export function getCollection(profile: Profile, name: string) {
   return typesenseFetch<Collection>(profile, `/collections/${encodeURIComponent(name)}`);
+}
+
+export const TYPESENSE_FIELD_TYPES = [
+  "string",
+  "string[]",
+  "int32",
+  "int32[]",
+  "int64",
+  "int64[]",
+  "float",
+  "float[]",
+  "bool",
+  "bool[]",
+  "geopoint",
+  "geopoint[]",
+  "object",
+  "object[]",
+  "auto",
+  "image",
+] as const;
+
+export type TypesenseFieldType = (typeof TYPESENSE_FIELD_TYPES)[number];
+
+export type CollectionCreateSchema = {
+  name: string;
+  fields: {
+    name: string;
+    type: string;
+    facet?: boolean;
+    optional?: boolean;
+    index?: boolean;
+  }[];
+  default_sorting_field?: string;
+};
+
+export function deleteCollection(profile: Profile, name: string) {
+  return typesenseFetch<{ name: string }>(
+    profile,
+    `/collections/${encodeURIComponent(name)}`,
+    undefined,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+export function createCollection(profile: Profile, schema: CollectionCreateSchema) {
+  return typesenseFetch<Collection>(profile, "/collections", undefined, {
+    method: "POST",
+    body: JSON.stringify(schema),
+  });
+}
+
+export type ImportResult = { success: boolean; error?: string };
+
+export async function importDocuments(
+  profile: Profile,
+  collectionName: string,
+  records: Record<string, unknown>[],
+): Promise<ImportResult[]> {
+  const jsonl = records
+    .map((r) => {
+      const cleaned: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(r)) {
+        if (v !== "" && v !== null && v !== undefined) cleaned[k] = v;
+      }
+      return JSON.stringify(cleaned);
+    })
+    .join("\n");
+  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=create`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-Ts-Host": profile.host,
+      "X-Ts-Port": String(profile.port),
+      "X-Ts-Protocol": profile.protocol,
+      "X-Ts-Api-Key": profile.apiKey,
+      "Content-Type": "text/plain",
+    },
+    body: jsonl,
+    signal: AbortSignal.timeout(60_000),
+  });
+
+  // Response is JSONL — one result object per line — not a JSON array
+  const text = await res.text();
+  if (!res.ok && !text.trim()) {
+    throw new Error(`Import failed: HTTP ${res.status}`);
+  }
+  return text
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line) as ImportResult);
 }
 
 export type SearchHit = { document: Record<string, unknown> };

@@ -11,3 +11,14 @@ export async function GET(request: NextRequest) {
 
   return proxyToTypesense(profile, "/collections");
 }
+
+export async function POST(request: NextRequest) {
+  const authError = await requireAuth(request);
+  if (authError) return authError;
+
+  const profile = extractProfile(request);
+  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
+
+  const body = await request.text();
+  return proxyToTypesense(profile, "/collections", undefined, { method: "POST", body });
+}
