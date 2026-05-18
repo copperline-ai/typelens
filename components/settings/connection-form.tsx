@@ -219,7 +219,17 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
               name="apiKey"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>API Key</FormLabel>
+                  <FormLabel>
+                    API Key{" "}
+                    <a
+                      href="https://typesense.org/docs/30.2/api/authentication.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
+                    >
+                      Learn more
+                    </a>
+                  </FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="Enter your Typesense API key" {...field} />
                   </FormControl>
