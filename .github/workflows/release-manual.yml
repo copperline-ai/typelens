@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Map product to config
         id: map
@@ -88,7 +88,7 @@ jobs:
 
       - name: release-it (manual increment + AI changelog)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
           RELEASE_BUMP_OVERRIDE: ${{ inputs.release_level }}

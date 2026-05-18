@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Ensure GitHub CLI
         run: |
@@ -62,7 +62,7 @@ jobs:
 
       - name: release-it (AI bump + GitHub release)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           RELEASE_AI_MODEL: ${{ vars.RELEASE_AI_MODEL }}
         run: ./node_modules/.bin/release-it --ci -c .release-it/typelens.json
