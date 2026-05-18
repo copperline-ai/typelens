@@ -49,8 +49,8 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
     <>
       <Card className={isActive ? "border-primary/50 bg-primary/5" : ""}>
         <CardContent className="pt-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-0.5 min-w-0">
+          <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
+            <div className="space-y-0.5 min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium">{profile.name}</span>
                 {isActive && <Badge className="h-5 px-1.5 text-[10px]">Active</Badge>}
@@ -69,7 +69,7 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
                 {"•".repeat(8)}
               </p>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 ml-auto">
               <Button
                 size="icon"
                 variant="outline"
