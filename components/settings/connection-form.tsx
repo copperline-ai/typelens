@@ -148,7 +148,7 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="My Typesense Server" {...field} />
+                    <Input placeholder="My Typesense Server" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,7 +192,7 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                   <FormItem className="col-span-2">
                     <FormLabel>Host</FormLabel>
                     <FormControl>
-                      <Input placeholder="localhost" {...field} />
+                      <Input placeholder="localhost" autoComplete="off" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -242,7 +242,12 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                     </a>
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Enter your Typesense API key" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter your Typesense API key"
+                      autoComplete="new-password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
