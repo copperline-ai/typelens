@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "../route";
 
-vi.stubEnv("BASIC_AUTH_PASSWORD", "test-secret");
+vi.stubEnv("AUTH_PASSWORD", "test-secret");
 
 async function makeAuthCookie(): Promise<string> {
   const { createSessionToken, SESSION_COOKIE } = await import("@/lib/auth-session");

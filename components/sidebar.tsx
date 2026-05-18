@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Database, Moon, Monitor, PanelLeftClose, Search, Settings, Sun } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Database, LogOut, Moon, Monitor, PanelLeftClose, Settings, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
 import type { Theme } from "@/lib/store";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
-  { href: "/search", label: "Search", icon: Search },
   { href: "/settings/connection", label: "Settings", icon: Settings },
 ];
 
@@ -22,8 +22,9 @@ const themeIcons: Record<Theme, React.ElementType> = {
 
 const themeOrder: Theme[] = ["system", "light", "dark"];
 
-export function Sidebar() {
+export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const theme = useThemeStore(selectTheme);
   const { setTheme } = useThemeStore(selectThemeActions);
@@ -40,7 +41,14 @@ export function Sidebar() {
     setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
   }
 
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
   const ThemeIcon = themeIcons[theme];
+  const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
   return (
     <aside
@@ -125,14 +133,35 @@ export function Sidebar() {
             v{process.env.NEXT_PUBLIC_APP_VERSION}
           </span>
         )}
-        <button
-          onClick={cycleTheme}
-          title={theme}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-          aria-label={`Theme: ${theme}`}
-        >
-          <ThemeIcon className="h-4 w-4" />
-        </button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              title="Settings"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent side="top" align={collapsed ? "center" : "end"} className="w-44 p-1">
+            <button
+              onClick={cycleTheme}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ThemeIcon className="h-4 w-4 shrink-0" />
+              <span>Theme: {themeLabel}</span>
+            </button>
+            {authEnabled && (
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4 shrink-0" />
+                <span>Log out</span>
+              </button>
+            )}
+          </PopoverContent>
+        </Popover>
       </div>
     </aside>
   );

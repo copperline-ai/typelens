@@ -5,12 +5,13 @@ import { HydrateStore } from "@/components/hydrate-store";
 import { KeepAlive } from "@/components/keep-alive";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const authEnabled = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
   return (
     <ToastProvider>
       <HydrateStore />
       <KeepAlive />
       <div className="flex h-screen overflow-hidden">
-        <Sidebar />
+        <Sidebar authEnabled={authEnabled} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />
           <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>

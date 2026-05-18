@@ -6,10 +6,10 @@ declare namespace NodeJS {
 
     // ── Authentication ───────────────────────────────────────────────────────
     /** Dashboard login username (required). */
-    readonly BASIC_AUTH_USERNAME: string;
+    readonly AUTH_USERNAME: string;
 
     /** Dashboard login password — also used as the session-signing secret (required). */
-    readonly BASIC_AUTH_PASSWORD: string;
+    readonly AUTH_PASSWORD: string;
 
     // ── Server-side (never exposed to the browser) ──────────────────────────
     /**

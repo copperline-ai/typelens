@@ -2,8 +2,8 @@ export const SESSION_COOKIE = "__dashboard_session";
 const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 function signingSecret(): string {
-  const s = process.env.BASIC_AUTH_PASSWORD;
-  if (!s) throw new Error("BASIC_AUTH_PASSWORD is not set");
+  const s = process.env.AUTH_PASSWORD;
+  if (!s) throw new Error("AUTH_PASSWORD is not set");
   return s;
 }
 

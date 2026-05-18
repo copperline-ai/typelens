@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { requireAuth } from "../require-auth";
 
-vi.stubEnv("BASIC_AUTH_PASSWORD", "test-secret");
+vi.stubEnv("AUTH_PASSWORD", "test-secret");
 
 describe("requireAuth", () => {
   it("returns 401 when no session cookie present", async () => {

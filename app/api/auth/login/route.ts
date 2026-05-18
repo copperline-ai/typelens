@@ -5,8 +5,8 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const { username, password } = (body ?? {}) as { username?: string; password?: string };
 
-  const expectedUsername = process.env.BASIC_AUTH_USERNAME;
-  const expectedPassword = process.env.BASIC_AUTH_PASSWORD;
+  const expectedUsername = process.env.AUTH_USERNAME;
+  const expectedPassword = process.env.AUTH_PASSWORD;
 
   if (
     !expectedUsername ||
