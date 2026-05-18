@@ -62,7 +62,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   return (
     <aside
       className={cn(
-        "flex h-full flex-col border-r bg-background transition-[width] duration-200",
+        "flex h-full flex-col overflow-hidden border-r bg-background transition-[width] duration-200",
         collapsed ? "w-14" : "w-56",
       )}
     >
@@ -103,7 +103,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           )}
         </button>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-2">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto min-h-0 p-2">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
