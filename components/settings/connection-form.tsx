@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -126,6 +127,17 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Connection" : "Add Connection"}</DialogTitle>
+          <DialogDescription>
+            Configure your Typesense server.{" "}
+            <a
+              href="https://typesense.org/docs/30.2/api/authentication.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground"
+            >
+              Learn more
+            </a>
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -222,7 +234,7 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                   <FormLabel>
                     API Key{" "}
                     <a
-                      href="https://typesense.org/docs/30.2/api/authentication.html"
+                      href="https://typesense.org/docs/30.2/api/api-keys.html#create-an-api-key"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
