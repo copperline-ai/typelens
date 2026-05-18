@@ -255,50 +255,53 @@ export default function CollectionsPage() {
           </div>
         </div>
         {collections && collections.length > 0 && (
-          <div className="flex items-center justify-end gap-0.5">
-            {collections.length > 1 &&
-              SORT_OPTIONS.map(({ key, icon: Icon, label, sep }) => (
-                <Fragment key={key}>
-                  {sep && <span className="mx-1 h-4 w-px bg-border" />}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title={label}
-                    className={cn(
-                      "h-8 w-8",
-                      sortKey === key
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                    onClick={() => setSortKey(key)}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Button>
-                </Fragment>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-0.5">
+              {(
+                [
+                  ["card", LayoutGrid, "Card view"],
+                  ["table", LayoutList, "Table view"],
+                ] as const
+              ).map(([mode, Icon, label]) => (
+                <Button
+                  key={mode}
+                  variant="ghost"
+                  size="icon"
+                  title={label}
+                  className={cn(
+                    "h-8 w-8",
+                    viewMode === mode
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => changeView(mode)}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
               ))}
-            <span className="mx-1 h-4 w-px bg-border" />
-            {(
-              [
-                ["card", LayoutGrid, "Card view"],
-                ["table", LayoutList, "Table view"],
-              ] as const
-            ).map(([mode, Icon, label]) => (
-              <Button
-                key={mode}
-                variant="ghost"
-                size="icon"
-                title={label}
-                className={cn(
-                  "h-8 w-8",
-                  viewMode === mode
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={() => changeView(mode)}
-              >
-                <Icon className="h-4 w-4" />
-              </Button>
-            ))}
+            </div>
+            <div className="flex items-center gap-0.5">
+              {collections.length > 1 &&
+                SORT_OPTIONS.map(({ key, icon: Icon, label, sep }) => (
+                  <Fragment key={key}>
+                    {sep && <span className="mx-1 h-4 w-px bg-border" />}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title={label}
+                      className={cn(
+                        "h-8 w-8",
+                        sortKey === key
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                      onClick={() => setSortKey(key)}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </Button>
+                  </Fragment>
+                ))}
+            </div>
           </div>
         )}
       </div>
