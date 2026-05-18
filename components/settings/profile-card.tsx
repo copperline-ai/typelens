@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type TestState =
   | { status: "idle" }
@@ -49,8 +49,8 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
     <>
       <Card className={isActive ? "border-primary/50 bg-primary/5" : ""}>
         <CardContent className="pt-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-0.5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium">{profile.name}</span>
                 {isActive && <Badge className="h-5 px-1.5 text-[10px]">Active</Badge>}
@@ -68,6 +68,41 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
                 API Key: {profile.apiKey.slice(0, 4)}
                 {"•".repeat(8)}
               </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={handleTest}
+                disabled={testState.status === "testing"}
+                title="Test connection"
+              >
+                <Wifi className="h-4 w-4" />
+              </Button>
+              {!isActive && (
+                <Button size="sm" variant="outline" onClick={() => setActiveProfile(profile.id)}>
+                  Set Active
+                </Button>
+              )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onEdit}
+                title="Edit"
+                disabled={isReadOnly}
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setDeleteOpen(true)}
+                title="Delete"
+                disabled={isReadOnly}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -94,36 +129,6 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
             </div>
           )}
         </CardContent>
-
-        <CardFooter className="flex-wrap gap-2">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={handleTest}
-            disabled={testState.status === "testing"}
-            title="Test connection"
-          >
-            <Wifi className="h-4 w-4" />
-          </Button>
-          {!isActive && (
-            <Button size="sm" variant="outline" onClick={() => setActiveProfile(profile.id)}>
-              Set Active
-            </Button>
-          )}
-          <Button size="icon" variant="ghost" onClick={onEdit} title="Edit" disabled={isReadOnly}>
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="text-destructive hover:text-destructive"
-            onClick={() => setDeleteOpen(true)}
-            title="Delete"
-            disabled={isReadOnly}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </CardFooter>
       </Card>
 
       {!isReadOnly && (
