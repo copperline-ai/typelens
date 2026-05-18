@@ -101,11 +101,17 @@ function inferType(rawValues: unknown[]): TypesenseFieldType {
 function inferFieldsFromRecords(records: Record<string, unknown>[]): FormValues["fields"] {
   if (records.length === 0) return [];
   const sample = records.slice(0, 100);
-  const keys = Object.keys(sample[0] ?? {});
 
-  return keys.map((key) => {
+  // Discover all keys across every record so fields that appear only later are included
+  const allKeys = new Set<string>();
+  for (const record of records) {
+    for (const key of Object.keys(record)) allKeys.add(key);
+  }
+
+  return Array.from(allKeys).map((key) => {
     const rawValues = sample.map((r) => r[key]);
-    const hasEmpty = rawValues.some((v) => v === null || v === undefined || v === "");
+    // Check optionality across all records, not just the sample
+    const hasEmpty = records.some((r) => r[key] === null || r[key] === undefined || r[key] === "");
     return {
       name: key,
       type: inferType(rawValues),
