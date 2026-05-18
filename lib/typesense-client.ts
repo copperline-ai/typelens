@@ -41,7 +41,13 @@ export async function typesenseFetch<T>(
   path: string,
   signal?: AbortSignal,
 ): Promise<T> {
-  const url = `${profile.protocol}://${profile.host}:${profile.port}${path}`;
+  const url = `/api/typesense${path}`;
+  const headers = {
+    "X-Ts-Host": profile.host,
+    "X-Ts-Port": String(profile.port),
+    "X-Ts-Protocol": profile.protocol,
+    "X-Ts-Api-Key": profile.apiKey,
+  };
 
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
     if (attempt > 0) await sleep(RETRY_DELAYS_MS[attempt - 1]!, signal);
@@ -50,17 +56,19 @@ export async function typesenseFetch<T>(
       ? AbortSignal.any([signal, AbortSignal.timeout(30_000)])
       : AbortSignal.timeout(30_000);
 
-    const res = await fetch(url, {
-      headers: { "X-TYPESENSE-API-KEY": profile.apiKey },
-      signal: combined,
-    });
+    const res = await fetch(url, { headers, signal: combined });
 
-    // 503 = server starting; retry if we have attempts left
-    if (res.status === 503 && attempt < RETRY_DELAYS_MS.length) continue;
+    // 503 from Typesense or 502/504 from proxy (can't reach Typesense) — retry
+    if (
+      (res.status === 503 || res.status === 502 || res.status === 504) &&
+      attempt < RETRY_DELAYS_MS.length
+    )
+      continue;
 
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`Typesense ${res.status}${text ? `: ${text}` : ""}`);
+      const data = await res.json().catch(() => null);
+      const message = (data as { error?: string } | null)?.error ?? `Typesense ${res.status}`;
+      throw new Error(message);
     }
 
     return res.json() as Promise<T>;
