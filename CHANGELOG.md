@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.3.0] - 2026-05-18
+
+### Features
+- Replace logo and app icon with new brand asset (`b18ad2b`, `be4f8fd`)  
+- Show Typesense server version in status popover (`488a5b7`)  
+- Add Learn more links to schema form areas in collections (`66c9822`)  
+- Sort collections by name and date with icon toolbar; pin sidebar gear (`f2f101e`)  
+- Add card/table view toggle with localStorage persistence in collections (`f87703f`)  
+- Add list/card view toggle for connections; expand to full content width (`ff54740`)
+
+### Bug Fixes
+- Check field optionality and keys across all records, not just sample (`eeed723`)  
+- Use logo.png directly instead of favicon.svg for header icon (`53c389a`)  
+- Add viewport-fit=cover and safe-area padding for sidebar gear on iPhone (`d1a6a7b`)  
+- Pin gear icon to bottom on mobile/PWA via overflow-hidden + min-h-0 (`cc0053e`)  
+- Show logout by checking session cookie, not build-time env vars (`0b3577a`)  
+- Correct broken SVG path and add favicon.ico for Chrome (`53db91e`)  
+- Drop version row in status popover (`23a8cf3`)  
+- Left-align view toggle, right-align sort toolbar in collections (`ac7b72f`)  
+- Regenerate all favicon assets from logo.png (`b2b7252`)  
+- Update API key Learn more URL and add auth link to modal header (`91b12b3`)  
+- Remove background from logo before generating favicon assets (`255095c`)  
+- Drop "Set via environment variables" label in profile card (`dfe30d8`)  
+- Change dialog description link text to "How authentication works" (`8dc99c5`)  
+- Suppress browser autofill on connection fields (`083a720`)  
+- Right-align action icons opposite connection info (`c671e86`)  
+- Wrap action buttons below info on narrow viewports (`1db915d`)  
+- Move connections view toggle to left-aligned toolbar above list (`e9bb091`)  
+- Remove subtitle from connections page header (`40a7c4c`)  
+- Use h-dvh for mobile viewport height (`2f77c21`)  
+- Prevent silent no-op when paths contains "." and remove workflow path filter (`5fb31cc`, `88ad29f`)  
+- Switch Railway builder from DOCKERFILE to RAILPACK (`5dbb6ef`)  
+- Use GH_TOKEN instead of GITHUB_TOKEN to bypass branch protection (`ae0d64c`)
+
+### Other
+- Refresh .env.example for current application (`e943ab5`)
+
 ## [1.2.7] - 2026-05-18
 
 ### Other
