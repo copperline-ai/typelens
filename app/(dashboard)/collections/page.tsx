@@ -1,14 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState, type ElementType } from "react";
 import Link from "next/link";
-import { Plus, RefreshCw } from "lucide-react";
+import {
+  ArrowDownAZ,
+  ArrowUpAZ,
+  CalendarArrowDown,
+  CalendarArrowUp,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type SortKey = "name-asc" | "name-desc" | "created-desc" | "created-asc";
+
+const SORT_OPTIONS: { key: SortKey; icon: ElementType; label: string; sep?: true }[] = [
+  { key: "name-asc", icon: ArrowDownAZ, label: "Name A→Z" },
+  { key: "name-desc", icon: ArrowUpAZ, label: "Name Z→A" },
+  { key: "created-desc", icon: CalendarArrowDown, label: "Newest first", sep: true },
+  { key: "created-asc", icon: CalendarArrowUp, label: "Oldest first" },
+];
+
+function sortCollections(cols: Collection[], key: SortKey): Collection[] {
+  return [...cols].sort((a, b) => {
+    switch (key) {
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "created-desc":
+        return (b.created_at ?? 0) - (a.created_at ?? 0);
+      case "created-asc":
+        return (a.created_at ?? 0) - (b.created_at ?? 0);
+    }
+  });
+}
 
 function CollectionsSkeleton({ count }: { count: number }) {
   return (
@@ -29,6 +61,7 @@ export default function CollectionsPage() {
   const [loading, setLoading] = useState(false);
   const [skeletonCount, setSkeletonCount] = useState(3);
   const [createOpen, setCreateOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("name-asc");
 
   async function fetchCollections() {
     if (!activeProfile) return;
@@ -56,33 +89,58 @@ export default function CollectionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Collections</h1>
-          {collections && (
-            <p className="text-sm text-muted-foreground mt-1">
-              {collections.length} {collections.length === 1 ? "collection" : "collections"}
-            </p>
-          )}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">Collections</h1>
+            {collections && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {collections.length} {collections.length === 1 ? "collection" : "collections"}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {activeProfile && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchCollections}
+                disabled={loading}
+                title="Refresh"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+              </Button>
+            )}
+            {activeProfile && (
+              <Button size="icon" onClick={() => setCreateOpen(true)} title="New Collection">
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {activeProfile && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={fetchCollections}
-              disabled={loading}
-              title="Refresh"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          )}
-          {activeProfile && (
-            <Button size="icon" onClick={() => setCreateOpen(true)} title="New Collection">
-              <Plus className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        {collections && collections.length > 1 && (
+          <div className="flex items-center justify-end gap-0.5">
+            {SORT_OPTIONS.map(({ key, icon: Icon, label, sep }) => (
+              <Fragment key={key}>
+                {sep && <span className="mx-1 h-4 w-px bg-border" />}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title={label}
+                  className={cn(
+                    "h-8 w-8",
+                    sortKey === key
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => setSortKey(key)}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
+              </Fragment>
+            ))}
+          </div>
+        )}
       </div>
 
       {!activeProfile && (
@@ -154,7 +212,7 @@ export default function CollectionsPage() {
 
       {activeProfile && !loading && !error && collections && collections.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {collections.map((c) => (
+          {sortCollections(collections, sortKey).map((c) => (
             <CollectionCard
               key={c.name}
               collection={c}
