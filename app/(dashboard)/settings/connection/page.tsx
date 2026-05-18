@@ -221,9 +221,6 @@ export default function ConnectionSettingsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Connections</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Add and manage your Typesense connections.
-          </p>
         </div>
         <Button size="icon" onClick={handleAddOpen} title="Add Connection">
           <Plus className="h-4 w-4" />
