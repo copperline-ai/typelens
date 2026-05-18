@@ -225,44 +225,36 @@ export default function ConnectionSettingsPage() {
             Add and manage your Typesense connections.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {profiles.length > 0 && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                title="Card view"
-                className={cn(
-                  "h-8 w-8",
-                  viewMode === "card"
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={() => changeView("card")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                title="List view"
-                className={cn(
-                  "h-8 w-8",
-                  viewMode === "list"
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                onClick={() => changeView("list")}
-              >
-                <LayoutList className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-          <Button size="icon" onClick={handleAddOpen} title="Add Connection">
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button size="icon" onClick={handleAddOpen} title="Add Connection">
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
+
+      {profiles.length > 0 && (
+        <div className="flex items-center gap-0.5">
+          {(["card", "list"] as const).map((mode) => (
+            <Button
+              key={mode}
+              variant="ghost"
+              size="icon"
+              title={mode === "card" ? "Card view" : "List view"}
+              className={cn(
+                "h-8 w-8",
+                viewMode === mode
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              onClick={() => changeView(mode)}
+            >
+              {mode === "card" ? (
+                <LayoutGrid className="h-4 w-4" />
+              ) : (
+                <LayoutList className="h-4 w-4" />
+              )}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {profiles.length === 0 ? (
         <div className="rounded-lg border border-dashed p-12 text-center">
