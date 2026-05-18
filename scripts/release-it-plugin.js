@@ -63,7 +63,7 @@ function parseAiJson(text) {
 function commitsForApp(comparison, paths) {
   const list = comparison.commits || [];
   const normalized = paths.map((p) => p.replace(/\\/g, "/").replace(/\/$/, ""));
-  if (normalized.length === 0) return list;
+  if (normalized.length === 0 || normalized.includes(".")) return list;
 
   const changed = comparison.files || [];
   const touchesApp = changed.some((f) => {
