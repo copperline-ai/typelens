@@ -128,14 +128,13 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Connection" : "Add Connection"}</DialogTitle>
           <DialogDescription>
-            Configure your Typesense server.{" "}
             <a
               href="https://typesense.org/docs/30.2/api/authentication.html"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-foreground"
             >
-              Learn more
+              How authentication works
             </a>
           </DialogDescription>
         </DialogHeader>
