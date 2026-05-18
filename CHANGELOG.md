@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.7] - 2026-05-18
+
+### Other
+
+- Manual release (no commits since last tag in this app's path filter).
+
 ## [1.2.0] - 2026-05-16
 
 ### Features
