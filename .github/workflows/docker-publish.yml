@@ -1,14 +1,6 @@
 name: Docker Publish
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - Dockerfile
-      - "app/**"
-      - "components/**"
-      - "lib/**"
   workflow_call:
     inputs:
       version:
