@@ -64,11 +64,6 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
               <p className="text-sm text-muted-foreground">
                 {profile.protocol}://{profile.host}:{profile.port}
               </p>
-              {isReadOnly && (
-                <p className="text-xs text-muted-foreground/70">
-                  Set via environment variables · cannot be edited
-                </p>
-              )}
               <p className="font-mono text-xs text-muted-foreground">
                 API Key: {profile.apiKey.slice(0, 4)}
                 {"•".repeat(8)}
