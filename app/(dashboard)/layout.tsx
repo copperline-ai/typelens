@@ -1,11 +1,14 @@
+import { cookies } from "next/headers";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { ToastProvider } from "@/components/async-boundary";
 import { HydrateStore } from "@/components/hydrate-store";
 import { KeepAlive } from "@/components/keep-alive";
+import { SESSION_COOKIE } from "@/lib/auth-session";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const authEnabled = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const authEnabled = cookieStore.has(SESSION_COOKIE);
   return (
     <ToastProvider>
       <HydrateStore />
