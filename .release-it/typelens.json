@@ -18,7 +18,7 @@
   },
   "plugins": {
     "./scripts/release-it-plugin.js": {
-      "paths": ["."],
+      "paths": [],
       "infile": "CHANGELOG.md",
       "model": "openai/gpt-4.1-mini"
     }
