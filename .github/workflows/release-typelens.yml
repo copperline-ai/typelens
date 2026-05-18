@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: release-typelens
@@ -25,6 +26,8 @@ jobs:
   release:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.version.outputs.new_version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,4 +79,14 @@ jobs:
         run: |
           version="$(node -p "require('./package.json').version")"
           echo "new_version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=dashboard-v$version" >> "$GITHUB_OUTPUT"
+          echo "tag=typelens-v$version" >> "$GITHUB_OUTPUT"
+
+  docker:
+    needs: release
+    uses: ./.github/workflows/docker-publish.yml
+    with:
+      version: ${{ needs.release.outputs.new_version }}
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
