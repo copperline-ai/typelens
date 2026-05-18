@@ -21,6 +21,7 @@ type State = {
   lastLatencyMs: number | null;
   lastCollectionCount: number | null;
   lastTestedAt: Date | null;
+  lastTypesenseVersion: string | null;
 };
 
 type Actions = {
@@ -42,6 +43,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
   lastLatencyMs: null,
   lastCollectionCount: null,
   lastTestedAt: null,
+  lastTypesenseVersion: null,
 
   actions: {
     async hydrateFromStorage() {
@@ -185,6 +187,20 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
             lastCollectionCount: collectionCount,
             lastTestedAt: new Date(),
           });
+          fetch("/api/typesense/version", {
+            headers: {
+              "X-Ts-Host": profile.host,
+              "X-Ts-Port": String(profile.port),
+              "X-Ts-Protocol": profile.protocol,
+              "X-Ts-Api-Key": profile.apiKey,
+            },
+          })
+            .then((r) => r.json())
+            .then((data: unknown) => {
+              const version = (data as { version?: string })?.version;
+              if (version) set({ lastTypesenseVersion: version });
+            })
+            .catch(() => {});
           return { ok: true, latencyMs };
         } catch (err) {
           // fetch() itself threw (timeout, network error to the Next.js server) — retry
@@ -232,6 +248,20 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           lastCollectionCount: collectionCount,
           lastTestedAt: new Date(),
         });
+        fetch("/api/typesense/version", {
+          headers: {
+            "X-Ts-Host": profile.host,
+            "X-Ts-Port": String(profile.port),
+            "X-Ts-Protocol": profile.protocol,
+            "X-Ts-Api-Key": profile.apiKey,
+          },
+        })
+          .then((r) => r.json())
+          .then((data: unknown) => {
+            const version = (data as { version?: string })?.version;
+            if (version) set({ lastTypesenseVersion: version });
+          })
+          .catch(() => {});
         return { ok: true, latencyMs };
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
@@ -255,3 +285,5 @@ export const selectLastCollectionCount = (s: ReturnType<typeof useConnectionStor
   s.lastCollectionCount;
 export const selectLastTestedAt = (s: ReturnType<typeof useConnectionStore.getState>) =>
   s.lastTestedAt;
+export const selectLastTypesenseVersion = (s: ReturnType<typeof useConnectionStore.getState>) =>
+  s.lastTypesenseVersion;

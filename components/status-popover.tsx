@@ -9,6 +9,7 @@ import {
   selectLastLatencyMs,
   selectLastCollectionCount,
   selectLastTestedAt,
+  selectLastTypesenseVersion,
 } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -26,6 +27,7 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
   const lastLatencyMs = useConnectionStore(selectLastLatencyMs);
   const lastCollectionCount = useConnectionStore(selectLastCollectionCount);
   const lastTestedAt = useConnectionStore(selectLastTestedAt);
+  const lastTypesenseVersion = useConnectionStore(selectLastTypesenseVersion);
 
   const [testState, setTestState] = React.useState<TestState>("idle");
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
@@ -79,6 +81,9 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
           <dd className="font-mono text-xs truncate">
             {activeProfile ? `${activeProfile.host}:${activeProfile.port}` : "—"}
           </dd>
+
+          <dt className="text-muted-foreground">Version</dt>
+          <dd className="font-mono text-xs">{lastTypesenseVersion ?? "—"}</dd>
 
           <dt className="text-muted-foreground">Latency</dt>
           <dd>{lastLatencyMs !== null ? `${lastLatencyMs} ms` : "—"}</dd>
