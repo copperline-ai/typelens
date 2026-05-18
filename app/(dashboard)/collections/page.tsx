@@ -7,8 +7,11 @@ import {
   ArrowUpAZ,
   CalendarArrowDown,
   CalendarArrowUp,
+  LayoutGrid,
+  LayoutList,
   Plus,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
@@ -16,7 +19,21 @@ import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+
+const fmt = new Intl.NumberFormat();
+const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
 type SortKey = "name-asc" | "name-desc" | "created-desc" | "created-asc";
 
@@ -42,13 +59,121 @@ function sortCollections(cols: Collection[], key: SortKey): Collection[] {
   });
 }
 
-function CollectionsSkeleton({ count }: { count: number }) {
+function CollectionsSkeleton({ count, view }: { count: number; view: "card" | "table" }) {
+  if (view === "table") {
+    return (
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              {["Name", "Documents", "Fields", "Default Sort", "Created"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">
+                  {h}
+                </th>
+              ))}
+              <th className="w-10" />
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: count }).map((_, i) => (
+              <tr key={i} className="border-b last:border-0">
+                {Array.from({ length: 6 }).map((__, j) => (
+                  <td key={j} className="px-4 py-3">
+                    <Skeleton className="h-4 w-24" />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
         <Skeleton key={i} className="h-32" />
       ))}
     </div>
+  );
+}
+
+function CollectionTableRow({
+  collection,
+  onDelete,
+}: {
+  collection: Collection;
+  onDelete?: () => Promise<void>;
+}) {
+  const { name, num_documents, fields, default_sorting_field, created_at } = collection;
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleDelete() {
+    if (!onDelete) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await onDelete();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Delete failed");
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+      <td className="px-4 py-3 font-medium">
+        <Link
+          href={`/collections/${encodeURIComponent(name)}`}
+          className="hover:underline underline-offset-2"
+        >
+          {name}
+        </Link>
+      </td>
+      <td className="px-4 py-3 text-muted-foreground">{fmt.format(num_documents)}</td>
+      <td className="px-4 py-3 text-muted-foreground">{fields.length}</td>
+      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+        {default_sorting_field ?? <span className="not-italic">—</span>}
+      </td>
+      <td className="px-4 py-3 text-muted-foreground">
+        {created_at ? dateFmt.format(new Date(created_at * 1000)) : "—"}
+      </td>
+      <td className="px-4 py-3">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              className="rounded p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              aria-label={`Delete ${name}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete collection?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete{" "}
+                <span className="font-mono font-medium text-foreground">{name}</span> and all{" "}
+                {fmt.format(num_documents)} {num_documents === 1 ? "document" : "documents"}. This
+                action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </td>
+    </tr>
   );
 }
 
@@ -62,6 +187,17 @@ export default function CollectionsPage() {
   const [skeletonCount, setSkeletonCount] = useState(3);
   const [createOpen, setCreateOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name-asc");
+  const [viewMode, setViewMode] = useState<"card" | "table">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("collections-view") as "card" | "table") ?? "card";
+    }
+    return "card";
+  });
+
+  function changeView(mode: "card" | "table") {
+    setViewMode(mode);
+    localStorage.setItem("collections-view", mode);
+  }
 
   async function fetchCollections() {
     if (!activeProfile) return;
@@ -118,26 +254,50 @@ export default function CollectionsPage() {
             )}
           </div>
         </div>
-        {collections && collections.length > 1 && (
+        {collections && collections.length > 0 && (
           <div className="flex items-center justify-end gap-0.5">
-            {SORT_OPTIONS.map(({ key, icon: Icon, label, sep }) => (
-              <Fragment key={key}>
-                {sep && <span className="mx-1 h-4 w-px bg-border" />}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  title={label}
-                  className={cn(
-                    "h-8 w-8",
-                    sortKey === key
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                  onClick={() => setSortKey(key)}
-                >
-                  <Icon className="h-4 w-4" />
-                </Button>
-              </Fragment>
+            {collections.length > 1 &&
+              SORT_OPTIONS.map(({ key, icon: Icon, label, sep }) => (
+                <Fragment key={key}>
+                  {sep && <span className="mx-1 h-4 w-px bg-border" />}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title={label}
+                    className={cn(
+                      "h-8 w-8",
+                      sortKey === key
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                    onClick={() => setSortKey(key)}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Button>
+                </Fragment>
+              ))}
+            <span className="mx-1 h-4 w-px bg-border" />
+            {(
+              [
+                ["card", LayoutGrid, "Card view"],
+                ["table", LayoutList, "Table view"],
+              ] as const
+            ).map(([mode, Icon, label]) => (
+              <Button
+                key={mode}
+                variant="ghost"
+                size="icon"
+                title={label}
+                className={cn(
+                  "h-8 w-8",
+                  viewMode === mode
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                onClick={() => changeView(mode)}
+              >
+                <Icon className="h-4 w-4" />
+              </Button>
             ))}
           </div>
         )}
@@ -184,7 +344,7 @@ export default function CollectionsPage() {
       )}
 
       {activeProfile && status === "connected" && loading && (
-        <CollectionsSkeleton count={skeletonCount} />
+        <CollectionsSkeleton count={skeletonCount} view={viewMode} />
       )}
 
       {activeProfile && status === "connected" && error && (
@@ -210,20 +370,56 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && !loading && !error && collections && collections.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sortCollections(collections, sortKey).map((c) => (
-            <CollectionCard
-              key={c.name}
-              collection={c}
-              onDelete={async () => {
-                await deleteCollection(activeProfile!, c.name);
-                setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {activeProfile &&
+        !loading &&
+        !error &&
+        collections &&
+        collections.length > 0 &&
+        (viewMode === "table" ? (
+          <div className="overflow-x-auto rounded-lg border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                    Documents
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Fields</th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                    Default Sort
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Created</th>
+                  <th className="w-10" />
+                </tr>
+              </thead>
+              <tbody>
+                {sortCollections(collections, sortKey).map((c) => (
+                  <CollectionTableRow
+                    key={c.name}
+                    collection={c}
+                    onDelete={async () => {
+                      await deleteCollection(activeProfile!, c.name);
+                      setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
+                    }}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sortCollections(collections, sortKey).map((c) => (
+              <CollectionCard
+                key={c.name}
+                collection={c}
+                onDelete={async () => {
+                  await deleteCollection(activeProfile!, c.name);
+                  setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
+                }}
+              />
+            ))}
+          </div>
+        ))}
 
       <CreateCollectionDialog
         open={createOpen}
