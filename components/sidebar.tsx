@@ -127,9 +127,10 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
       </nav>
       <div
         className={cn(
-          "border-t py-3",
+          "border-t pt-3",
           collapsed ? "flex justify-center px-2" : "flex items-center justify-between px-4",
         )}
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         {!collapsed && (
           <span className="text-xs text-muted-foreground">
