@@ -155,7 +155,17 @@ function FieldsTable({ form }: { form: ReturnType<typeof useForm<FormValues>> })
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Fields</span>
+        <span className="text-sm font-medium">
+          Fields{" "}
+          <a
+            href="https://typesense.org/docs/30.2/api/collections.html#field-types"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
+          >
+            Learn more
+          </a>
+        </span>
         <Button
           type="button"
           variant="outline"
@@ -503,7 +513,15 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                       <FormItem>
                         <FormLabel>
                           Default Sort Field{" "}
-                          <span className="text-muted-foreground font-normal">(optional)</span>
+                          <span className="text-muted-foreground font-normal">(optional)</span>{" "}
+                          <a
+                            href="https://typesense.org/docs/30.2/api/collections.html#schema-parameters"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
+                          >
+                            Learn more
+                          </a>
                         </FormLabel>
                         <Select
                           onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
@@ -538,7 +556,15 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                 <p className="font-medium text-foreground">Auto schema detection</p>
                 <p>
                   Typesense will automatically detect field types when documents are added. Every
-                  field in your documents will be indexed for search and filtering.
+                  field in your documents will be indexed for search and filtering.{" "}
+                  <a
+                    href="https://typesense.org/docs/30.2/api/collections.html#with-auto-schema-detection"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-foreground"
+                  >
+                    Learn more
+                  </a>
                 </p>
               </div>
             )}
