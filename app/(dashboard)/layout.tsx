@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <ToastProvider>
       <HydrateStore />
       <KeepAlive />
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-dvh overflow-hidden">
         <Sidebar authEnabled={authEnabled} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header />
