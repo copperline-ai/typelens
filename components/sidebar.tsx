@@ -75,7 +75,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
         {!collapsed && (
           <div className="flex items-center gap-2">
             <img
-              src="/favicon.svg"
+              src="/logo.png"
               alt=""
               width={30}
               height={30}
@@ -97,13 +97,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <img
-              src="/favicon.svg"
-              alt="TypeLens icon"
-              width={36}
-              height={36}
-              className="h-9 w-9"
-            />
+            <img src="/logo.png" alt="TypeLens icon" width={36} height={36} className="h-9 w-9" />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}
