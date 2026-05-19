@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.12.0] - 2026-05-19
+
+### Features
+
+- Add optional expires_at dropdown on API key create dialog and larger status dot tap target (`81e3a1a`)
+
 ## [1.11.0] - 2026-05-19
 
 ### Features
