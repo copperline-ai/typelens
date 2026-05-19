@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Cable, Database, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Cable, Database, LogOut, Moon, Monitor, Settings, Sun } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
   type ConnectionStatus,
 } from "@/lib/stores/connection";
+import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
+import type { Theme } from "@/lib/store";
 import { StatusPopover } from "@/components/status-popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -23,10 +26,35 @@ const statusDot: Record<ConnectionStatus, string> = {
   idle: "bg-muted-foreground/50",
 };
 
-export function Header() {
+const themeIcons: Record<Theme, React.ElementType> = {
+  system: Monitor,
+  light: Sun,
+  dark: Moon,
+};
+
+const themeOrder: Theme[] = ["system", "light", "dark"];
+
+export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
+  const router = useRouter();
   const activeProfile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore((s) => s.status);
+  const theme = useThemeStore(selectTheme);
+  const { setTheme } = useThemeStore(selectThemeActions);
+
+  function cycleTheme() {
+    const idx = themeOrder.indexOf(theme);
+    setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
+  }
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
+
+  const ThemeIcon = themeIcons[theme];
+  const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
   return (
     <header className="flex h-14 items-center border-b bg-background px-4 gap-3">
@@ -47,15 +75,15 @@ export function Header() {
             <Link
               key={href}
               href={href}
+              title={label}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
+                "flex items-center justify-center rounded-md p-1.5 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-muted text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <span>{label}</span>
             </Link>
           );
         })}
@@ -79,13 +107,34 @@ export function Header() {
           </button>
         }
       />
-      <Link
-        href="/settings/connection"
-        className="md:hidden flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-        aria-label="Settings"
-      >
-        <Settings className="h-4 w-4" />
-      </Link>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            className="md:hidden flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent side="bottom" align="end" className="w-44 p-1">
+          <button
+            onClick={cycleTheme}
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ThemeIcon className="h-4 w-4 shrink-0" />
+            <span>Theme: {themeLabel}</span>
+          </button>
+          {authEnabled && (
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Log out</span>
+            </button>
+          )}
+        </PopoverContent>
+      </Popover>
     </header>
   );
 }
