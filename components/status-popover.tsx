@@ -74,11 +74,6 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
             </>
           )}
 
-          <dt className="text-muted-foreground">Host</dt>
-          <dd className="font-mono text-xs truncate">
-            {activeProfile ? `${activeProfile.host}:${activeProfile.port}` : "—"}
-          </dd>
-
           <dt className="text-muted-foreground">Latency</dt>
           <dd>{lastLatencyMs !== null ? `${lastLatencyMs} ms` : "—"}</dd>
 
