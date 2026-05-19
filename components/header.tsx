@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cable, Database } from "lucide-react";
+import { Cable, Database, Settings } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
@@ -40,13 +40,6 @@ export function Header() {
             className="h-[30px] w-[30px] shrink-0"
             aria-hidden="true"
           />
-          <span
-            className="text-xl font-semibold leading-none tracking-tight"
-            style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
-          >
-            <span style={{ color: "#0067a3" }}>type</span>
-            <span style={{ color: "#00d2da" }}>lens</span>
-          </span>
         </Link>
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -80,12 +73,19 @@ export function Header() {
                 activeProfile ? statusDot[status] : "bg-muted-foreground",
               )}
             />
-            <span className="text-muted-foreground">
+            <span className="hidden md:inline text-muted-foreground">
               {activeProfile ? activeProfile.name : "No connection"}
             </span>
           </button>
         }
       />
+      <Link
+        href="/settings/connection"
+        className="md:hidden flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        aria-label="Settings"
+      >
+        <Settings className="h-4 w-4" />
+      </Link>
     </header>
   );
 }
