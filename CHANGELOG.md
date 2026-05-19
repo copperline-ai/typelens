@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0] - 2026-05-19
+
+### Features
+
+- Added wordmark-only logo in expanded sidebar and mobile header (COP-451) (`77e443e`)
+
 ## [1.6.0] - 2026-05-19
 
 ### Features
