@@ -136,6 +136,22 @@ function parseDate(s: string): Date | null {
   return null;
 }
 
+function parseNumericDate(n: number): Date | null {
+  if (!Number.isInteger(n) || n <= 0) return null;
+  const s = String(n);
+  if (s.length === 10) {
+    const d = new Date(n * 1000);
+    const y = d.getFullYear();
+    return y >= 2001 && y <= 2100 ? d : null;
+  }
+  if (s.length === 13) {
+    const d = new Date(n);
+    const y = d.getFullYear();
+    return y >= 2001 && y <= 2100 ? d : null;
+  }
+  return null;
+}
+
 function FieldValue({ value }: { value: unknown }) {
   if (value === null || value === undefined) {
     return <span className="text-xs text-muted-foreground italic">null</span>;
@@ -148,6 +164,17 @@ function FieldValue({ value }: { value: unknown }) {
     );
   }
   if (typeof value === "number") {
+    const parsed = parseNumericDate(value);
+    if (parsed) {
+      return (
+        <span
+          className="text-xs font-mono text-violet-600 dark:text-violet-400"
+          title={String(value)}
+        >
+          {parsed.toLocaleString()}
+        </span>
+      );
+    }
     return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
   }
   if (typeof value === "string") {
