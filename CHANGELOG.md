@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.1] - 2026-05-19
+
+### Bug Fixes
+
+- Fix sorting of release notes by published_at date descending (`47e62d9`, `c93c9a7`)
+
 ## [1.15.0] - 2026-05-19
 
 ### Features
