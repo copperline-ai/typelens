@@ -3,11 +3,12 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronRight, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Copy, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
   deleteCollection,
+  deleteDocument,
   sampleDocuments,
   type Collection,
   type SearchHit,
@@ -114,6 +115,27 @@ function FieldsTable({ fields }: { fields: Collection["fields"] }) {
 
 // ── DocumentCard ─────────────────────────────────────────────────────────────
 
+function isUrl(s: string) {
+  try {
+    const url = new URL(s);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parseDate(s: string): Date | null {
+  // Unix timestamp (10 or 13 digit number-string)
+  if (/^\d{10}$/.test(s)) return new Date(parseInt(s, 10) * 1000);
+  if (/^\d{13}$/.test(s)) return new Date(parseInt(s, 10));
+  // ISO 8601 / RFC 3339
+  if (/^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
 function FieldValue({ value }: { value: unknown }) {
   if (value === null || value === undefined) {
     return <span className="text-xs text-muted-foreground italic">null</span>;
@@ -129,6 +151,28 @@ function FieldValue({ value }: { value: unknown }) {
     return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
   }
   if (typeof value === "string") {
+    if (isUrl(value)) {
+      const display = value.length > 80 ? value.slice(0, 80) + "…" : value;
+      return (
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-mono text-blue-600 dark:text-blue-400 underline underline-offset-2 break-all hover:opacity-80"
+          title={value}
+        >
+          {display}
+        </a>
+      );
+    }
+    const parsed = parseDate(value);
+    if (parsed) {
+      return (
+        <span className="text-xs font-mono text-violet-600 dark:text-violet-400" title={value}>
+          {parsed.toLocaleString()}
+        </span>
+      );
+    }
     const display = value.length > 120 ? value.slice(0, 120) + "…" : value;
     return (
       <span className="text-xs font-mono break-all" title={value.length > 120 ? value : undefined}>
@@ -161,8 +205,41 @@ function FieldValue({ value }: { value: unknown }) {
   return <span className="text-xs font-mono">{String(value)}</span>;
 }
 
-function DocumentCard({ hit, fields }: { hit: SearchHit; fields: Collection["fields"] }) {
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy(e: React.MouseEvent) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+  return (
+    <button
+      onClick={copy}
+      className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+      title="Copy ID"
+    >
+      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+    </button>
+  );
+}
+
+function DocumentCard({
+  hit,
+  fields,
+  collectionName,
+  profile,
+  onDeleted,
+}: {
+  hit: SearchHit;
+  fields: Collection["fields"];
+  collectionName: string;
+  profile: NonNullable<ReturnType<typeof useConnectionStore.getState>["profiles"][number]>;
+  onDeleted?: () => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const doc = hit.document;
   const fieldMap = new Map(fields.map((f) => [f.name, f]));
 
@@ -178,16 +255,26 @@ function DocumentCard({ hit, fields }: { hit: SearchHit; fields: Collection["fie
   const docId = doc["id"] as string | undefined;
   const bodyFields = ordered.filter(([k]) => k !== "id");
 
-  // Pick first non-empty string field value for the collapsed preview snippet
   const previewSnippet = bodyFields
     .map(([, v]) => v)
     .find((v): v is string => typeof v === "string" && v.length > 0);
+
+  async function handleDelete() {
+    if (!docId) return;
+    setDeleting(true);
+    try {
+      await deleteDocument(profile, collectionName, docId);
+      onDeleted?.();
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   return (
     <div className="rounded-lg border overflow-hidden text-sm">
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left hover:bg-muted/30 transition-colors"
+        className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left hover:bg-muted/30 transition-colors"
       >
         <ChevronRight
           className={cn(
@@ -202,12 +289,52 @@ function DocumentCard({ hit, fields }: { hit: SearchHit; fields: Collection["fie
             {previewSnippet.length > 80 ? previewSnippet.slice(0, 80) + "…" : previewSnippet}
           </span>
         )}
-        <span className="text-xs text-muted-foreground shrink-0 ml-auto">
-          {bodyFields.length} fields
-        </span>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              disabled={deleting}
+              className="shrink-0 ml-auto p-1 rounded text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+              title="Delete document"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete document?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Permanently delete document{" "}
+                <span className="font-mono font-medium text-foreground">{docId}</span>. This cannot
+                be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </button>
       {expanded && (
         <div className="border-t divide-y">
+          {docId && (
+            <div className="flex items-center gap-3 px-4 py-2 hover:bg-muted/20 transition-colors">
+              <div className="w-36 shrink-0">
+                <span className="text-xs font-mono text-muted-foreground">id</span>
+              </div>
+              <div className="flex flex-1 min-w-0 items-center gap-1.5">
+                <span className="text-xs font-mono break-all">{docId}</span>
+                <CopyButton text={docId} />
+              </div>
+            </div>
+          )}
           {bodyFields.map(([key, value]) => {
             const fieldDef = fieldMap.get(key);
             return (
@@ -312,32 +439,39 @@ function DocumentsSection({
           ) : (
             <div className="space-y-2">
               {hits.map((hit, i) => (
-                <DocumentCard key={i} hit={hit} fields={fields} />
+                <DocumentCard
+                  key={i}
+                  hit={hit}
+                  fields={fields}
+                  collectionName={collectionName}
+                  profile={profile}
+                  onDeleted={() => load(page)}
+                />
               ))}
             </div>
           )}
           {found !== null && found > 0 && (
-            <div className="flex items-center justify-between pt-1">
-              <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between pt-1 gap-2">
+              <p className="text-xs text-muted-foreground whitespace-nowrap min-w-0 truncate">
                 {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} documents
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 px-2"
+                  className="h-7 px-2 whitespace-nowrap"
                   disabled={page <= 1}
                   onClick={() => goTo(page - 1)}
                 >
                   Previous
                 </Button>
-                <span className="text-xs text-muted-foreground px-2">
+                <span className="text-xs text-muted-foreground px-2 whitespace-nowrap">
                   {page} / {totalPages}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 px-2"
+                  className="h-7 px-2 whitespace-nowrap"
                   disabled={totalPages === null || page >= totalPages}
                   onClick={() => goTo(page + 1)}
                 >

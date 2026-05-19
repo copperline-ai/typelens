@@ -184,6 +184,15 @@ export async function importDocuments(
     .map((line) => JSON.parse(line) as ImportResult);
 }
 
+export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {
+  return typesenseFetch<Record<string, unknown>>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(documentId)}`,
+    undefined,
+    { method: "DELETE" },
+  );
+}
+
 export type SearchHit = { document: Record<string, unknown> };
 export type SearchResult = { found: number; hits?: SearchHit[] };
 
