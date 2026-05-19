@@ -143,6 +143,18 @@ export function createCollection(profile: Profile, schema: CollectionCreateSchem
   });
 }
 
+export function cloneCollection(profile: Profile, sourceName: string, newName: string) {
+  return typesenseFetch<Collection>(
+    profile,
+    `/collections?src_name=${encodeURIComponent(sourceName)}`,
+    undefined,
+    {
+      method: "POST",
+      body: JSON.stringify({ name: newName }),
+    },
+  );
+}
+
 export type ImportResult = { success: boolean; error?: string };
 
 export async function importDocuments(
@@ -182,6 +194,26 @@ export async function importDocuments(
     .split("\n")
     .filter((line) => line.trim())
     .map((line) => JSON.parse(line) as ImportResult);
+}
+
+export async function exportDocuments(profile: Profile, collectionName: string): Promise<string> {
+  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/export`;
+  const res = await fetch(url, {
+    headers: {
+      "X-Ts-Host": profile.host,
+      "X-Ts-Port": String(profile.port),
+      "X-Ts-Protocol": profile.protocol,
+      "X-Ts-Api-Key": profile.apiKey,
+    },
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    const message =
+      (data as { error?: string } | null)?.error ?? `Export failed: HTTP ${res.status}`;
+    throw new Error(message);
+  }
+  return res.text();
 }
 
 export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {

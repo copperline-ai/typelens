@@ -3,12 +3,13 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronRight, Copy, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Copy, Download, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
   deleteCollection,
   deleteDocument,
+  exportDocuments,
   sampleDocuments,
   type Collection,
   type SearchHit,
@@ -27,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/async-boundary";
+import { CloneCollectionDialog } from "@/components/collections/clone-collection-dialog";
 import { cn } from "@/lib/utils";
 
 const fmt = new Intl.NumberFormat();
@@ -489,7 +491,7 @@ function DocumentsSection({
           {found !== null && found > 0 && (
             <div className="flex items-center justify-between pt-1 gap-2">
               <p className="text-xs text-muted-foreground whitespace-nowrap min-w-0 truncate">
-                {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} docs
+                {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} documents
               </p>
               <div className="flex items-center gap-1 shrink-0">
                 <Button
@@ -542,6 +544,25 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [cloneOpen, setCloneOpen] = useState(false);
+
+  async function handleExport() {
+    if (!activeProfile || !collection) return;
+    setExporting(true);
+    try {
+      const jsonl = await exportDocuments(activeProfile, collectionName);
+      const blob = new Blob([jsonl], { type: "application/x-ndjson" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${collectionName}.jsonl`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function handleDelete() {
     if (!activeProfile) return;
@@ -628,6 +649,25 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 <RefreshCw className="h-4 w-4" />
               </Button>
 
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleExport}
+                disabled={exporting}
+                title="Export documents as JSONL"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCloneOpen(true)}
+                title="Clone collection"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -707,6 +747,15 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
             </CollapsibleSection>
           )}
         </>
+      )}
+
+      {collection && (
+        <CloneCollectionDialog
+          sourceName={collection.name}
+          open={cloneOpen}
+          onOpenChange={setCloneOpen}
+          onCloned={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
+        />
       )}
     </div>
   );
