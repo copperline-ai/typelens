@@ -3,12 +3,13 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronRight, Copy, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Copy, Download, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
   deleteCollection,
   deleteDocument,
+  exportDocuments,
   sampleDocuments,
   type Collection,
   type SearchHit,
@@ -533,6 +534,24 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    if (!activeProfile || !collection) return;
+    setExporting(true);
+    try {
+      const jsonl = await exportDocuments(activeProfile, collectionName);
+      const blob = new Blob([jsonl], { type: "application/x-ndjson" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${collectionName}.jsonl`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function handleDelete() {
     if (!activeProfile) return;
@@ -617,6 +636,16 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 title="Refresh"
               >
                 <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleExport}
+                disabled={exporting}
+                title="Export documents as JSONL"
+              >
+                <Download className="h-4 w-4" />
               </Button>
 
               <AlertDialog>
