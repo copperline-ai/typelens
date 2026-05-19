@@ -91,7 +91,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <img src="/logo.png" alt="TypeLens icon" width={36} height={36} className="h-9 w-9" />
+            <img src="/logo.png" alt="typelens icon" width={36} height={36} className="h-9 w-9" />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}

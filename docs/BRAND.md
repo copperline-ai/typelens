@@ -1,8 +1,8 @@
-# TypeLens Brand Guide
+# typelens Brand Guide
 
 ## Overview
 
-TypeLens is a high-tech, sleek dashboard for Typesense. The visual identity is anchored by a magnifying glass motif with a blue-teal technology palette — precision, clarity, and depth.
+typelens is a high-tech, sleek dashboard for Typesense. The visual identity is anchored by a magnifying glass motif with a blue-teal technology palette — precision, clarity, and depth.
 
 **Tagline:** See your search clearly.
 
@@ -90,7 +90,7 @@ Preferred display font for marketing contexts: **Space Grotesk** (not yet instal
 
 ## Logo Concept
 
-The TypeLens logo depicts a magnifying glass with concentric rings and a central network node pattern.
+The typelens logo depicts a magnifying glass with concentric rings and a central network node pattern.
 
 - Outer rings: Light Blue `#7ec8e3`
 - Body / lens frame: Metallic Blue `#0067a3`
@@ -113,4 +113,4 @@ The TypeLens logo depicts a magnifying glass with concentric rings and a central
 1. Never use the teal on a light blue background — contrast is too low.
 2. Primary call-to-action buttons use `--primary` with `--primary-foreground` text.
 3. Destructive actions remain red (inherited `--destructive`) — do not override with brand colors.
-4. Dark mode is the recommended default presentation for TypeLens.
+4. Dark mode is the recommended default presentation for typelens.

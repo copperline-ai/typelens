@@ -1,4 +1,4 @@
-# TypeLens
+# typelens
 
 A Typesense collection explorer and manager.
 
