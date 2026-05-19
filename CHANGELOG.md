@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.11.0] - 2026-05-19
+
+### Features
+
+- Replace logo with TL lettermark icon (`a1ced08`)
+
 ## [1.10.0] - 2026-05-19
 
 ### Features
