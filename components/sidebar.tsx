@@ -62,7 +62,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   return (
     <aside
       className={cn(
-        "flex h-full flex-col overflow-hidden border-r bg-background transition-[width] duration-200",
+        "hidden md:flex h-full flex-col overflow-hidden border-r bg-background transition-[width] duration-200",
         collapsed ? "w-14" : "w-56",
       )}
     >
