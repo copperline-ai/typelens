@@ -92,7 +92,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
       <StatusPopover
         trigger={
           <button
-            className="flex items-center gap-2 text-sm rounded px-2 py-1 hover:bg-accent transition-colors"
+            className="flex items-center justify-center h-8 w-8 rounded-md md:h-auto md:w-auto md:justify-start md:gap-2 md:text-sm md:px-2 md:py-1 hover:bg-accent transition-colors"
             aria-label="Connection status — click for details"
           >
             <span

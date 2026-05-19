@@ -19,8 +19,47 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Phase = "form" | "reveal";
+
+const EXPIRY_OPTIONS = [
+  { label: "Never", value: "never" },
+  { label: "1 hour", value: "1h" },
+  { label: "24 hours", value: "24h" },
+  { label: "7 days", value: "7d" },
+  { label: "30 days", value: "30d" },
+  { label: "90 days", value: "90d" },
+  { label: "1 year", value: "1y" },
+] as const;
+
+type ExpiryValue = (typeof EXPIRY_OPTIONS)[number]["value"];
+
+function expiryToUnix(value: ExpiryValue): number | undefined {
+  const now = Math.floor(Date.now() / 1000);
+  switch (value) {
+    case "1h":
+      return now + 60 * 60;
+    case "24h":
+      return now + 24 * 60 * 60;
+    case "7d":
+      return now + 7 * 24 * 60 * 60;
+    case "30d":
+      return now + 30 * 24 * 60 * 60;
+    case "90d":
+      return now + 90 * 24 * 60 * 60;
+    case "1y":
+      return now + 365 * 24 * 60 * 60;
+    default:
+      return undefined;
+  }
+}
 
 function ActionCheckbox({
   action,
@@ -59,6 +98,7 @@ export function CreateApiKeyDialog({
   const [description, setDescription] = useState("");
   const [selectedActions, setSelectedActions] = useState<Set<string>>(new Set(["*"]));
   const [collections, setCollections] = useState("*");
+  const [expiry, setExpiry] = useState<ExpiryValue>("never");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdKey, setCreatedKey] = useState<ApiKey | null>(null);
@@ -69,6 +109,7 @@ export function CreateApiKeyDialog({
     setDescription("");
     setSelectedActions(new Set(["*"]));
     setCollections("*");
+    setExpiry("never");
     setSaving(false);
     setError(null);
     setCreatedKey(null);
@@ -107,6 +148,7 @@ export function CreateApiKeyDialog({
     setSaving(true);
     setError(null);
     try {
+      const expiresAt = expiryToUnix(expiry);
       const schema: ApiKeyCreateSchema = {
         description: description.trim(),
         actions: Array.from(selectedActions),
@@ -114,6 +156,7 @@ export function CreateApiKeyDialog({
           .split(",")
           .map((c) => c.trim())
           .filter(Boolean),
+        ...(expiresAt !== undefined && { expires_at: expiresAt }),
       };
       const key = await createApiKey(activeProfile, schema);
       setCreatedKey(key);
@@ -187,6 +230,24 @@ export function CreateApiKeyDialog({
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <Label>
+                  Expires at <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Select value={expiry} onValueChange={(v) => setExpiry(v as ExpiryValue)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPIRY_OPTIONS.map(({ label, value }) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
             <DialogFooter>
@@ -239,6 +300,12 @@ export function CreateApiKeyDialog({
                     <dt className="text-muted-foreground w-28">Collections</dt>
                     <dd className="font-mono text-xs">{createdKey.collections.join(", ")}</dd>
                   </div>
+                  {createdKey.expires_at && createdKey.expires_at > 0 && (
+                    <div className="flex gap-2">
+                      <dt className="text-muted-foreground w-28">Expires</dt>
+                      <dd>{new Date(createdKey.expires_at * 1000).toLocaleString()}</dd>
+                    </div>
+                  )}
                 </dl>
               )}
             </div>
