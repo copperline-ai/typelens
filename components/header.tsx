@@ -60,14 +60,13 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
     <header className="flex h-14 items-center border-b bg-background px-4 gap-3">
       <div className="flex md:hidden items-center gap-3">
         <Link href="/collections" className="flex items-center gap-2">
-          <img
-            src="/logo.png"
-            alt=""
-            width={30}
-            height={30}
-            className="h-[30px] w-[30px] shrink-0"
-            aria-hidden="true"
-          />
+          <span
+            className="text-xl font-semibold leading-none tracking-tight"
+            style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+          >
+            <span style={{ color: "#0067a3" }}>type</span>
+            <span style={{ color: "#00d2da" }}>lens</span>
+          </span>
         </Link>
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
