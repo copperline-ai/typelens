@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="89" ry="89" fill="#0067a3"/>
+  <text
+    x="256"
+    y="278"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="'Space Grotesk', Inter, -apple-system, system-ui, sans-serif"
+    font-weight="600"
+    font-size="380"
+    letter-spacing="-10"
+  ><tspan fill="#ffffff">t</tspan><tspan fill="#00d2da">l</tspan></text>
+</svg>

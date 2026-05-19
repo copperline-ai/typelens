@@ -1,3 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512">
-  <image href="/logo.png" x="0" y="0" width="512" height="512"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#00457e"/>
+  <text x="256" y="278" text-anchor="middle" dominant-baseline="central"
+    font-family="'Space Grotesk', Inter, -apple-system, system-ui, sans-serif"
+    font-weight="600" font-size="380" letter-spacing="-10">
+    <tspan fill="#7ec8e3">t</tspan><tspan fill="#00d2da">l</tspan>
+  </text>
 </svg>

@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-// COP-431: Generate all icon variants from the new logo source
-const https = require("https");
-const fs = require("fs");
+// Regenerate all icon variants from the SVG logo mark source.
+// Requires: sharp, @resvg/resvg-js, or run via a browser-based capture.
+// Quickest path on macOS: npm run generate-icons (uses sips + magick).
+const { execSync } = require("child_process");
 const path = require("path");
-const sharp = require("sharp");
 
-const SOURCE_URL = "https://ik.imagekit.io/copperline/a7c0131d-2608-485a-aa70-5a086f47317b.png";
 const PUBLIC = path.join(__dirname, "..", "public");
+const MASTER = path.join(PUBLIC, "logo.png"); // 512x512 square, no rounded corners
 
 const PNG_VARIANTS = [
-  { file: "logo.png", size: 512 },
   { file: "favicon.png", size: 32 },
   { file: "favicon-64.png", size: 64 },
+  { file: "apple-touch-icon.png", size: 180 },
   { file: path.join("icons", "icon-72.png"), size: 72 },
   { file: path.join("icons", "icon-96.png"), size: 96 },
   { file: path.join("icons", "icon-128.png"), size: 128 },
@@ -22,52 +22,37 @@ const PNG_VARIANTS = [
   { file: path.join("icons", "icon-512.png"), size: 512 },
 ];
 
-function download(url) {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
-        if (res.statusCode === 301 || res.statusCode === 302) {
-          return resolve(download(res.headers.location));
-        }
-        const chunks = [];
-        res.on("data", (c) => chunks.push(c));
-        res.on("end", () => resolve(Buffer.concat(chunks)));
-        res.on("error", reject);
-      })
-      .on("error", reject);
-  });
+function sips(size, dest) {
+  execSync(`sips -z ${size} ${size} "${MASTER}" --out "${dest}"`, { stdio: "pipe" });
 }
 
-function svgWrapper(size) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <image href="../logo.png" x="0" y="0" width="${size}" height="${size}"/>
-</svg>
-`;
-}
-
-async function main() {
-  console.log("Downloading source image...");
-  const srcBuf = await download(SOURCE_URL);
-  console.log(`Downloaded ${srcBuf.length} bytes`);
-
-  fs.mkdirSync(path.join(PUBLIC, "icons"), { recursive: true });
+function main() {
+  console.log(`Source: ${MASTER}`);
 
   for (const { file, size } of PNG_VARIANTS) {
     const dest = path.join(PUBLIC, file);
-    await sharp(srcBuf).resize(size, size).png().toFile(dest);
+    sips(size, dest);
     console.log(`  ${file} (${size}x${size})`);
   }
 
-  // SVG wrappers embed the resized logo.png
-  fs.writeFileSync(path.join(PUBLIC, "favicon.svg"), svgWrapper(32));
-  console.log("  favicon.svg");
-  fs.writeFileSync(path.join(PUBLIC, "icon.svg"), svgWrapper(512));
-  console.log("  icon.svg");
+  // Multi-size favicon.ico
+  const ico = path.join(PUBLIC, "favicon.ico");
+  execSync(`magick "${MASTER}" -define icon:auto-resize=16,24,32,48,64 "${ico}"`, {
+    stdio: "pipe",
+  });
+  console.log("  favicon.ico");
 
-  console.log("Done.");
+  // Transparent-corners PNG for web/logo use
+  const transparent = path.join(PUBLIC, "logo-mark-transparent.png");
+  execSync(
+    `magick "${MASTER}" \\( +clone -alpha extract -draw "roundrectangle 0,0,511,511,89,89" \\) -alpha off -compose CopyOpacity -composite "${transparent}"`,
+    { stdio: "pipe" },
+  );
+  console.log("  logo-mark-transparent.png");
+
+  console.log(
+    "Done. Note: if you update the logo, re-capture logo.png from logo-capture.html at 512x512 first.",
+  );
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main();

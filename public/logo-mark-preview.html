@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeLens Logo Mark Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; font-family: monospace; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 48px; }
+    h2 { margin: 0; font-size: 12px; color: #8899aa; letter-spacing: 0.08em; text-transform: uppercase; }
+    .row { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .size-label { font-size: 11px; color: #445566; }
+    .divider { width: 100%; max-width: 800px; border: none; border-top: 1px solid #222; }
+    .on-dark { background: #1a1a2e; padding: 24px; border-radius: 12px; }
+    .on-light { background: #f5f5f5; padding: 24px; border-radius: 12px; }
+    .on-mid { background: #0067a3; padding: 24px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+
+  <h2>Primary — deep blue bg (app icons, favicon, PWA)</h2>
+  <div class="row">
+    <div class="icon-wrap">
+      <img src="logo.png" width="256" height="256" style="border-radius:45px;">
+      <span class="size-label">logo.png (square source)</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="icons/icon-192.png" width="192" height="192" style="border-radius:34px;">
+      <span class="size-label">icon-192.png</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="icons/icon-96.png" width="96" height="96" style="border-radius:17px;">
+      <span class="size-label">icon-96.png</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="favicon-64.png" width="64" height="64" style="border-radius:11px;">
+      <span class="size-label">favicon-64.png</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="favicon.png" width="32" height="32" style="border-radius:6px;">
+      <span class="size-label">favicon.png</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Transparent-corners version — floats on any background</h2>
+  <div class="row">
+    <div class="on-dark icon-wrap">
+      <img src="logo-mark-transparent.png" width="160" height="160">
+      <span class="size-label" style="color:#8899aa;">on dark</span>
+    </div>
+    <div class="on-light icon-wrap">
+      <img src="logo-mark-transparent.png" width="160" height="160">
+      <span class="size-label" style="color:#666;">on light</span>
+    </div>
+    <div class="on-mid icon-wrap">
+      <img src="logo-mark-transparent.png" width="160" height="160">
+      <span class="size-label" style="color:#cde;">on brand blue</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>All three variants (SVG logo marks)</h2>
+  <div class="row">
+    <div class="icon-wrap">
+      <img src="logo-mark.svg" width="160" height="160">
+      <span class="size-label" style="color:#8899aa;">logo-mark.svg (deep blue)</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="logo-mark-brandblue.svg" width="160" height="160">
+      <span class="size-label" style="color:#8899aa;">logo-mark-brandblue.svg</span>
+    </div>
+    <div class="icon-wrap">
+      <img src="logo-mark-white.svg" width="160" height="160">
+      <span class="size-label" style="color:#8899aa;">logo-mark-white.svg</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Apple touch icon (180×180)</h2>
+  <div class="row">
+    <div class="icon-wrap">
+      <img src="apple-touch-icon.png" width="180" height="180" style="border-radius:40px;">
+      <span class="size-label" style="color:#8899aa;">apple-touch-icon.png</span>
+    </div>
+  </div>
+
+</body>
+</html>

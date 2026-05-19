@@ -4,8 +4,8 @@
   "description": "Typesense dashboard — search and manage your collections",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0067a3",
+  "background_color": "#00457e",
+  "theme_color": "#00457e",
   "icons": [
     {
       "src": "/icons/icon-72.png",
