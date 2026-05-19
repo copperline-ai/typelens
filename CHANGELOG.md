@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.1] - 2026-05-19
+
+### Other
+
+- Add Railway template markdown and update README (`d43c81e`)
+
 ## [1.13.0] - 2026-05-19
 
 ### Features
