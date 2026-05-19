@@ -317,27 +317,27 @@ function DocumentsSection({
             </div>
           )}
           {found !== null && found > 0 && (
-            <div className="flex items-center justify-between pt-1">
-              <p className="text-xs text-muted-foreground">
+            <div className="flex items-center justify-between pt-1 gap-2">
+              <p className="text-xs text-muted-foreground whitespace-nowrap min-w-0 truncate">
                 {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} documents
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 px-2"
+                  className="h-7 px-2 whitespace-nowrap"
                   disabled={page <= 1}
                   onClick={() => goTo(page - 1)}
                 >
                   Previous
                 </Button>
-                <span className="text-xs text-muted-foreground px-2">
+                <span className="text-xs text-muted-foreground px-2 whitespace-nowrap">
                   {page} / {totalPages}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 px-2"
+                  className="h-7 px-2 whitespace-nowrap"
                   disabled={totalPages === null || page >= totalPages}
                   onClick={() => goTo(page + 1)}
                 >
