@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex h-dvh overflow-hidden">
         <Sidebar authEnabled={authEnabled} />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <Header />
+          <Header authEnabled={authEnabled} />
           <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
         </div>
       </div>
