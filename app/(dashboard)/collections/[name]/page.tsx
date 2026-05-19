@@ -154,6 +154,8 @@ function parseNumericDate(n: number): Date | null {
 }
 
 function FieldValue({ value }: { value: unknown }) {
+  const [showRaw, setShowRaw] = useState(false);
+
   if (value === null || value === undefined) {
     return <span className="text-xs text-muted-foreground italic">null</span>;
   }
@@ -168,12 +170,14 @@ function FieldValue({ value }: { value: unknown }) {
     const parsed = parseNumericDate(value);
     if (parsed) {
       return (
-        <span
-          className="text-xs font-mono text-violet-600 dark:text-violet-400"
-          title={String(value)}
+        <button
+          type="button"
+          onClick={() => setShowRaw((r) => !r)}
+          className="text-xs font-mono text-violet-600 dark:text-violet-400 hover:opacity-70 transition-opacity cursor-pointer text-left"
+          title={showRaw ? "Click to show parsed date" : "Click to show raw value"}
         >
-          {parsed.toLocaleString()}
-        </span>
+          {showRaw ? String(value) : parsed.toLocaleString()}
+        </button>
       );
     }
     return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
@@ -196,9 +200,14 @@ function FieldValue({ value }: { value: unknown }) {
     const parsed = parseDate(value);
     if (parsed) {
       return (
-        <span className="text-xs font-mono text-violet-600 dark:text-violet-400" title={value}>
-          {parsed.toLocaleString()}
-        </span>
+        <button
+          type="button"
+          onClick={() => setShowRaw((r) => !r)}
+          className="text-xs font-mono text-violet-600 dark:text-violet-400 hover:opacity-70 transition-opacity cursor-pointer text-left"
+          title={showRaw ? "Click to show parsed date" : "Click to show raw value"}
+        >
+          {showRaw ? value : parsed.toLocaleString()}
+        </button>
       );
     }
     const display = value.length > 120 ? value.slice(0, 120) + "…" : value;
