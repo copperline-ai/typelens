@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0] - 2026-05-19
+
+### Features
+
+- Mobile: icon-only navigation and gear settings popover (`6e33352`) (COP-450)
+
 ## [1.5.0] - 2026-05-19
 
 ### Features
