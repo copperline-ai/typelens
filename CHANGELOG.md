@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.2] - 2026-05-19
+
+### Other
+
+- Standardize product name to lowercase typelens (`795b161`)
+
 ## [1.13.1] - 2026-05-19
 
 ### Other
