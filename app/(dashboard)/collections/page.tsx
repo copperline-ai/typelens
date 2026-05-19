@@ -7,6 +7,7 @@ import {
   ArrowUpAZ,
   CalendarArrowDown,
   CalendarArrowUp,
+  Copy,
   LayoutGrid,
   LayoutList,
   Plus,
@@ -17,6 +18,7 @@ import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/st
 import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
+import { CloneCollectionDialog } from "@/components/collections/clone-collection-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { Button } from "@/components/ui/button";
 import {
@@ -71,7 +73,7 @@ function CollectionsSkeleton({ count, view }: { count: number; view: "card" | "t
                   {h}
                 </th>
               ))}
-              <th className="w-10" />
+              <th className="w-20" />
             </tr>
           </thead>
           <tbody>
@@ -101,13 +103,16 @@ function CollectionsSkeleton({ count, view }: { count: number; view: "card" | "t
 function CollectionTableRow({
   collection,
   onDelete,
+  onClone,
 }: {
   collection: Collection;
   onDelete?: () => Promise<void>;
+  onClone?: (newName: string) => void;
 }) {
   const { name, num_documents, fields, default_sorting_field, created_at } = collection;
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cloneOpen, setCloneOpen] = useState(false);
 
   async function handleDelete() {
     if (!onDelete) return;
@@ -122,58 +127,75 @@ function CollectionTableRow({
   }
 
   return (
-    <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-      <td className="px-4 py-3 font-medium">
-        <Link
-          href={`/collections/${encodeURIComponent(name)}`}
-          className="hover:underline underline-offset-2"
-        >
-          {name}
-        </Link>
-      </td>
-      <td className="px-4 py-3 text-muted-foreground">{fmt.format(num_documents)}</td>
-      <td className="px-4 py-3 text-muted-foreground">{fields.length}</td>
-      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
-        {default_sorting_field ?? <span className="not-italic">—</span>}
-      </td>
-      <td className="px-4 py-3 text-muted-foreground">
-        {created_at ? dateFmt.format(new Date(created_at * 1000)) : "—"}
-      </td>
-      <td className="px-4 py-3">
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
+    <>
+      <tr className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+        <td className="px-4 py-3 font-medium">
+          <Link
+            href={`/collections/${encodeURIComponent(name)}`}
+            className="hover:underline underline-offset-2"
+          >
+            {name}
+          </Link>
+        </td>
+        <td className="px-4 py-3 text-muted-foreground">{fmt.format(num_documents)}</td>
+        <td className="px-4 py-3 text-muted-foreground">{fields.length}</td>
+        <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+          {default_sorting_field ?? <span className="not-italic">—</span>}
+        </td>
+        <td className="px-4 py-3 text-muted-foreground">
+          {created_at ? dateFmt.format(new Date(created_at * 1000)) : "—"}
+        </td>
+        <td className="px-4 py-3">
+          <div className="flex items-center gap-0.5">
             <button
-              className="rounded p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-              aria-label={`Delete ${name}`}
+              className="rounded p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              aria-label={`Clone ${name}`}
+              onClick={() => setCloneOpen(true)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Copy className="h-4 w-4" />
             </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete collection?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete{" "}
-                <span className="font-mono font-medium text-foreground">{name}</span> and all{" "}
-                {fmt.format(num_documents)} {num_documents === 1 ? "document" : "documents"}. This
-                action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              {error && <p className="text-xs text-destructive">{error}</p>}
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting…" : "Delete"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </td>
-    </tr>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  className="rounded p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  aria-label={`Delete ${name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete collection?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete{" "}
+                    <span className="font-mono font-medium text-foreground">{name}</span> and all{" "}
+                    {fmt.format(num_documents)} {num_documents === 1 ? "document" : "documents"}.
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  {error && <p className="text-xs text-destructive">{error}</p>}
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting…" : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </td>
+      </tr>
+      <CloneCollectionDialog
+        sourceName={name}
+        open={cloneOpen}
+        onOpenChange={setCloneOpen}
+        onCloned={(newName) => onClone?.(newName)}
+      />
+    </>
   );
 }
 
@@ -392,7 +414,7 @@ export default function CollectionsPage() {
                     Default Sort
                   </th>
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Created</th>
-                  <th className="w-10" />
+                  <th className="w-20" />
                 </tr>
               </thead>
               <tbody>
@@ -404,6 +426,7 @@ export default function CollectionsPage() {
                       await deleteCollection(activeProfile!, c.name);
                       setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
                     }}
+                    onClone={fetchCollections}
                   />
                 ))}
               </tbody>
@@ -419,6 +442,7 @@ export default function CollectionsPage() {
                   await deleteCollection(activeProfile!, c.name);
                   setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
                 }}
+                onClone={fetchCollections}
               />
             ))}
           </div>
