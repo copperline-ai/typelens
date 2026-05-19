@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0] - 2026-05-19
+
+### Features
+
+- Add API key management page and routes (`651ba2d`) (COP-457)
+
 ## [1.9.0] - 2026-05-19
 
 ### Features
