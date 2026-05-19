@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.0] - 2026-05-19
+
+### Features
+
+- Poll `/api/healthz` for version and show toast notification on new deploy (`1367179`)
+
 ## [1.12.0] - 2026-05-19
 
 ### Features
