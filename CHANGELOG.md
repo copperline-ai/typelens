@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.0] - 2026-05-19
+
+### Features
+
+- Mobile improvements including icon-only logo, dot-only status, and settings gear on mobile devices (COP-449) (`49fef32`)
+
 ## [1.4.0] - 2026-05-19
 
 ### Features
