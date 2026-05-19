@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.0] - 2026-05-19
+
+### Features
+
+- Export collection as JSONL in documents module (COP-454) (`9452fad`)
+
 ## [1.7.1] - 2026-05-19
 
 ### Bug Fixes
