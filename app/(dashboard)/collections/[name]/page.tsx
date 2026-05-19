@@ -490,7 +490,7 @@ function DocumentsSection({
           {found !== null && found > 0 && (
             <div className="flex items-center justify-between pt-1 gap-2">
               <p className="text-xs text-muted-foreground whitespace-nowrap min-w-0 truncate">
-                {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} docs
+                {fmt.format(start)}–{fmt.format(end)} of {fmt.format(found)} documents
               </p>
               <div className="flex items-center gap-1 shrink-0">
                 <Button
