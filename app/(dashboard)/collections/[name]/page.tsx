@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/async-boundary";
+import { CloneCollectionDialog } from "@/components/collections/clone-collection-dialog";
 import { cn } from "@/lib/utils";
 
 const fmt = new Intl.NumberFormat();
@@ -544,6 +545,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [cloneOpen, setCloneOpen] = useState(false);
 
   async function handleExport() {
     if (!activeProfile || !collection) return;
@@ -657,6 +659,15 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 <Download className="h-4 w-4" />
               </Button>
 
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCloneOpen(true)}
+                title="Clone collection"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -736,6 +747,15 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
             </CollapsibleSection>
           )}
         </>
+      )}
+
+      {collection && (
+        <CloneCollectionDialog
+          sourceName={collection.name}
+          open={cloneOpen}
+          onOpenChange={setCloneOpen}
+          onCloned={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
+        />
       )}
     </div>
   );

@@ -20,5 +20,7 @@ export async function POST(request: NextRequest) {
   if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
 
   const body = await request.text();
-  return proxyToTypesense(profile, "/collections", undefined, { method: "POST", body });
+  const srcName = request.nextUrl.searchParams.get("src_name");
+  const searchParams = srcName ? new URLSearchParams({ src_name: srcName }) : undefined;
+  return proxyToTypesense(profile, "/collections", searchParams, { method: "POST", body });
 }
