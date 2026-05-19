@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.1] - 2026-05-19
+
+### Bug Fixes
+
+- Remove host row from status popover (COP-447) (`e72f40a`)
+
 ## [1.3.0] - 2026-05-18
 
 ### Features
