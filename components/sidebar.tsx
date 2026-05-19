@@ -73,23 +73,13 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
         )}
       >
         {!collapsed && (
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt=""
-              width={30}
-              height={30}
-              className="h-[30px] w-[30px] shrink-0"
-              aria-hidden="true"
-            />
-            <span
-              className="text-xl font-semibold leading-none tracking-tight"
-              style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
-            >
-              <span style={{ color: "#0067a3" }}>type</span>
-              <span style={{ color: "#00d2da" }}>lens</span>
-            </span>
-          </div>
+          <span
+            className="text-xl font-semibold leading-none tracking-tight"
+            style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+          >
+            <span style={{ color: "#0067a3" }}>type</span>
+            <span style={{ color: "#00d2da" }}>lens</span>
+          </span>
         )}
         <button
           onClick={() => setCollapsed((c) => !c)}
