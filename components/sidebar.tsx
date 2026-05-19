@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Cable,
   Database,
+  Key,
   LogOut,
   Moon,
   Monitor,
@@ -20,6 +21,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
+  { href: "/api-keys", label: "API Keys", icon: Key },
   { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 

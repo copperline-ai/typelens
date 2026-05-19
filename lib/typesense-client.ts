@@ -225,6 +225,58 @@ export function deleteDocument(profile: Profile, collectionName: string, documen
   );
 }
 
+export type ApiKey = {
+  id: number;
+  description: string;
+  actions: string[];
+  collections: string[];
+  value?: string;
+  value_prefix?: string;
+  expires_at?: number;
+};
+
+export type ApiKeyCreateSchema = {
+  description: string;
+  actions: string[];
+  collections: string[];
+  expires_at?: number;
+};
+
+export function listApiKeys(profile: Profile) {
+  return typesenseFetch<{ keys: ApiKey[] }>(profile, "/keys");
+}
+
+export function createApiKey(profile: Profile, schema: ApiKeyCreateSchema) {
+  return typesenseFetch<ApiKey>(profile, "/keys", undefined, {
+    method: "POST",
+    body: JSON.stringify(schema),
+  });
+}
+
+export function deleteApiKey(profile: Profile, id: number) {
+  return typesenseFetch<{ id: number }>(profile, `/keys/${id}`, undefined, { method: "DELETE" });
+}
+
+export const TYPESENSE_KEY_ACTIONS = [
+  "documents:search",
+  "documents:get",
+  "documents:create",
+  "documents:update",
+  "documents:delete",
+  "documents:import",
+  "documents:export",
+  "collections:list",
+  "collections:get",
+  "collections:create",
+  "collections:update",
+  "collections:delete",
+  "keys:list",
+  "keys:get",
+  "keys:create",
+  "keys:delete",
+  "*",
+] as const;
+
 export type SearchHit = { document: Record<string, unknown> };
 export type SearchResult = { found: number; hits?: SearchHit[] };
 

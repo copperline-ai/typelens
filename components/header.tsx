@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Cable, Database, LogOut, Moon, Monitor, Settings, Sun } from "lucide-react";
+import { Cable, Database, Key, LogOut, Moon, Monitor, Settings, Sun } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
+  { href: "/api-keys", label: "API Keys", icon: Key },
   { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 
