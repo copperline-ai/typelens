@@ -19,6 +19,7 @@ import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
 import type { Theme } from "@/lib/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppVersion } from "@/lib/hooks/use-app-version";
+import { ReleaseNotesModal } from "@/components/release-notes-modal";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
@@ -41,6 +42,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const theme = useThemeStore(selectTheme);
   const { setTheme } = useThemeStore(selectThemeActions);
   const appVersion = useAppVersion();
+  const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   useEffect(() => {
     const check = () => {
@@ -127,10 +129,15 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         {!collapsed && (
-          <span className="text-xs text-muted-foreground">
+          <button
+            onClick={() => setReleaseNotesOpen(true)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="View release notes"
+          >
             {appVersion ? `v${appVersion}` : ""}
-          </span>
+          </button>
         )}
+        <ReleaseNotesModal open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen} />
         <Popover>
           <PopoverTrigger asChild>
             <button

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Cable, Database, Key, LogOut, Moon, Monitor, Settings, Sun } from "lucide-react";
@@ -14,6 +15,7 @@ import { StatusPopover } from "@/components/status-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useAppVersion } from "@/lib/hooks/use-app-version";
+import { ReleaseNotesModal } from "@/components/release-notes-modal";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
@@ -56,6 +58,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
   }
 
   const appVersion = useAppVersion();
+  const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
   const ThemeIcon = themeIcons[theme];
   const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
@@ -136,12 +139,17 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
             </button>
           )}
           <div className="border-t mt-1 pt-1 px-2 pb-0.5">
-            <span className="text-xs text-muted-foreground/60">
+            <button
+              onClick={() => setReleaseNotesOpen(true)}
+              className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+              title="View release notes"
+            >
               {appVersion ? `v${appVersion}` : ""}
-            </span>
+            </button>
           </div>
         </PopoverContent>
       </Popover>
+      <ReleaseNotesModal open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen} />
     </header>
   );
 }
