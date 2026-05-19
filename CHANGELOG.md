@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.0] - 2026-05-19
+
+### Features
+
+- Add docker-compose and start script for local development (`813253f`)
+
 ## [1.13.2] - 2026-05-19
 
 ### Other
