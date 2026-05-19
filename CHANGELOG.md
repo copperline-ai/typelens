@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2026-05-19
+
+### Features
+
+- Add mobile header navigation and hide sidebar on small screens (COP-448) (`e27c677`)
+
 ## [1.3.1] - 2026-05-19
 
 ### Bug Fixes
