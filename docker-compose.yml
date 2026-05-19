@@ -1,0 +1,30 @@
+services:
+  typesense:
+    image: typesense/typesense:30.2
+    command: --data-dir=/data --api-key=${TYPESENSE_API_KEY:-xyz} --enable-cors
+    volumes:
+      - typesense-data:/data
+    ports:
+      - "8108:8108"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8108/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  typelens:
+    image: ghcr.io/copperline-ai/typelens:latest
+    ports:
+      - "3000:3000"
+    environment:
+      TYPESENSE_SERVER_NAME: Local
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:-xyz}
+    depends_on:
+      typesense:
+        condition: service_healthy
+
+volumes:
+  typesense-data:

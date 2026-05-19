@@ -15,18 +15,21 @@ A Typesense collection explorer and manager.
 ### One-command setup
 
 ```bash
-docker compose up
+./start.sh
 ```
 
-This starts:
+This generates a random `TYPESENSE_API_KEY` into `.env` (if one doesn't exist), then starts:
 
 | Service | URL | Notes |
 | --- | --- | --- |
-| Typesense | <http://localhost:8108> | API key: `xyz` (override via env) |
+| Typesense | <http://localhost:8108> | API key from `.env` |
+| typelens | <http://localhost:3000> | Pre-connected to Typesense |
+
+typelens is pre-configured to talk to Typesense over Docker's internal network — no manual connection setup required.
 
 ### Configuration
 
-Override defaults with a `.env` file at the repo root:
+Override any defaults with a `.env` file at the repo root before running `./start.sh`:
 
 ```env
 TYPESENSE_API_KEY=your-secret-key
