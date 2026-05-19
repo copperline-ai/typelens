@@ -13,6 +13,7 @@ import type { Theme } from "@/lib/store";
 import { StatusPopover } from "@/components/status-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useAppVersion } from "@/lib/hooks/use-app-version";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
@@ -54,6 +55,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
     router.refresh();
   }
 
+  const appVersion = useAppVersion();
   const ThemeIcon = themeIcons[theme];
   const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
@@ -133,6 +135,11 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
               <span>Log out</span>
             </button>
           )}
+          <div className="border-t mt-1 pt-1 px-2 pb-0.5">
+            <span className="text-xs text-muted-foreground/60">
+              {appVersion ? `v${appVersion}` : ""}
+            </span>
+          </div>
         </PopoverContent>
       </Popover>
     </header>

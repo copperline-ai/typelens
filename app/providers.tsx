@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { useThemeStore, selectThemeActions } from "@/lib/store";
+import { Toaster } from "sonner";
+import { useThemeStore, selectThemeActions, selectTheme } from "@/lib/store";
 
 function ThemeHydrator() {
   const { hydrateFromStorage } = useThemeStore(selectThemeActions);
@@ -26,10 +27,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }),
   );
 
+  const theme = useThemeStore(selectTheme);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeHydrator />
       {children}
+      <Toaster theme={theme} richColors position="bottom-right" />
     </QueryClientProvider>
   );
 }

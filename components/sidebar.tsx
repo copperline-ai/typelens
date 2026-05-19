@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
 import type { Theme } from "@/lib/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useAppVersion } from "@/lib/hooks/use-app-version";
 
 const navItems = [
   { href: "/collections", label: "Collections", icon: Database },
@@ -39,6 +40,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const [collapsed, setCollapsed] = useState(false);
   const theme = useThemeStore(selectTheme);
   const { setTheme } = useThemeStore(selectThemeActions);
+  const appVersion = useAppVersion();
 
   useEffect(() => {
     const check = () => {
@@ -126,7 +128,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
       >
         {!collapsed && (
           <span className="text-xs text-muted-foreground">
-            v{process.env.NEXT_PUBLIC_APP_VERSION}
+            {appVersion ? `v${appVersion}` : ""}
           </span>
         )}
         <Popover>
