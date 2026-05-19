@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.0] - 2026-05-19
+
+### Features
+
+- Add collection cloning action to typelens collections (COP-455) (`9c770de`)
+
 ## [1.8.0] - 2026-05-19
 
 ### Features
