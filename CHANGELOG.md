@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.0] - 2026-05-19
+
+### Features
+
+- Add release notes modal on version string click (`c877d91`)
+
 ## [1.14.0] - 2026-05-19
 
 ### Features
