@@ -62,6 +62,21 @@ describe("GET /api/typesense/aliases/:name", () => {
     const res = await GET(req, { params: Promise.resolve({ name: "my-alias" }) });
     expect(res.status).toBe(401);
   });
+
+  it("proxies GET to Typesense aliases endpoint", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ name: "my-alias", collection_name: "products" }), {
+        status: 200,
+      }),
+    );
+    const req = new NextRequest("http://localhost/api/typesense/aliases/my-alias", {
+      headers: { Cookie: await makeAuthCookie(), ...validProfileHeaders },
+    });
+    const res = await GET(req, { params: Promise.resolve({ name: "my-alias" }) });
+    expect(res.status).toBe(200);
+    const calledUrl = String(vi.mocked(fetch).mock.calls[0][0]);
+    expect(calledUrl).toContain("/aliases/my-alias");
+  });
 });
 
 describe("DELETE /api/typesense/aliases/:name", () => {
