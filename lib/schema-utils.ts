@@ -56,8 +56,8 @@ export function inferFieldsFromRecords(records: Record<string, unknown>[]): Infe
 export type SchemaDiff = {
   newFields: Pick<CollectionField, "name" | "type">[];
   typeConflicts: { name: string; existingType: string; incomingType: string }[];
-  missingFromFile: CollectionField[];
-  compatible: CollectionField[];
+  missingFromFile: Pick<CollectionField, "name" | "type">[];
+  compatible: Pick<CollectionField, "name" | "type">[];
 };
 
 export function diffSchemas(
@@ -69,7 +69,7 @@ export function diffSchemas(
 
   const newFields: SchemaDiff["newFields"] = [];
   const typeConflicts: SchemaDiff["typeConflicts"] = [];
-  const compatible: CollectionField[] = [];
+  const compatible: SchemaDiff["compatible"] = [];
 
   for (const inc of incoming) {
     const existing = currentMap.get(inc.name);
@@ -77,13 +77,13 @@ export function diffSchemas(
       newFields.push(inc);
     } else if (existing.type !== inc.type) {
       typeConflicts.push({ name: inc.name, existingType: existing.type, incomingType: inc.type });
-      compatible.push(existing as CollectionField);
+      // do NOT push to compatible
     } else {
-      compatible.push(existing as CollectionField);
+      compatible.push(existing);
     }
   }
 
-  const missingFromFile = (current as CollectionField[]).filter((f) => !incomingMap.has(f.name));
+  const missingFromFile = current.filter((f) => !incomingMap.has(f.name));
 
   return { newFields, typeConflicts, missingFromFile, compatible };
 }

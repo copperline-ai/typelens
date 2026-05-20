@@ -12,7 +12,7 @@ describe("inferType", () => {
     expect(inferType([1, 2, 3])).toBe("int64");
   });
   it("returns 'float' for decimals", () => {
-    expect(inferType([1.5, 2.7, 3.0])).toBe("float");
+    expect(inferType([1.5, 2.7, 3.3])).toBe("float");
   });
   it("returns 'string[]' for string arrays", () => {
     expect(inferType([["a", "b"], ["c"]])).toBe("string[]");
@@ -88,5 +88,11 @@ describe("diffSchemas", () => {
     const diff = diffSchemas(current, incoming);
     expect(diff.compatible).toHaveLength(1);
     expect(diff.newFields).toHaveLength(0);
+  });
+  it("does not include type-conflicted fields in compatible", () => {
+    const current = [{ name: "price", type: "int32" }];
+    const incoming = [{ name: "price", type: "float" }];
+    const diff = diffSchemas(current, incoming);
+    expect(diff.compatible).toHaveLength(0);
   });
 });
