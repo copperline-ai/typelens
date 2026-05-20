@@ -216,6 +216,96 @@ export async function exportDocuments(profile: Profile, collectionName: string):
   return res.text();
 }
 
+export type SchemaFieldPatch = {
+  name: string;
+  drop?: boolean;
+  type?: string;
+  facet?: boolean;
+  optional?: boolean;
+  index?: boolean;
+  embed?: { from: string[]; model_config: Record<string, string> };
+};
+
+export function updateCollectionSchema(profile: Profile, name: string, fields: SchemaFieldPatch[]) {
+  return typesenseFetch<Collection>(
+    profile,
+    `/collections/${encodeURIComponent(name)}`,
+    undefined,
+    { method: "PATCH", body: JSON.stringify({ fields }) },
+  );
+}
+
+export function truncateDocuments(profile: Profile, collectionName: string) {
+  return typesenseFetch<{ num_deleted: number }>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/documents?truncate=true`,
+    undefined,
+    { method: "DELETE" },
+  );
+}
+
+export type CollectionAlias = { name: string; collection_name: string };
+
+export function listAliases(profile: Profile) {
+  return typesenseFetch<{ aliases: CollectionAlias[] }>(profile, "/aliases");
+}
+
+export function upsertAlias(profile: Profile, aliasName: string, collectionName: string) {
+  return typesenseFetch<CollectionAlias>(
+    profile,
+    `/aliases/${encodeURIComponent(aliasName)}`,
+    undefined,
+    { method: "PUT", body: JSON.stringify({ collection_name: collectionName }) },
+  );
+}
+
+export function deleteAlias(profile: Profile, aliasName: string) {
+  return typesenseFetch<CollectionAlias>(
+    profile,
+    `/aliases/${encodeURIComponent(aliasName)}`,
+    undefined,
+    { method: "DELETE" },
+  );
+}
+
+export type ImportAction = "create" | "upsert" | "update" | "emplace";
+
+export async function importDocumentsWithOptions(
+  profile: Profile,
+  collectionName: string,
+  records: Record<string, unknown>[],
+  action: ImportAction = "upsert",
+): Promise<ImportResult[]> {
+  const jsonl = records
+    .map((r) => {
+      const cleaned: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(r)) {
+        if (v !== "" && v !== null && v !== undefined) cleaned[k] = v;
+      }
+      return JSON.stringify(cleaned);
+    })
+    .join("\n");
+  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=${action}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-Ts-Host": profile.host,
+      "X-Ts-Port": String(profile.port),
+      "X-Ts-Protocol": profile.protocol,
+      "X-Ts-Api-Key": profile.apiKey,
+      "Content-Type": "text/plain",
+    },
+    body: jsonl,
+    signal: AbortSignal.timeout(120_000),
+  });
+  const text = await res.text();
+  if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
+  return text
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line) as ImportResult);
+}
+
 export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {
   return typesenseFetch<Record<string, unknown>>(
     profile,
