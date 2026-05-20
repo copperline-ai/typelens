@@ -157,10 +157,13 @@ export function cloneCollection(profile: Profile, sourceName: string, newName: s
 
 export type ImportResult = { success: boolean; error?: string };
 
-export async function importDocuments(
+export type ImportAction = "create" | "upsert" | "update" | "emplace";
+
+export async function importDocumentsWithOptions(
   profile: Profile,
   collectionName: string,
   records: Record<string, unknown>[],
+  action: ImportAction = "upsert",
 ): Promise<ImportResult[]> {
   const jsonl = records
     .map((r) => {
@@ -171,7 +174,7 @@ export async function importDocuments(
       return JSON.stringify(cleaned);
     })
     .join("\n");
-  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=create`;
+  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=${action}`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -182,18 +185,22 @@ export async function importDocuments(
       "Content-Type": "text/plain",
     },
     body: jsonl,
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(120_000),
   });
-
-  // Response is JSONL — one result object per line — not a JSON array
   const text = await res.text();
-  if (!res.ok && !text.trim()) {
-    throw new Error(`Import failed: HTTP ${res.status}`);
-  }
+  if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
   return text
     .split("\n")
     .filter((line) => line.trim())
     .map((line) => JSON.parse(line) as ImportResult);
+}
+
+export async function importDocuments(
+  profile: Profile,
+  collectionName: string,
+  records: Record<string, unknown>[],
+): Promise<ImportResult[]> {
+  return importDocumentsWithOptions(profile, collectionName, records, "create");
 }
 
 export async function exportDocuments(profile: Profile, collectionName: string): Promise<string> {
@@ -219,7 +226,7 @@ export async function exportDocuments(profile: Profile, collectionName: string):
 export type SchemaFieldPatch = {
   name: string;
   drop?: boolean;
-  type?: string;
+  type?: TypesenseFieldType | string;
   facet?: boolean;
   optional?: boolean;
   index?: boolean;
@@ -266,44 +273,6 @@ export function deleteAlias(profile: Profile, aliasName: string) {
     undefined,
     { method: "DELETE" },
   );
-}
-
-export type ImportAction = "create" | "upsert" | "update" | "emplace";
-
-export async function importDocumentsWithOptions(
-  profile: Profile,
-  collectionName: string,
-  records: Record<string, unknown>[],
-  action: ImportAction = "upsert",
-): Promise<ImportResult[]> {
-  const jsonl = records
-    .map((r) => {
-      const cleaned: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(r)) {
-        if (v !== "" && v !== null && v !== undefined) cleaned[k] = v;
-      }
-      return JSON.stringify(cleaned);
-    })
-    .join("\n");
-  const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=${action}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "X-Ts-Host": profile.host,
-      "X-Ts-Port": String(profile.port),
-      "X-Ts-Protocol": profile.protocol,
-      "X-Ts-Api-Key": profile.apiKey,
-      "Content-Type": "text/plain",
-    },
-    body: jsonl,
-    signal: AbortSignal.timeout(120_000),
-  });
-  const text = await res.text();
-  if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
-  return text
-    .split("\n")
-    .filter((line) => line.trim())
-    .map((line) => JSON.parse(line) as ImportResult);
 }
 
 export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {
