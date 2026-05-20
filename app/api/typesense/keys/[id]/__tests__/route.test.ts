@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE } from "../route";
 
+vi.stubEnv("AUTH_USERNAME", "admin");
 vi.stubEnv("AUTH_PASSWORD", "test-secret");
 
 async function makeAuthCookie(): Promise<string> {
