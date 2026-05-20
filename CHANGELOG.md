@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.17.1] - 2026-05-20
+
+### Bug Fixes
+
+- Fix showing card view on mobile when table view is active in collections (`a3fcfa0`, `b472d54`)
+
 ## [1.17.0] - 2026-05-20
 
 ### Other
