@@ -230,6 +230,7 @@ export type SchemaFieldPatch = {
   facet?: boolean;
   optional?: boolean;
   index?: boolean;
+  num_dim?: number;
   embed?: { from: string[]; model_config: Record<string, string> };
 };
 
