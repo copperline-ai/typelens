@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.2] - 2026-05-20
+
+### Other
+
+- Manual release (no commits since last tag in this app's path filter).
+
 ## [1.15.1] - 2026-05-19
 
 ### Bug Fixes
