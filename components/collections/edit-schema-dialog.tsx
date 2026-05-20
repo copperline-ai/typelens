@@ -102,8 +102,7 @@ function buildPatchOps(
         orig.type !== upd.type ||
         (orig.facet ?? false) !== upd.facet ||
         (orig.optional ?? false) !== upd.optional ||
-        (orig.index ?? true) !== upd.index ||
-        origName !== upd.name;
+        (orig.index ?? true) !== upd.index;
       if (changed) {
         ops.push({ name: origName, drop: true });
         ops.push(fieldDef);
@@ -179,7 +178,16 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
 
   function handleOpenChange(next: boolean) {
     if (!next) {
-      form.reset();
+      form.reset({
+        fields: collection.fields.map((f) => ({
+          name: f.name,
+          type: f.type as (typeof TYPESENSE_FIELD_TYPES)[number],
+          facet: f.facet ?? false,
+          optional: f.optional ?? false,
+          index: f.index ?? true,
+          _originalName: f.name,
+        })),
+      });
       setSubmitState({ status: "idle" });
       setDeleteOriginal(false);
     }
@@ -217,7 +225,8 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
           ...(f.optional ? { optional: true } : {}),
           ...(!f.index ? { index: false } : {}),
         })),
-        ...(collection.default_sorting_field
+        ...(collection.default_sorting_field &&
+        data.fields.some((f) => f.name === collection.default_sorting_field)
           ? { default_sorting_field: collection.default_sorting_field }
           : {}),
       });
@@ -256,6 +265,10 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
   }
 
   async function onSubmit(data: FormValues) {
+    if (data.fields.length === 0) {
+      form.setError("fields", { type: "manual", message: "At least one field is required" });
+      return;
+    }
     if (changeType === "add-only") {
       await handleDirectPatch(data);
     } else {
@@ -454,6 +467,10 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
                 </div>
               </div>
             </div>
+
+            {typeof form.formState.errors.fields?.message === "string" && (
+              <p className="text-xs text-destructive">{form.formState.errors.fields.message}</p>
+            )}
 
             {submitState.status === "migrating" && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
