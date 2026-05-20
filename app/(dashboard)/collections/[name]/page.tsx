@@ -3,7 +3,19 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, ChevronRight, Copy, Download, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  Copy,
+  Download,
+  Eraser,
+  FileInput,
+  Layers,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
@@ -11,6 +23,7 @@ import {
   deleteDocument,
   exportDocuments,
   sampleDocuments,
+  truncateDocuments,
   type Collection,
   type SearchHit,
 } from "@/lib/typesense-client";
@@ -29,6 +42,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { CloneCollectionDialog } from "@/components/collections/clone-collection-dialog";
+import { EditSchemaDialog } from "@/components/collections/edit-schema-dialog";
+import { ImportRecordsDialog } from "@/components/collections/import-records-dialog";
+import { AddEmbeddingDialog } from "@/components/collections/add-embedding-dialog";
 import { cn } from "@/lib/utils";
 
 const fmt = new Intl.NumberFormat();
@@ -546,6 +562,11 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [cloneOpen, setCloneOpen] = useState(false);
+  const [editSchemaOpen, setEditSchemaOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [addEmbeddingOpen, setAddEmbeddingOpen] = useState(false);
+  const [truncating, setTruncating] = useState(false);
+  const [truncateError, setTruncateError] = useState<string | null>(null);
 
   async function handleExport() {
     if (!activeProfile || !collection) return;
@@ -574,6 +595,20 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : String(err));
       setDeleting(false);
+    }
+  }
+
+  async function handleTruncate() {
+    if (!activeProfile) return;
+    setTruncating(true);
+    setTruncateError(null);
+    try {
+      await truncateDocuments(activeProfile, collectionName);
+      fetchCollection();
+    } catch (err) {
+      setTruncateError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setTruncating(false);
     }
   }
 
@@ -668,6 +703,71 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 <Copy className="h-4 w-4" />
               </Button>
 
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setEditSchemaOpen(true)}
+                title="Edit schema"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setImportOpen(true)}
+                title="Import records"
+              >
+                <FileInput className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setAddEmbeddingOpen(true)}
+                title="Add embedding field"
+              >
+                <Layers className="h-4 w-4" />
+              </Button>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-amber-600 hover:text-amber-600 hover:bg-amber-50 border-amber-200 dark:border-amber-800 dark:hover:bg-amber-950/30"
+                    disabled={truncating}
+                    title="Truncate collection (delete all records)"
+                  >
+                    <Eraser className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Truncate collection?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete all {fmt.format(collection.num_documents)}{" "}
+                      {collection.num_documents === 1 ? "document" : "documents"} from{" "}
+                      <span className="font-mono font-medium text-foreground">
+                        {collection.name}
+                      </span>{" "}
+                      without deleting the collection or its schema. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  {truncateError && <p className="text-xs text-destructive">{truncateError}</p>}
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-amber-600 text-white hover:bg-amber-700"
+                      onClick={handleTruncate}
+                      disabled={truncating}
+                    >
+                      Truncate
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -755,6 +855,33 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           open={cloneOpen}
           onOpenChange={setCloneOpen}
           onCloned={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
+        />
+      )}
+
+      {collection && activeProfile && (
+        <EditSchemaDialog
+          collection={collection}
+          open={editSchemaOpen}
+          onOpenChange={setEditSchemaOpen}
+          onUpdated={fetchCollection}
+        />
+      )}
+
+      {collection && activeProfile && (
+        <ImportRecordsDialog
+          collection={collection}
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onImported={fetchCollection}
+        />
+      )}
+
+      {collection && activeProfile && (
+        <AddEmbeddingDialog
+          collection={collection}
+          open={addEmbeddingOpen}
+          onOpenChange={setAddEmbeddingOpen}
+          onAdded={fetchCollection}
         />
       )}
     </div>
