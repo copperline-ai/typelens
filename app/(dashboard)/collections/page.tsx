@@ -64,31 +64,38 @@ function sortCollections(cols: Collection[], key: SortKey): Collection[] {
 function CollectionsSkeleton({ count, view }: { count: number; view: "card" | "table" }) {
   if (view === "table") {
     return (
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              {["Name", "Documents", "Fields", "Default Sort", "Created"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">
-                  {h}
-                </th>
-              ))}
-              <th className="w-20" />
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: count }).map((_, i) => (
-              <tr key={i} className="border-b last:border-0">
-                {Array.from({ length: 6 }).map((__, j) => (
-                  <td key={j} className="px-4 py-3">
-                    <Skeleton className="h-4 w-24" />
-                  </td>
+      <>
+        <div className="hidden md:block overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50">
+                {["Name", "Documents", "Fields", "Default Sort", "Created"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left font-medium text-muted-foreground">
+                    {h}
+                  </th>
                 ))}
+                <th className="w-20" />
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {Array.from({ length: count }).map((_, i) => (
+                <tr key={i} className="border-b last:border-0">
+                  {Array.from({ length: 6 }).map((__, j) => (
+                    <td key={j} className="px-4 py-3">
+                      <Skeleton className="h-4 w-24" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="md:hidden grid grid-cols-1 gap-4">
+          {Array.from({ length: count }).map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      </>
     );
   }
   return (
@@ -292,6 +299,7 @@ export default function CollectionsPage() {
                   title={label}
                   className={cn(
                     "h-8 w-8",
+                    mode === "table" && "hidden md:flex",
                     viewMode === mode
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:text-foreground",
@@ -401,37 +409,58 @@ export default function CollectionsPage() {
         collections &&
         collections.length > 0 &&
         (viewMode === "table" ? (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                    Documents
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Fields</th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                    Default Sort
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Created</th>
-                  <th className="w-20" />
-                </tr>
-              </thead>
-              <tbody>
-                {sortCollections(collections, sortKey).map((c) => (
-                  <CollectionTableRow
-                    key={c.name}
-                    collection={c}
-                    onDelete={async () => {
-                      await deleteCollection(activeProfile!, c.name);
-                      setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
-                    }}
-                    onClone={fetchCollections}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <div className="hidden md:block overflow-x-auto rounded-lg border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Name</th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                      Documents
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                      Fields
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                      Default Sort
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
+                      Created
+                    </th>
+                    <th className="w-20" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortCollections(collections, sortKey).map((c) => (
+                    <CollectionTableRow
+                      key={c.name}
+                      collection={c}
+                      onDelete={async () => {
+                        await deleteCollection(activeProfile!, c.name);
+                        setCollections(
+                          (prev) => prev?.filter((col) => col.name !== c.name) ?? null,
+                        );
+                      }}
+                      onClone={fetchCollections}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="md:hidden grid grid-cols-1 gap-4">
+              {sortCollections(collections, sortKey).map((c) => (
+                <CollectionCard
+                  key={c.name}
+                  collection={c}
+                  onDelete={async () => {
+                    await deleteCollection(activeProfile!, c.name);
+                    setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
+                  }}
+                  onClone={fetchCollections}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {sortCollections(collections, sortKey).map((c) => (
