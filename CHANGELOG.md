@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.16.0] - 2026-05-20
+
+### Features
+
+- Add GitHub OAuth app support for authentication (`a95a231`)
+
 ## [1.15.2] - 2026-05-20
 
 ### Other
