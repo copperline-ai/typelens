@@ -30,16 +30,24 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+type RequiredFieldGap = { name: string; count: number };
+
 type FileState =
   | { status: "idle" }
-  | { status: "parsed"; records: Record<string, unknown>[]; fileName: string; diff: SchemaDiff }
+  | {
+      status: "parsed";
+      records: Record<string, unknown>[];
+      fileName: string;
+      diff: SchemaDiff;
+      requiredGaps: RequiredFieldGap[];
+    }
   | { status: "error"; message: string };
 
 type SubmitState =
   | { status: "idle" }
   | { status: "patching-schema" }
   | { status: "importing"; total: number }
-  | { status: "done"; imported: number; failed: number }
+  | { status: "done"; imported: number; failed: number; errorSamples: string[] }
   | { status: "error"; message: string };
 
 const ACTION_LABELS: Record<ImportAction, { label: string; description: string }> = {
@@ -122,7 +130,14 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
 
       const inferred = inferFieldsFromRecords(records);
       const diff = diffSchemas(collection.fields, inferred);
-      setFileState({ status: "parsed", records, fileName: file.name, diff });
+      const requiredGaps: RequiredFieldGap[] = collection.fields
+        .filter((f) => !(f.optional ?? false))
+        .map((f) => ({
+          name: f.name,
+          count: records.filter((r) => !(f.name in r) || r[f.name] == null).length,
+        }))
+        .filter(({ count }) => count > 0);
+      setFileState({ status: "parsed", records, fileName: file.name, diff, requiredGaps });
     };
     reader.readAsText(file);
   }
@@ -156,8 +171,16 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
         records,
         action,
       );
-      const failed = results.filter((r) => !r.success).length;
-      setSubmitState({ status: "done", imported: results.length - failed, failed });
+      const failedResults = results.filter((r) => !r.success);
+      const errorSamples = [
+        ...new Set(failedResults.slice(0, 20).map((r) => r.error ?? "Unknown error")),
+      ].slice(0, 4);
+      setSubmitState({
+        status: "done",
+        imported: results.length - failedResults.length,
+        failed: failedResults.length,
+        errorSamples,
+      });
       onImported();
     } catch (err) {
       setSubmitState({
@@ -262,11 +285,40 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
                   </div>
                 )}
 
+              {fileState.requiredGaps.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-destructive">
+                    <AlertTriangle className="h-3 w-3" />
+                    Required field{fileState.requiredGaps.length !== 1 ? "s" : ""} missing from some
+                    records
+                  </div>
+                  {fileState.requiredGaps.map(({ name, count }) => (
+                    <p key={name} className="text-xs font-mono text-muted-foreground">
+                      <span className="text-foreground font-medium">{name}</span> — missing in{" "}
+                      {count.toLocaleString()} record{count !== 1 ? "s" : ""}
+                    </p>
+                  ))}
+                  <p className="text-xs text-muted-foreground">
+                    These records will fail. Use{" "}
+                    <span className="font-medium text-foreground">Edit Schema</span> to mark the
+                    fields optional, or fix the source data.
+                  </p>
+                </div>
+              )}
+
               {fileState.diff.missingFromFile.length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   {fileState.diff.missingFromFile.length} collection field
-                  {fileState.diff.missingFromFile.length !== 1 ? "s" : ""} not present in file (
-                  {fileState.diff.missingFromFile.map((f) => f.name).join(", ")})
+                  {fileState.diff.missingFromFile.length !== 1 ? "s" : ""} not in file (
+                  {fileState.diff.missingFromFile
+                    .map((f) => {
+                      const required = !(
+                        collection.fields.find((cf) => cf.name === f.name)?.optional ?? false
+                      );
+                      return required ? `${f.name}*` : f.name;
+                    })
+                    .join(", ")}
+                  {fileState.requiredGaps.length > 0 ? " — * = required" : ""})
                 </p>
               )}
             </div>
@@ -299,13 +351,25 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
 
           {/* Status */}
           {submitState.status === "done" && (
-            <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-              <Check className="h-4 w-4" />
-              {submitState.imported.toLocaleString()} imported
-              {submitState.failed > 0 && (
-                <span className="text-destructive">
-                  , {submitState.failed.toLocaleString()} failed
-                </span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+                <Check className="h-4 w-4" />
+                {submitState.imported.toLocaleString()} imported
+                {submitState.failed > 0 && (
+                  <span className="text-destructive">
+                    , {submitState.failed.toLocaleString()} failed
+                  </span>
+                )}
+              </div>
+              {submitState.errorSamples.length > 0 && (
+                <div className="space-y-1 rounded-md border border-destructive/20 bg-destructive/5 p-2">
+                  <p className="text-xs font-medium text-destructive">Sample errors:</p>
+                  {submitState.errorSamples.map((e, i) => (
+                    <p key={i} className="text-xs font-mono text-muted-foreground break-all">
+                      {e}
+                    </p>
+                  ))}
+                </div>
               )}
             </div>
           )}

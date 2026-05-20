@@ -864,6 +864,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           open={editSchemaOpen}
           onOpenChange={setEditSchemaOpen}
           onUpdated={fetchCollection}
+          onRenamed={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
         />
       )}
 

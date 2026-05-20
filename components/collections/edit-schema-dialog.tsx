@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -48,7 +48,10 @@ const fieldRowSchema = z.object({
   _originalName: z.string().optional(),
 });
 
-const formSchema = z.object({ fields: z.array(fieldRowSchema) });
+const formSchema = z.object({
+  collectionName: z.string().min(1, "Required"),
+  fields: z.array(fieldRowSchema),
+});
 type FormValues = z.infer<typeof formSchema>;
 
 type ChangeClassification = "add-only" | "modifying";
@@ -151,9 +154,10 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated: () => void;
+  onRenamed?: (newName: string) => void;
 }
 
-export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: Props) {
+export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated, onRenamed }: Props) {
   const activeProfile = useConnectionStore(selectActiveProfile);
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
   const [deleteOriginal, setDeleteOriginal] = useState(false);
@@ -161,6 +165,7 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      collectionName: collection.name,
       fields: collection.fields.map((f) => ({
         name: f.name,
         type: f.type as (typeof TYPESENSE_FIELD_TYPES)[number],
@@ -172,13 +177,33 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        collectionName: collection.name,
+        fields: collection.fields.map((f) => ({
+          name: f.name,
+          type: f.type as (typeof TYPESENSE_FIELD_TYPES)[number],
+          facet: f.facet ?? false,
+          optional: f.optional ?? false,
+          index: f.index ?? true,
+          _originalName: f.name,
+        })),
+      });
+    }
+  }, [open]);
+
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "fields" });
   const watchedFields = form.watch("fields");
+  const watchedName = form.watch("collectionName");
+  const isRename = watchedName !== collection.name;
   const changeType = classifyChanges(collection.fields, watchedFields);
+  const needsMigration = isRename || changeType === "modifying";
 
   function handleOpenChange(next: boolean) {
     if (!next) {
       form.reset({
+        collectionName: collection.name,
         fields: collection.fields.map((f) => ({
           name: f.name,
           type: f.type as (typeof TYPESENSE_FIELD_TYPES)[number],
@@ -212,7 +237,10 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
 
   async function handleMigration(data: FormValues) {
     if (!activeProfile) return;
-    const newName = `${collection.name}_${Date.now()}`;
+    const renaming = data.collectionName !== collection.name;
+    // For rename: use the exact name the user specified.
+    // For schema-only migration: use a timestamped temp name until the alias is swapped in.
+    const newName = renaming ? data.collectionName : `${collection.name}_${Date.now()}`;
 
     try {
       setSubmitState({ status: "migrating", step: "Creating new collection…" });
@@ -246,16 +274,45 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
         await importDocumentsWithOptions(activeProfile, newName, records, "upsert");
       }
 
-      setSubmitState({ status: "migrating", step: "Updating alias…" });
-      await upsertAlias(activeProfile, collection.name, newName);
+      if (renaming) {
+        // Rename path: no alias involved — the new collection has its own name.
+        if (deleteOriginal) {
+          setSubmitState({ status: "migrating", step: "Removing original collection…" });
+          await deleteCollection(activeProfile, collection.name);
+        }
+        if (onRenamed) {
+          onRenamed(newName);
+        } else {
+          onUpdated();
+        }
+        handleOpenChange(false);
+      } else {
+        // Schema-only migration path: delete original first (required so the alias
+        // can reuse the original name), then point the alias at the new collection.
+        if (deleteOriginal) {
+          setSubmitState({ status: "migrating", step: "Removing original collection…" });
+          await deleteCollection(activeProfile, collection.name);
+        }
 
-      if (deleteOriginal) {
-        setSubmitState({ status: "migrating", step: "Removing original collection…" });
-        await deleteCollection(activeProfile, collection.name);
+        setSubmitState({ status: "migrating", step: "Creating alias…" });
+        try {
+          await upsertAlias(activeProfile, collection.name, newName);
+        } catch (aliasErr) {
+          if (!deleteOriginal) {
+            // Original still exists — can't alias with the same name.
+            setSubmitState({
+              status: "error",
+              message: `Migration complete but alias could not be created: "${collection.name}" still exists. Check "Delete original and create alias" to enable alias creation, or create it manually. New collection: ${newName}`,
+            });
+            onUpdated();
+            return;
+          }
+          throw aliasErr;
+        }
+
+        onUpdated();
+        handleOpenChange(false);
       }
-
-      onUpdated();
-      handleOpenChange(false);
     } catch (err) {
       setSubmitState({
         status: "error",
@@ -269,7 +326,8 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
       form.setError("fields", { type: "manual", message: "At least one field is required" });
       return;
     }
-    if (changeType === "add-only") {
+    const renaming = data.collectionName !== collection.name;
+    if (!renaming && changeType === "add-only") {
       await handleDirectPatch(data);
     } else {
       await handleMigration(data);
@@ -285,17 +343,21 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
           <DialogTitle>Edit Schema</DialogTitle>
         </DialogHeader>
 
-        {changeType === "modifying" && (
+        {needsMigration && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 px-4 py-3 text-sm">
             <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
             <div className="space-y-1">
               <p className="font-medium text-amber-800 dark:text-amber-200">
-                Destructive changes detected — alias migration required
+                {isRename && changeType !== "modifying"
+                  ? "Rename requires data migration"
+                  : isRename
+                    ? "Rename + schema changes require data migration"
+                    : "Destructive schema changes require data migration"}
               </p>
               <p className="text-amber-700 dark:text-amber-300 text-xs">
-                Modifying or removing fields requires creating a new collection and migrating all
-                documents. A Typesense alias <code className="font-mono">{collection.name}</code>{" "}
-                will point to the new collection.
+                {isRename
+                  ? `All documents will be copied to "${watchedName}". Check the box to remove the original collection afterwards.`
+                  : `A new collection will be created and documents migrated. Check the box below to delete the original and create a Typesense alias pointing to the new collection.`}
               </p>
               <label className="flex items-center gap-2 cursor-pointer mt-1">
                 <input
@@ -305,7 +367,9 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
                   className="h-3.5 w-3.5 rounded border-border accent-primary"
                 />
                 <span className="text-xs text-amber-700 dark:text-amber-300">
-                  Delete original collection after migration
+                  {isRename
+                    ? "Delete original collection after rename"
+                    : "Delete original and create alias (required for alias to work)"}
                 </span>
               </label>
             </div>
@@ -314,6 +378,22 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="collectionName"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium w-24 shrink-0">Name</label>
+                    <FormControl>
+                      <Input className="font-mono" {...field} />
+                    </FormControl>
+                  </div>
+                  <FormMessage className="text-xs ml-28" />
+                </FormItem>
+              )}
+            />
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Fields</span>
@@ -497,9 +577,13 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated }: 
                   ? "Updating…"
                   : submitState.status === "migrating"
                     ? "Migrating…"
-                    : changeType === "modifying"
-                      ? "Migrate & Update"
-                      : "Update Schema"}
+                    : isRename && changeType === "modifying"
+                      ? "Rename & Migrate"
+                      : isRename
+                        ? "Rename Collection"
+                        : changeType === "modifying"
+                          ? "Migrate & Update"
+                          : "Update Schema"}
               </Button>
             </DialogFooter>
           </form>
