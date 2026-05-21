@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version,
   },
+  middlewareClientMaxBodySize: "100mb",
 };
 
 export default nextConfig;
