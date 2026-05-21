@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.19.2] - 2026-05-21
+
+### Bug Fixes
+
+- Increase request body size limit to 100mb for large document imports (`a998334`)
+
+### Other
+
+- Revert fallback to JSONL parsing for .json files with newline-delimited JSON (`3d3e6b0`)
+
 ## [1.19.1] - 2026-05-21
 
 ### Bug Fixes
