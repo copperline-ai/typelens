@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.7] - 2026-05-21
+
+### Bug Fixes
+- Suppress Radix DialogContent aria-describedby warnings for better accessibility compliance (`b04f991`)
+- Replace deprecated middlewareClientMaxBodySize with proxyClientMaxBodySize in config (`dec74f7`)
+
 ## [1.19.6] - 2026-05-21
 
 ### Bug Fixes
