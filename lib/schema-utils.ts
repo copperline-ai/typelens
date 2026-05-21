@@ -44,7 +44,9 @@ export function inferFieldsFromRecords(records: Record<string, unknown>[]): Infe
   const sample = records.slice(0, 100);
   const allKeys = new Set<string>();
   for (const record of records) {
-    for (const key of Object.keys(record)) allKeys.add(key);
+    for (const key of Object.keys(record)) {
+      if (key !== "id") allKeys.add(key);
+    }
   }
   return Array.from(allKeys).map((key) => {
     const rawValues = sample.map((r) => r[key]);

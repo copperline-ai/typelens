@@ -11,6 +11,7 @@ import {
   Download,
   Eraser,
   FileInput,
+  FileJson,
   Layers,
   Pencil,
   RefreshCw,
@@ -568,6 +569,24 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [truncating, setTruncating] = useState(false);
   const [truncateError, setTruncateError] = useState<string | null>(null);
 
+  function handleExportSchema() {
+    if (!collection) return;
+    const schema = {
+      name: collection.name,
+      fields: collection.fields,
+      ...(collection.default_sorting_field
+        ? { default_sorting_field: collection.default_sorting_field }
+        : {}),
+    };
+    const blob = new Blob([JSON.stringify(schema, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${collectionName}-schema.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleExport() {
     if (!activeProfile || !collection) return;
     setExporting(true);
@@ -682,6 +701,16 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 title="Refresh"
               >
                 <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleExportSchema}
+                disabled={!collection}
+                title="Export schema as JSON"
+              >
+                <FileJson className="h-4 w-4" />
               </Button>
 
               <Button
