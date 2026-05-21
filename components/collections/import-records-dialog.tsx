@@ -8,6 +8,7 @@ import {
   updateCollectionSchema,
   type Collection,
   type ImportAction,
+  type ImportProgress,
 } from "@/lib/typesense-client";
 import { inferFieldsFromRecords, diffSchemas, type SchemaDiff } from "@/lib/schema-utils";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
@@ -46,7 +47,7 @@ type FileState =
 type SubmitState =
   | { status: "idle" }
   | { status: "patching-schema" }
-  | { status: "importing"; total: number }
+  | { status: "importing"; imported: number; total: number }
   | { status: "done"; imported: number; failed: number; errorSamples: string[] }
   | { status: "error"; message: string };
 
@@ -163,13 +164,15 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
       }
     }
 
-    setSubmitState({ status: "importing", total: records.length });
+    setSubmitState({ status: "importing", imported: 0, total: records.length });
     try {
       const results = await importDocumentsWithOptions(
         activeProfile,
         collection.name,
         records,
         action,
+        ({ imported, total }: ImportProgress) =>
+          setSubmitState({ status: "importing", imported, total }),
       );
       const failedResults = results.filter((r) => !r.success);
       const errorSamples = [
@@ -390,7 +393,7 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
             {submitState.status === "patching-schema"
               ? "Updating schema…"
               : submitState.status === "importing"
-                ? `Importing ${submitState.total.toLocaleString()} records…`
+                ? `Importing ${submitState.imported.toLocaleString()} / ${submitState.total.toLocaleString()}…`
                 : "Import"}
           </Button>
         </DialogFooter>

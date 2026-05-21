@@ -159,13 +159,13 @@ export type ImportResult = { success: boolean; error?: string };
 
 export type ImportAction = "create" | "upsert" | "update" | "emplace";
 
-export async function importDocumentsWithOptions(
-  profile: Profile,
-  collectionName: string,
-  records: Record<string, unknown>[],
-  action: ImportAction = "upsert",
-): Promise<ImportResult[]> {
-  const jsonl = records
+export type ImportProgress = { imported: number; failed: number; total: number };
+
+const IMPORT_BATCH_SIZE = 500;
+const IMPORT_RETRY_DELAYS_MS = [1_000, 3_000, 5_000];
+
+function recordsToJsonl(records: Record<string, unknown>[]): string {
+  return records
     .map((r) => {
       const cleaned: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(r)) {
@@ -174,33 +174,90 @@ export async function importDocumentsWithOptions(
       return JSON.stringify(cleaned);
     })
     .join("\n");
+}
+
+async function importBatch(
+  profile: Profile,
+  collectionName: string,
+  records: Record<string, unknown>[],
+  action: ImportAction,
+): Promise<ImportResult[]> {
   const url = `/api/typesense/collections/${encodeURIComponent(collectionName)}/documents/import?action=${action}`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "X-Ts-Host": profile.host,
-      "X-Ts-Port": String(profile.port),
-      "X-Ts-Protocol": profile.protocol,
-      "X-Ts-Api-Key": profile.apiKey,
-      "Content-Type": "text/plain",
-    },
-    body: jsonl,
-    signal: AbortSignal.timeout(120_000),
-  });
-  const text = await res.text();
-  if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
-  return text
-    .split("\n")
-    .filter((line) => line.trim())
-    .map((line) => JSON.parse(line) as ImportResult);
+  const jsonl = recordsToJsonl(records);
+  const headers = {
+    "X-Ts-Host": profile.host,
+    "X-Ts-Port": String(profile.port),
+    "X-Ts-Protocol": profile.protocol,
+    "X-Ts-Api-Key": profile.apiKey,
+    "Content-Type": "text/plain",
+  };
+
+  for (let attempt = 0; attempt <= IMPORT_RETRY_DELAYS_MS.length; attempt++) {
+    if (attempt > 0) await sleep(IMPORT_RETRY_DELAYS_MS[attempt - 1]!);
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: jsonl,
+        signal: AbortSignal.timeout(30_000),
+      });
+    } catch {
+      if (attempt < IMPORT_RETRY_DELAYS_MS.length) continue;
+      throw new Error("Typesense connection timed out");
+    }
+
+    if (
+      (res.status === 502 || res.status === 503 || res.status === 504) &&
+      attempt < IMPORT_RETRY_DELAYS_MS.length
+    )
+      continue;
+
+    const text = await res.text();
+    if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
+    return text
+      .split("\n")
+      .filter((line) => line.trim())
+      .map((line) => JSON.parse(line) as ImportResult);
+  }
+
+  throw new Error("Import batch failed after retries");
+}
+
+export async function importDocumentsWithOptions(
+  profile: Profile,
+  collectionName: string,
+  records: Record<string, unknown>[],
+  action: ImportAction = "upsert",
+  onProgress?: (progress: ImportProgress) => void,
+): Promise<ImportResult[]> {
+  const total = records.length;
+  const allResults: ImportResult[] = [];
+  let imported = 0;
+  let failed = 0;
+
+  for (let offset = 0; offset < total; offset += IMPORT_BATCH_SIZE) {
+    const batch = records.slice(offset, offset + IMPORT_BATCH_SIZE);
+    const batchResults = await importBatch(profile, collectionName, batch, action);
+    allResults.push(...batchResults);
+
+    const batchFailed = batchResults.filter((r) => !r.success).length;
+    imported += batchResults.length - batchFailed;
+    failed += batchFailed;
+    onProgress?.({ imported, failed, total });
+  }
+
+  return allResults;
 }
 
 export async function importDocuments(
   profile: Profile,
   collectionName: string,
   records: Record<string, unknown>[],
+  onProgress?: (progress: ImportProgress) => void,
 ): Promise<ImportResult[]> {
-  return importDocumentsWithOptions(profile, collectionName, records, "create");
+  return importDocumentsWithOptions(profile, collectionName, records, "create", onProgress);
 }
 
 export async function exportDocuments(profile: Profile, collectionName: string): Promise<string> {

@@ -16,6 +16,7 @@ import {
   type Collection,
   type CollectionField,
   type SchemaFieldPatch,
+  type ImportProgress,
 } from "@/lib/typesense-client";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
@@ -269,9 +270,19 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated, on
       if (records.length > 0) {
         setSubmitState({
           status: "migrating",
-          step: `Importing ${records.length.toLocaleString()} documents…`,
+          step: `Importing 0 / ${records.length.toLocaleString()} documents…`,
         });
-        await importDocumentsWithOptions(activeProfile, newName, records, "upsert");
+        await importDocumentsWithOptions(
+          activeProfile,
+          newName,
+          records,
+          "upsert",
+          ({ imported, total }: ImportProgress) =>
+            setSubmitState({
+              status: "migrating",
+              step: `Importing ${imported.toLocaleString()} / ${total.toLocaleString()} documents…`,
+            }),
+        );
       }
 
       if (renaming) {

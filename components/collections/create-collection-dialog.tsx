@@ -6,7 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Papa from "papaparse";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { TYPESENSE_FIELD_TYPES, createCollection, importDocuments } from "@/lib/typesense-client";
+import {
+  TYPESENSE_FIELD_TYPES,
+  createCollection,
+  importDocuments,
+  type ImportProgress,
+} from "@/lib/typesense-client";
 import { inferFieldsFromRecords } from "@/lib/schema-utils";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
@@ -233,7 +238,7 @@ type Mode = "auto" | "manual" | "file";
 type SubmitState =
   | { status: "idle" }
   | { status: "creating" }
-  | { status: "importing"; total: number }
+  | { status: "importing"; imported: number; total: number }
   | { status: "error"; message: string };
 
 interface Props {
@@ -417,10 +422,16 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
     }
 
     if (importRecords && parsedRecords.length > 0) {
-      setSubmitState({ status: "importing", total: parsedRecords.length });
+      setSubmitState({ status: "importing", imported: 0, total: parsedRecords.length });
       let results;
       try {
-        results = await importDocuments(activeProfile, data.name, parsedRecords);
+        results = await importDocuments(
+          activeProfile,
+          data.name,
+          parsedRecords,
+          ({ imported, total }: ImportProgress) =>
+            setSubmitState({ status: "importing", imported, total }),
+        );
       } catch (err) {
         setSubmitState({
           status: "error",
@@ -612,7 +623,7 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                 {submitState.status === "creating"
                   ? "Creating…"
                   : submitState.status === "importing"
-                    ? `Importing ${submitState.total.toLocaleString()} records…`
+                    ? `Importing ${submitState.imported.toLocaleString()} / ${submitState.total.toLocaleString()}…`
                     : "Create Collection"}
               </Button>
             </DialogFooter>
