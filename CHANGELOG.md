@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.1] - 2026-05-21
+
+### Bug Fixes
+
+- Fix Docker multi-arch support for Apple Silicon (arm64) (`d521d70`)
+
 ## [1.18.0] - 2026-05-21
 
 ### Features
