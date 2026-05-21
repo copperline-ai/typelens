@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.4] - 2026-05-21
+
+### Other
+
+- Bump actions/checkout from v4 to v6 in CI configuration (`2b076a0`)
+
 ## [1.18.3] - 2026-05-21
 
 ### Bug Fixes
