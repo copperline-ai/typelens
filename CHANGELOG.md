@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.0] - 2026-05-21
+
+### Features
+
+- Support JSONL/NDJSON files in create-from-file mode in collections (`763b21f`)
+
 ## [1.18.5] - 2026-05-21
 
 ### Bug Fixes
