@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.3] - 2026-05-21
+
+### Bug Fixes
+- Correct body size limit configuration
+- Exclude id from schema diff
+- Add schema export (`9955d88`)
+
 ## [1.19.2] - 2026-05-21
 
 ### Bug Fixes
