@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth-session";
 
-const basicAuthEnabled = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
-const githubAuthEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
-const AUTH_ENABLED = basicAuthEnabled || githubAuthEnabled;
+const AUTH_ENABLED = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
 
-const PUBLIC_PATHS = [
-  "/login",
-  "/unauthorized",
-  "/api/auth/login",
-  "/api/auth/github",
-  "/api/auth/callback/github",
-  "/api/healthz",
-];
+const PUBLIC_PATHS = ["/login", "/unauthorized", "/api/auth/login", "/api/healthz"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));

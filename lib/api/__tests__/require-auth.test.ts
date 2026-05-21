@@ -24,27 +24,13 @@ describe("requireAuth", () => {
   });
 });
 
-describe("requireAuth — auth disabled when no provider configured", () => {
-  it("returns null (passes) when neither basic nor github is configured", async () => {
+describe("requireAuth — auth disabled when no credentials configured", () => {
+  it("returns null (passes) when AUTH_USERNAME and AUTH_PASSWORD are not set", async () => {
     vi.stubEnv("AUTH_USERNAME", "");
     vi.stubEnv("AUTH_PASSWORD", "");
-    vi.stubEnv("GITHUB_CLIENT_ID", "");
-    vi.stubEnv("GITHUB_CLIENT_SECRET", "");
     const req = new NextRequest("http://localhost/api/test");
     const result = await requireAuth(req);
     expect(result).toBeNull();
-    vi.unstubAllEnvs();
-  });
-
-  it("enforces auth when only GitHub is configured", async () => {
-    vi.stubEnv("AUTH_USERNAME", "");
-    vi.stubEnv("AUTH_PASSWORD", "");
-    vi.stubEnv("GITHUB_CLIENT_ID", "gh-client");
-    vi.stubEnv("GITHUB_CLIENT_SECRET", "gh-secret");
-    const req = new NextRequest("http://localhost/api/test");
-    const result = await requireAuth(req);
-    expect(result).not.toBeNull();
-    expect(result!.status).toBe(401);
     vi.unstubAllEnvs();
   });
 });

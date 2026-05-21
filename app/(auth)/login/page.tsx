@@ -4,7 +4,6 @@ import LoginForm from "./login-form";
 
 export default function LoginPage() {
   const basicEnabled = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
-  const githubEnabled = !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
 
   return (
     <Card className="w-full max-w-sm">
@@ -14,7 +13,7 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <Suspense>
-          <LoginForm basicEnabled={basicEnabled} githubEnabled={githubEnabled} />
+          <LoginForm basicEnabled={basicEnabled} />
         </Suspense>
       </CardContent>
     </Card>
