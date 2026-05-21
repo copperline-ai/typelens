@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.3] - 2026-05-21
+
+### Bug Fixes
+
+- Drop GitHub OAuth and restore plain user/password authentication (`2b18c39`)
+
 ## [1.18.2] - 2026-05-21
 
 ### Bug Fixes
