@@ -284,7 +284,18 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
       const text = ev.target?.result as string;
       let records: Record<string, unknown>[] = [];
 
-      if (file.name.endsWith(".json")) {
+      if (file.name.endsWith(".jsonl") || file.name.endsWith(".ndjson")) {
+        try {
+          records = text
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => JSON.parse(line) as Record<string, unknown>);
+        } catch {
+          setSubmitState({ status: "error", message: "Failed to parse JSONL file." });
+          return;
+        }
+      } else if (file.name.endsWith(".json")) {
         try {
           const parsed = JSON.parse(text);
           if (Array.isArray(parsed)) {
@@ -320,7 +331,8 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
       const inferredNames = new Set(inferred.map((f) => f.name));
       form.reset({
         name:
-          currentName || file.name.replace(/\.(json|csv)$/i, "").replace(/[^a-zA-Z0-9_-]/g, "_"),
+          currentName ||
+          file.name.replace(/\.(jsonl|ndjson|json|csv)$/i, "").replace(/[^a-zA-Z0-9_-]/g, "_"),
         default_sorting_field: currentSort && inferredNames.has(currentSort) ? currentSort : "",
         fields: inferred,
       });
@@ -510,7 +522,8 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                 <div>
                   <label className="text-sm font-medium">Upload File</label>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    JSON or CSV — field names and types will be inferred from the data
+                    JSON, JSONL, NDJSON, or CSV — field names and types will be inferred from the
+                    data
                   </p>
                 </div>
                 <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
@@ -518,12 +531,12 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                   <span className="text-sm text-muted-foreground">
                     {fileInfo
                       ? `${fileInfo.name} — ${fileInfo.count.toLocaleString()} records`
-                      : "Click to choose a .json or .csv file"}
+                      : "Click to choose a .json, .jsonl, .ndjson, or .csv file"}
                   </span>
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".json,.csv"
+                    accept=".json,.jsonl,.ndjson,.csv"
                     className="hidden"
                     onChange={handleFileChange}
                   />
