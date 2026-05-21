@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import LoginForm from "./login-form";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   const basicEnabled = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
 
