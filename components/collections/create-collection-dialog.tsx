@@ -304,17 +304,8 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
             records = [parsed as Record<string, unknown>];
           }
         } catch {
-          // fall back to JSONL in case the file contains newline-delimited JSON
-          try {
-            records = text
-              .split("\n")
-              .map((line) => line.trim())
-              .filter(Boolean)
-              .map((line) => JSON.parse(line) as Record<string, unknown>);
-          } catch {
-            setSubmitState({ status: "error", message: "Failed to parse JSON file." });
-            return;
-          }
+          setSubmitState({ status: "error", message: "Failed to parse JSON file." });
+          return;
         }
       } else {
         const result = Papa.parse<Record<string, unknown>>(text, {
