@@ -300,6 +300,46 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
           const parsed = JSON.parse(text);
           if (Array.isArray(parsed)) {
             records = parsed as Record<string, unknown>[];
+          } else if (
+            typeof parsed === "object" &&
+            parsed !== null &&
+            Array.isArray((parsed as Record<string, unknown>).fields) &&
+            ((parsed as Record<string, unknown>).fields as unknown[]).length > 0 &&
+            typeof ((parsed as Record<string, unknown>).fields as Record<string, unknown>[])[0]
+              ?.name === "string" &&
+            typeof ((parsed as Record<string, unknown>).fields as Record<string, unknown>[])[0]
+              ?.type === "string"
+          ) {
+            // Schema definition file — load directly into the form
+            const schema = parsed as {
+              name?: string;
+              fields: {
+                name: string;
+                type: string;
+                facet?: boolean;
+                optional?: boolean;
+                index?: boolean;
+              }[];
+              default_sorting_field?: string;
+            };
+            const currentName = form.getValues("name");
+            form.reset({
+              name: currentName || schema.name || "",
+              default_sorting_field: schema.default_sorting_field ?? "",
+              fields: schema.fields.map((f) => ({
+                name: f.name,
+                type: (TYPESENSE_FIELD_TYPES as readonly string[]).includes(f.type)
+                  ? (f.type as (typeof TYPESENSE_FIELD_TYPES)[number])
+                  : "string",
+                facet: f.facet ?? false,
+                optional: f.optional ?? false,
+                index: f.index ?? true,
+              })),
+            });
+            setMode("manual");
+            setSubmitState({ status: "idle" });
+            setFileInfo({ name: file.name, count: 0 });
+            return;
           } else if (typeof parsed === "object" && parsed !== null) {
             records = [parsed as Record<string, unknown>];
           }
@@ -522,15 +562,17 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                 <div>
                   <label className="text-sm font-medium">Upload File</label>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    JSON, JSONL, NDJSON, or CSV — field names and types will be inferred from the
-                    data
+                    Schema JSON, data JSON/JSONL/NDJSON, or CSV — schema files are loaded directly;
+                    data files have fields inferred from records
                   </p>
                 </div>
                 <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
                   <Upload className="h-6 w-6 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
                     {fileInfo
-                      ? `${fileInfo.name} — ${fileInfo.count.toLocaleString()} records`
+                      ? fileInfo.count > 0
+                        ? `${fileInfo.name} — ${fileInfo.count.toLocaleString()} records`
+                        : `${fileInfo.name} — schema loaded`
                       : "Click to choose a .json, .jsonl, .ndjson, or .csv file"}
                   </span>
                   <input
@@ -542,7 +584,7 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
                   />
                 </label>
 
-                {fileInfo && (
+                {fileInfo && fileInfo.count > 0 && (
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
                       type="checkbox"
