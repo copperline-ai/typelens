@@ -40,7 +40,7 @@ export function ReleaseNotesModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl flex flex-col max-h-[80vh]">
+      <DialogContent className="max-w-2xl flex flex-col max-h-[80vh]" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Release Notes</DialogTitle>
         </DialogHeader>

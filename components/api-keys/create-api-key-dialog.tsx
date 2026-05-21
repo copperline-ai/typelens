@@ -180,7 +180,7 @@ export function CreateApiKeyDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" aria-describedby={undefined}>
         {phase === "form" ? (
           <>
             <DialogHeader>

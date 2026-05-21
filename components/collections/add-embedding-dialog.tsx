@@ -199,7 +199,10 @@ export function AddEmbeddingDialog({ collection, open, onOpenChange, onAdded }: 
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-lg max-h-[90vh] overflow-y-auto"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>Add Embedding Field</DialogTitle>
         </DialogHeader>
