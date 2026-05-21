@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.6] - 2026-05-21
+
+### Bug Fixes
+
+- Fix import process to batch documents in 500-record chunks with per-batch retry and progress tracking (`fb8b4ef`)
+
 ## [1.19.5] - 2026-05-21
 
 ### Bug Fixes
