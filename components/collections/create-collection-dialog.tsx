@@ -6,12 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Papa from "papaparse";
 import { Plus, Trash2, Upload } from "lucide-react";
-import {
-  TYPESENSE_FIELD_TYPES,
-  createCollection,
-  importDocuments,
-  type TypesenseFieldType,
-} from "@/lib/typesense-client";
+import { TYPESENSE_FIELD_TYPES, createCollection, importDocuments } from "@/lib/typesense-client";
+import { inferFieldsFromRecords } from "@/lib/schema-utils";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,66 +57,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-// ── Type inference ────────────────────────────────────────────────────────────
-
-function inferType(rawValues: unknown[]): TypesenseFieldType {
-  const nonEmpty = rawValues.filter((v) => v !== null && v !== undefined && v !== "");
-
-  if (nonEmpty.length === 0) return "string";
-
-  // Detect array fields — use the element type with [] suffix
-  const arrays = nonEmpty.filter(Array.isArray);
-  if (arrays.length > 0) {
-    const flat = arrays.flat() as unknown[];
-    const nonEmptyFlat = flat.filter((v) => v !== null && v !== undefined && v !== "");
-    if (nonEmptyFlat.length === 0) return "string[]";
-    if (nonEmptyFlat.every((v) => typeof v === "boolean")) return "bool[]";
-    if (nonEmptyFlat.every((v) => typeof v === "number")) {
-      return nonEmptyFlat.every((v) => Number.isInteger(v)) ? "int64[]" : "float[]";
-    }
-    return "string[]";
-  }
-
-  if (nonEmpty.every((v) => typeof v === "boolean")) return "bool";
-  if (nonEmpty.every((v) => typeof v === "number")) {
-    return nonEmpty.every((v) => Number.isInteger(v as number)) ? "int64" : "float";
-  }
-
-  // String values — check for bool-like strings, then numeric strings
-  const strings = nonEmpty.map((v) => String(v));
-  if (strings.every((v) => v.toLowerCase() === "true" || v.toLowerCase() === "false"))
-    return "bool";
-  if (strings.every((v) => !Number.isNaN(Number(v)) && v.trim() !== "")) {
-    return strings.every((v) => Number.isInteger(Number(v))) ? "int64" : "float";
-  }
-
-  return "string";
-}
-
-function inferFieldsFromRecords(records: Record<string, unknown>[]): FormValues["fields"] {
-  if (records.length === 0) return [];
-  const sample = records.slice(0, 100);
-
-  // Discover all keys across every record so fields that appear only later are included
-  const allKeys = new Set<string>();
-  for (const record of records) {
-    for (const key of Object.keys(record)) allKeys.add(key);
-  }
-
-  return Array.from(allKeys).map((key) => {
-    const rawValues = sample.map((r) => r[key]);
-    // Check optionality across all records, not just the sample
-    const hasEmpty = records.some((r) => r[key] === null || r[key] === undefined || r[key] === "");
-    return {
-      name: key,
-      type: inferType(rawValues),
-      facet: false,
-      optional: hasEmpty,
-      index: true,
-    };
-  });
-}
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 

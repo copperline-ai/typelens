@@ -12,7 +12,22 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
 
   const { name } = await params;
-  return proxyToTypesense(profile, `/collections/${encodeURIComponent(name)}`);
+  return proxyToTypesense(profile, `/aliases/${encodeURIComponent(name)}`);
+}
+
+export async function PUT(request: NextRequest, { params }: Params) {
+  const authError = await requireAuth(request);
+  if (authError) return authError;
+
+  const profile = extractProfile(request);
+  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
+
+  const { name } = await params;
+  const body = await request.text();
+  return proxyToTypesense(profile, `/aliases/${encodeURIComponent(name)}`, undefined, {
+    method: "PUT",
+    body,
+  });
 }
 
 export async function DELETE(request: NextRequest, { params }: Params) {
@@ -23,22 +38,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
 
   const { name } = await params;
-  return proxyToTypesense(profile, `/collections/${encodeURIComponent(name)}`, undefined, {
+  return proxyToTypesense(profile, `/aliases/${encodeURIComponent(name)}`, undefined, {
     method: "DELETE",
-  });
-}
-
-export async function PATCH(request: NextRequest, { params }: Params) {
-  const authError = await requireAuth(request);
-  if (authError) return authError;
-
-  const profile = extractProfile(request);
-  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
-
-  const { name } = await params;
-  const body = await request.text();
-  return proxyToTypesense(profile, `/collections/${encodeURIComponent(name)}`, undefined, {
-    method: "PATCH",
-    body,
   });
 }
