@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.4] - 2026-05-21
+
+### Bug Fixes
+
+- Fix recognition of schema JSON in create-from-file mode in collections (`de6a919`)
+
 ## [1.19.3] - 2026-05-21
 
 ### Bug Fixes
