@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.5] - 2026-05-21
+
+### Bug Fixes
+
+- fix(docker): disable provenance attestation to remove unknown/unknown manifest entry (`576119e`)
+
 ## [1.19.4] - 2026-05-21
 
 ### Bug Fixes
