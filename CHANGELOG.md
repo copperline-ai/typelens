@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.5] - 2026-05-21
+
+### Bug Fixes
+
+- Force dynamic rendering on login page to ensure environment variables are read at runtime (`9e599bc`)
+
 ## [1.18.4] - 2026-05-21
 
 ### Other
