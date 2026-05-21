@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.2] - 2026-05-21
+
+### Bug Fixes
+
+- Fix `AUTH_ENABLED` in `proxy.ts` to cover GitHub OAuth provider (`06ce7b0`)
+
 ## [1.18.1] - 2026-05-21
 
 ### Bug Fixes
