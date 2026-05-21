@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.1] - 2026-05-21
+
+### Bug Fixes
+
+- Fix fallback to JSONL parsing when `.json` file contains newline-delimited JSON (`f7e2292`)
+
 ## [1.19.0] - 2026-05-21
 
 ### Features
