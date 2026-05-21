@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.18.0] - 2026-05-21
+
+### Features
+- Add PATCH schema, truncate documents, and alias CRUD routes (`fed08cb`)
+- Add updateCollectionSchema, truncateDocuments, alias operations, and importDocumentsWithOptions to client (`413980d`)
+- Add EditSchemaDialog with direct PATCH and alias migration support (`5eb103e`)
+- Add ImportRecordsDialog with schema diffing and JSON/JSONL/CSV support (`8b6b427`)
+- Add AddEmbeddingDialog for auto-embed and manual vector field configuration (`28f9bb7`)
+- Wire up EditSchema, ImportRecords, AddEmbedding, and Truncate on collection details page (`44bd0ef`)
+- Add collection rename support and import error surfacing (`d7c7c9f`)
+
+### Bug Fixes
+- Correct diffSchemas compatible/conflict overlap and type safety (`bc5e208`)
+- Remove dead rename logic, guard default_sorting_field, fix form reset and empty-fields validation (`5403070`)
+
+### Other
+- Refactor: extract inferType/inferFieldsFromRecords to lib/schema-utils, add diffSchemas (`3e5b228`)
+- Refactor: deduplicate importDocuments via delegation, tighten SchemaFieldPatch type (`4684d56`)
+- Add missing tests for aliases list, document truncate, and alias GET routes (`a9c511e`)
+
 ## [1.17.1] - 2026-05-20
 
 ### Bug Fixes
