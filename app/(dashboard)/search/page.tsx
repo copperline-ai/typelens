@@ -755,15 +755,16 @@ function SearchPageContent() {
                   root: "w-full",
                   form: "relative flex items-center",
                   input: cn(
-                    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm",
+                    "flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-9 py-2 text-sm",
                     "ring-offset-background placeholder:text-muted-foreground",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     "[&::-webkit-search-cancel-button]:hidden",
                   ),
-                  submit: "hidden",
+                  submit:
+                    "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/50",
                   reset:
                     "absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors",
-                  submitIcon: "hidden",
+                  submitIcon: "h-4 w-4 fill-current",
                   resetIcon: "h-3.5 w-3.5 fill-current",
                 }}
               />
