@@ -254,7 +254,7 @@ function HitCard({ hit }: { hit: Record<string, unknown> }) {
     <div className="rounded-md border bg-card divide-y hover:bg-muted/10 transition-colors min-w-0">
       {ordered.map(([key, value]) => (
         <div key={key} className="flex items-start gap-3 px-3 py-2 min-w-0">
-          <span className="text-xs font-mono text-muted-foreground shrink-0 w-36 truncate pt-px">
+          <span className="text-xs font-mono text-muted-foreground shrink-0 w-20 sm:w-36 truncate pt-px">
             {key}
           </span>
           <div className="flex-1 min-w-0 pt-px flex items-start gap-1.5">
@@ -634,6 +634,7 @@ function SearchPageContent() {
 
   const [searchMode, setSearchMode] = useState<SearchMode>("auto");
   const [customQueryFields, setCustomQueryFields] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const activeCollection = collections.find((c) => c.name === selectedCollection) ?? null;
 
@@ -660,10 +661,28 @@ function SearchPageContent() {
 
   const adapter = useMemo(() => {
     if (!profile || !selectedCollection || !queryBy) return null;
+    if (typeof window === "undefined") return null;
+
+    const proxyPort =
+      Number(window.location.port) || (window.location.protocol === "https:" ? 443 : 80);
+
     return new TypesenseInstantSearchAdapter({
       server: {
         apiKey: profile.apiKey,
-        nodes: [{ host: profile.host, port: profile.port, protocol: profile.protocol }],
+        nodes: [
+          {
+            host: window.location.hostname,
+            port: proxyPort,
+            protocol: window.location.protocol.replace(":", "") as "http" | "https",
+            path: "/api/typesense",
+          },
+        ],
+        additionalHeaders: {
+          "X-Ts-Host": profile.host,
+          "X-Ts-Port": String(profile.port),
+          "X-Ts-Protocol": profile.protocol,
+          "X-Ts-Api-Key": profile.apiKey,
+        },
       },
       additionalSearchParameters: { query_by: queryBy },
     });
@@ -687,14 +706,14 @@ function SearchPageContent() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-6">
-      <div className="flex items-center gap-4">
+    <div className="flex h-full flex-col gap-4 p-4 sm:p-6">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
         {loading ? (
-          <div className="h-10 w-52 animate-pulse rounded-md border bg-muted" />
+          <div className="h-10 w-48 animate-pulse rounded-md border bg-muted" />
         ) : (
           <Select value={selectedCollection} onValueChange={setSelectedCollection}>
-            <SelectTrigger className="w-72">
+            <SelectTrigger className="w-full sm:w-72">
               <SelectValue placeholder="Select a collection…" />
             </SelectTrigger>
             <SelectContent>
@@ -707,7 +726,7 @@ function SearchPageContent() {
           </Select>
         )}
         {selectedCollection && activeCollection && (
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <SearchFieldsPopover
               fields={activeCollection.fields}
               searchMode={searchMode}
@@ -731,7 +750,7 @@ function SearchPageContent() {
                 </SelectContent>
               </Select>
             </div>
-          </>
+          </div>
         )}
       </div>
 
@@ -769,15 +788,32 @@ function SearchPageContent() {
                 }}
               />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Stats classNames={{ root: "text-xs text-muted-foreground" }} />
+              {facetFields.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setFiltersOpen((o) => !o)}
+                  className="flex sm:hidden items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+                >
+                  <SlidersHorizontal className="h-3 w-3 shrink-0" />
+                  Filters
+                  {filtersOpen ? <X className="h-3 w-3" /> : null}
+                </button>
+              )}
               <div className="flex-1" />
               <ShortcutsHelp />
               <ExportButton collectionName={selectedCollection} queryBy={queryBy} />
             </div>
-            <div className="flex min-h-0 flex-1 gap-6 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col sm:flex-row gap-4 sm:gap-6 overflow-hidden">
               {facetFields.length > 0 && (
-                <aside className="w-44 shrink-0 space-y-5">
+                <aside
+                  className={cn(
+                    "shrink-0 space-y-5",
+                    "sm:w-44 sm:block",
+                    filtersOpen ? "block" : "hidden sm:block",
+                  )}
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       Filters
