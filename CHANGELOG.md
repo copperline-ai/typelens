@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.0] - 2026-05-22
+
+### Features
+
+- Enhance mobile layout and fix network error via proxy in search feature (COP-473) (`aeef90a`)
+
 ## [1.20.1] - 2026-05-22
 
 ### Bug Fixes
