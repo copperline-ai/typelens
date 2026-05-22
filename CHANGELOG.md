@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.20.1] - 2026-05-22
+
+### Bug Fixes
+
+- Restore decorative search icon left-aligned in input (`e54bea7`)
+
 ## [1.20.0] - 2026-05-22
 
 ### Features
