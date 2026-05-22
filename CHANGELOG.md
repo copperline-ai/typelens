@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.20.0] - 2026-05-22
+
+### Features
+
+- Full InstantSearch UI with Typesense adapter (`51c0414`)
+
 ## [1.19.7] - 2026-05-21
 
 ### Bug Fixes
