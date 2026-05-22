@@ -10,6 +10,7 @@ import {
   Moon,
   Monitor,
   PanelLeftClose,
+  Search,
   Settings,
   Sun,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { useAppVersion } from "@/lib/hooks/use-app-version";
 import { ReleaseNotesModal } from "@/components/release-notes-modal";
 
 const navItems = [
+  { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
   { href: "/api-keys", label: "API Keys", icon: Key },
   { href: "/settings/connection", label: "Connections", icon: Cable },

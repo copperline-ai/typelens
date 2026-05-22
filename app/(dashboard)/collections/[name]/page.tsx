@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Check,
   ChevronRight,
   Copy,
   Download,
@@ -47,6 +46,7 @@ import { EditSchemaDialog } from "@/components/collections/edit-schema-dialog";
 import { ImportRecordsDialog } from "@/components/collections/import-records-dialog";
 import { AddEmbeddingDialog } from "@/components/collections/add-embedding-dialog";
 import { cn } from "@/lib/utils";
+import { CopyButton, FieldValue } from "@/components/field-value";
 
 const fmt = new Intl.NumberFormat();
 
@@ -134,152 +134,6 @@ function FieldsTable({ fields }: { fields: Collection["fields"] }) {
 
 // ── DocumentCard ─────────────────────────────────────────────────────────────
 
-function isUrl(s: string) {
-  try {
-    const url = new URL(s);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function parseDate(s: string): Date | null {
-  // Unix timestamp (10 or 13 digit number-string)
-  if (/^\d{10}$/.test(s)) return new Date(parseInt(s, 10) * 1000);
-  if (/^\d{13}$/.test(s)) return new Date(parseInt(s, 10));
-  // ISO 8601 / RFC 3339
-  if (/^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/.test(s)) {
-    const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d;
-  }
-  return null;
-}
-
-function parseNumericDate(n: number): Date | null {
-  if (!Number.isInteger(n) || n <= 0) return null;
-  const s = String(n);
-  if (s.length === 10) {
-    const d = new Date(n * 1000);
-    const y = d.getFullYear();
-    return y >= 2001 && y <= 2100 ? d : null;
-  }
-  if (s.length === 13) {
-    const d = new Date(n);
-    const y = d.getFullYear();
-    return y >= 2001 && y <= 2100 ? d : null;
-  }
-  return null;
-}
-
-function FieldValue({ value }: { value: unknown }) {
-  const [showRaw, setShowRaw] = useState(false);
-
-  if (value === null || value === undefined) {
-    return <span className="text-xs text-muted-foreground italic">null</span>;
-  }
-  if (typeof value === "boolean") {
-    return (
-      <Badge variant={value ? "default" : "outline"} className="text-xs">
-        {String(value)}
-      </Badge>
-    );
-  }
-  if (typeof value === "number") {
-    const parsed = parseNumericDate(value);
-    if (parsed) {
-      return (
-        <button
-          type="button"
-          onClick={() => setShowRaw((r) => !r)}
-          className="text-xs font-mono text-violet-600 dark:text-violet-400 hover:opacity-70 transition-opacity cursor-pointer text-left"
-          title={showRaw ? "Click to show parsed date" : "Click to show raw value"}
-        >
-          {showRaw ? String(value) : parsed.toLocaleString()}
-        </button>
-      );
-    }
-    return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
-  }
-  if (typeof value === "string") {
-    if (isUrl(value)) {
-      const display = value.length > 80 ? value.slice(0, 80) + "…" : value;
-      return (
-        <a
-          href={value}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs font-mono text-blue-600 dark:text-blue-400 underline underline-offset-2 break-all hover:opacity-80"
-          title={value}
-        >
-          {display}
-        </a>
-      );
-    }
-    const parsed = parseDate(value);
-    if (parsed) {
-      return (
-        <button
-          type="button"
-          onClick={() => setShowRaw((r) => !r)}
-          className="text-xs font-mono text-violet-600 dark:text-violet-400 hover:opacity-70 transition-opacity cursor-pointer text-left"
-          title={showRaw ? "Click to show parsed date" : "Click to show raw value"}
-        >
-          {showRaw ? value : parsed.toLocaleString()}
-        </button>
-      );
-    }
-    const display = value.length > 120 ? value.slice(0, 120) + "…" : value;
-    return (
-      <span className="text-xs font-mono break-all" title={value.length > 120 ? value : undefined}>
-        {display}
-      </span>
-    );
-  }
-  if (Array.isArray(value)) {
-    if (value.length === 0)
-      return <span className="text-xs text-muted-foreground italic">[ ]</span>;
-    if (value.every((v) => typeof v === "string" || typeof v === "number")) {
-      return (
-        <div className="flex flex-wrap gap-1">
-          {(value as (string | number)[]).slice(0, 8).map((v, i) => (
-            <Badge key={i} variant="secondary" className="text-xs font-mono">
-              {String(v)}
-            </Badge>
-          ))}
-          {value.length > 8 && (
-            <span className="text-xs text-muted-foreground">+{value.length - 8} more</span>
-          )}
-        </div>
-      );
-    }
-    return <span className="text-xs text-muted-foreground italic">[{value.length} items]</span>;
-  }
-  if (typeof value === "object") {
-    return <span className="text-xs text-muted-foreground italic">{"{ … }"}</span>;
-  }
-  return <span className="text-xs font-mono">{String(value)}</span>;
-}
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  function copy(e: React.MouseEvent) {
-    e.stopPropagation();
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  }
-  return (
-    <button
-      onClick={copy}
-      className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
-      title="Copy ID"
-    >
-      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-    </button>
-  );
-}
-
 function DocumentCard({
   hit,
   fields,
@@ -308,9 +162,9 @@ function DocumentCard({
   ];
 
   const docId = doc["id"] as string | undefined;
-  const bodyFields = ordered.filter(([k]) => k !== "id");
 
-  const previewSnippet = bodyFields
+  const previewSnippet = ordered
+    .filter(([k]) => k !== "id")
     .map(([, v]) => v)
     .find((v): v is string => typeof v === "string" && v.length > 0);
 
@@ -379,18 +233,7 @@ function DocumentCard({
       </button>
       {expanded && (
         <div className="border-t divide-y">
-          {docId && (
-            <div className="flex items-center gap-3 px-4 py-2 hover:bg-muted/20 transition-colors">
-              <div className="w-36 shrink-0">
-                <span className="text-xs font-mono text-muted-foreground">id</span>
-              </div>
-              <div className="flex flex-1 min-w-0 items-center gap-1.5">
-                <span className="text-xs font-mono break-all">{docId}</span>
-                <CopyButton text={docId} />
-              </div>
-            </div>
-          )}
-          {bodyFields.map(([key, value]) => {
+          {ordered.map(([key, value]) => {
             const fieldDef = fieldMap.get(key);
             return (
               <div
@@ -405,8 +248,9 @@ function DocumentCard({
                     </span>
                   )}
                 </div>
-                <div className="flex-1 min-w-0 pt-px">
+                <div className="flex-1 min-w-0 pt-px flex items-start gap-1.5">
                   <FieldValue value={value} />
+                  {key === "id" && typeof value === "string" && <CopyButton text={value} />}
                 </div>
               </div>
             );
