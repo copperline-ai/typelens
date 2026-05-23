@@ -440,15 +440,20 @@ function KeyboardShortcuts({
 }) {
   const { refine: refineQuery } = useSearchBox();
   const { currentRefinement, nbPages, refine: refinePage } = usePagination();
+  const isMobile = useIsMobile();
 
   const queryRef = useRef(refineQuery);
   const pageRef = useRef({ current: currentRefinement, total: nbPages, refine: refinePage });
+  const isMobileRef = useRef(isMobile);
   useEffect(() => {
     queryRef.current = refineQuery;
   }, [refineQuery]);
   useEffect(() => {
     pageRef.current = { current: currentRefinement, total: nbPages, refine: refinePage };
   }, [currentRefinement, nbPages, refinePage]);
+  useEffect(() => {
+    isMobileRef.current = isMobile;
+  }, [isMobile]);
 
   useEffect(() => {
     function getInput() {
@@ -495,7 +500,40 @@ function KeyboardShortcuts({
       }
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    function onTouchStart(e: TouchEvent) {
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      if (!isMobileRef.current) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+      if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return;
+      if (dx < 0) {
+        if (pageRef.current.current < pageRef.current.total - 1)
+          pageRef.current.refine(pageRef.current.current + 1);
+      } else {
+        if (pageRef.current.current > 0) pageRef.current.refine(pageRef.current.current - 1);
+      }
+    }
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
