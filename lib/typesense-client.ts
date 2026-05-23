@@ -333,6 +333,19 @@ export function deleteAlias(profile: Profile, aliasName: string) {
   );
 }
 
+export function getDocument(
+  profile: Profile,
+  collectionName: string,
+  documentId: string,
+): Promise<Record<string, unknown>> {
+  return typesenseFetch<Record<string, unknown>>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(documentId)}`,
+    undefined,
+    { method: "GET" },
+  );
+}
+
 export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {
   return typesenseFetch<Record<string, unknown>>(
     profile,
