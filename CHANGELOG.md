@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.22.0] - 2026-05-23
+
+### Features
+
+- Add mobile drawer for export panel in search (COP-475) (`f4a3ca8`)
+
 ## [1.21.1] - 2026-05-23
 
 ### Bug Fixes
