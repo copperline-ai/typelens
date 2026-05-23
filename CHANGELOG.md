@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.0] - 2026-05-23
+
+### Features
+
+- Add document view page (COP-476) (`bbb4b0c`)
+
 ## [1.22.0] - 2026-05-23
 
 ### Features
