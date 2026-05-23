@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.1] - 2026-05-23
+
+### Bug Fixes
+
+- Add missing API route for individual document GET/DELETE (`8c1410e`) (COP-477)
+
 ## [1.23.0] - 2026-05-23
 
 ### Features
