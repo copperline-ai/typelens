@@ -66,7 +66,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
   return (
     <header className="flex h-14 items-center border-b bg-background px-4 gap-3">
       <div className="flex md:hidden items-center gap-3">
-        <Link href="/collections" className="flex items-center gap-2">
+        <Link href="/search" className="flex items-center gap-2">
           <span
             className="text-xl font-semibold leading-none tracking-tight"
             style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
