@@ -154,6 +154,7 @@ export function FieldValue({ value }: { value: unknown }) {
             open={lightboxOpen}
             close={() => setLightboxOpen(false)}
             slides={[{ src: value }]}
+            controller={{ closeOnPullDown: true }}
           />
         </>
       );
