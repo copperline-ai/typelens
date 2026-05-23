@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.1] - 2026-05-23
+
+### Bug Fixes
+
+- Make filters scrollable on mobile in search (`4f3e6e0`)
+
 ## [1.21.0] - 2026-05-22
 
 ### Features
