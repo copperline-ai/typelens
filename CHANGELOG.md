@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.26.0] - 2026-05-23
+
+### Features
+
+- Move record navigation buttons to toolbar with horizontal layout in search (COP-481) (`f6c0fa7`)
+
 ## [1.25.0] - 2026-05-23
 
 ### Features
