@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.2] - 2026-05-23
+
+### Bug Fixes
+
+- Remove breadcrumb navigation from document view page (COP-479) (`92b3dd5`)
+
 ## [1.23.1] - 2026-05-23
 
 ### Bug Fixes
