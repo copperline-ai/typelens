@@ -34,8 +34,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { CopyButton, FieldValue } from "@/components/field-value";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 function getQueryBy(fields: CollectionField[]): string {
   const stringFields = fields.filter((f) => f.type === "string" || f.type === "string[]");
@@ -294,6 +302,7 @@ function buildFilterBy(refinementList: Record<string, string[]> | undefined): st
 function ExportButton({ collectionName, queryBy }: { collectionName: string; queryBy: string }) {
   const profile = useConnectionStore(selectActiveProfile);
   const { indexUiState } = useInstantSearch();
+  const isMobile = useIsMobile();
 
   if (!profile) return null;
 
@@ -328,57 +337,77 @@ const results = await client
     query_by: '${queryBy}',${filterLine}${pageLine}
   });`;
 
+  const trigger = (
+    <button
+      type="button"
+      className="flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+      title="Export search as cURL / SDK"
+    >
+      <Code2 className="h-3.5 w-3.5 shrink-0" />
+      <span>Export</span>
+    </button>
+  );
+
+  const exportContent = (
+    <div className="space-y-5">
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            cURL
+          </p>
+          <CopyButton text={curlCmd} label="Copy cURL" />
+        </div>
+        <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-md bg-muted/50 p-3 text-xs font-mono">
+          {curlCmd}
+        </pre>
+      </div>
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            JavaScript — Typesense SDK
+          </p>
+          <CopyButton text={jsCode} label="Copy JS" />
+        </div>
+        <pre className="overflow-x-auto whitespace-pre rounded-md bg-muted/50 p-3 text-xs font-mono">
+          {jsCode}
+        </pre>
+      </div>
+      <div className="rounded-md border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+        Want to build your own InstantSearch UI?{" "}
+        <a
+          href="https://typesense.org/docs/guide/search-ui-components.html#with-a-package-manager"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2 hover:opacity-80"
+        >
+          Learn more →
+        </a>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer>
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Export search query</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-y-auto px-4 pb-6">{exportContent}</div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
-          title="Export search as cURL / SDK"
-        >
-          <Code2 className="h-3.5 w-3.5 shrink-0" />
-          <span>Export</span>
-        </button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Export search query</DialogTitle>
         </DialogHeader>
-        <div className="space-y-5">
-          <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                cURL
-              </p>
-              <CopyButton text={curlCmd} label="Copy cURL" />
-            </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-md bg-muted/50 p-3 text-xs font-mono">
-              {curlCmd}
-            </pre>
-          </div>
-          <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                JavaScript — Typesense SDK
-              </p>
-              <CopyButton text={jsCode} label="Copy JS" />
-            </div>
-            <pre className="overflow-x-auto whitespace-pre rounded-md bg-muted/50 p-3 text-xs font-mono">
-              {jsCode}
-            </pre>
-          </div>
-          <div className="rounded-md border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-            Want to build your own InstantSearch UI?{" "}
-            <a
-              href="https://typesense.org/docs/guide/search-ui-components.html#with-a-package-manager"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline underline-offset-2 hover:opacity-80"
-            >
-              Learn more →
-            </a>
-          </div>
-        </div>
+        {exportContent}
       </DialogContent>
     </Dialog>
   );
