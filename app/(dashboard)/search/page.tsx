@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Configure,
@@ -243,7 +244,13 @@ function SearchFieldsPopover({
   );
 }
 
-function HitCard({ hit }: { hit: Record<string, unknown> }) {
+function HitCard({
+  hit,
+  collectionName,
+}: {
+  hit: Record<string, unknown>;
+  collectionName: string;
+}) {
   const raw = Object.entries(hit).filter(([k]) => !k.startsWith("__") && k !== "objectID");
   const ordered: [string, unknown][] = [
     ...raw.filter(([k]) => k === "id"),
@@ -258,7 +265,16 @@ function HitCard({ hit }: { hit: Record<string, unknown> }) {
             {key}
           </span>
           <div className="flex-1 min-w-0 pt-px flex items-start gap-1.5">
-            <FieldValue value={value} />
+            {key === "id" && typeof value === "string" && collectionName ? (
+              <Link
+                href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(value)}`}
+                className="text-xs font-mono break-all text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
+              >
+                {value}
+              </Link>
+            ) : (
+              <FieldValue value={value} />
+            )}
             {key === "id" && typeof value === "string" && (
               <CopyButton text={value} label="Copy ID" />
             )}
@@ -456,7 +472,13 @@ function KeyboardShortcuts({
   return null;
 }
 
-function HitsWithNav({ navRef }: { navRef: React.RefObject<NavHandle> }) {
+function HitsWithNav({
+  navRef,
+  collectionName,
+}: {
+  navRef: React.RefObject<NavHandle>;
+  collectionName: string;
+}) {
   const { hits } = useHits<Record<string, unknown>>();
   const [currentIdx, setCurrentIdx] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -507,7 +529,7 @@ function HitsWithNav({ navRef }: { navRef: React.RefObject<NavHandle> }) {
                   itemRefs.current[i] = el;
                 }}
               >
-                <HitCard hit={hit} />
+                <HitCard hit={hit} collectionName={collectionName} />
               </div>
             ))}
           </div>
@@ -842,7 +864,7 @@ function SearchPageContent() {
                   ))}
                 </aside>
               )}
-              <HitsWithNav navRef={navRef} />
+              <HitsWithNav navRef={navRef} collectionName={selectedCollection} />
             </div>
             <Pagination
               classNames={{

@@ -192,7 +192,17 @@ function DocumentCard({
           )}
         />
         <span className="text-xs text-muted-foreground font-mono shrink-0">id</span>
-        <span className="text-xs font-mono font-medium truncate">{docId ?? "—"}</span>
+        {docId ? (
+          <Link
+            href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(docId)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs font-mono font-medium truncate text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
+          >
+            {docId}
+          </Link>
+        ) : (
+          <span className="text-xs font-mono font-medium truncate">—</span>
+        )}
         {!expanded && previewSnippet && (
           <span className="text-xs text-muted-foreground truncate ml-2 opacity-60">
             {previewSnippet.length > 80 ? previewSnippet.slice(0, 80) + "…" : previewSnippet}
