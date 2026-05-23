@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -504,9 +504,11 @@ function KeyboardShortcuts({
 function HitsWithNav({
   navRef,
   collectionName,
+  onNavStateChange,
 }: {
   navRef: React.RefObject<NavHandle>;
   collectionName: string;
+  onNavStateChange?: (isFirst: boolean, isLast: boolean) => void;
 }) {
   const { hits } = useHits<Record<string, unknown>>();
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -541,61 +543,31 @@ function HitsWithNav({
   const isFirst = currentIdx === 0;
   const isLast = hits.length === 0 || currentIdx >= hits.length - 1;
 
-  return (
-    <div className="flex flex-1 min-w-0 gap-2 overflow-hidden">
-      <div
-        ref={scrollRef}
-        className="relative flex-1 min-w-0 overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {hits.length === 0 ? (
-          <p className="py-12 text-center text-sm text-muted-foreground">No results</p>
-        ) : (
-          <div className="space-y-5">
-            {hits.map((hit, i) => (
-              <div
-                key={String(hit.objectID)}
-                ref={(el) => {
-                  itemRefs.current[i] = el;
-                }}
-              >
-                <HitCard hit={hit} collectionName={collectionName} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  useEffect(() => {
+    onNavStateChange?.(isFirst, isLast);
+  }, [isFirst, isLast]); // eslint-disable-line react-hooks/exhaustive-deps
 
-      {/* Nav column — sibling of scroll container, always visible */}
-      <div className="shrink-0 flex flex-col gap-1 pt-px">
-        <button
-          type="button"
-          disabled={isFirst}
-          onClick={() => navigateTo(currentIdx - 1)}
-          className={cn(
-            "p-1.5 rounded-md transition-colors",
-            isFirst
-              ? "text-muted-foreground/25 cursor-not-allowed"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted",
-          )}
-          title="Previous document"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          disabled={isLast}
-          onClick={() => navigateTo(currentIdx + 1)}
-          className={cn(
-            "p-1.5 rounded-md transition-colors",
-            isLast
-              ? "text-muted-foreground/25 cursor-not-allowed"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted",
-          )}
-          title="Next document"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-      </div>
+  return (
+    <div
+      ref={scrollRef}
+      className="relative flex-1 min-w-0 overflow-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {hits.length === 0 ? (
+        <p className="py-12 text-center text-sm text-muted-foreground">No results</p>
+      ) : (
+        <div className="space-y-5">
+          {hits.map((hit, i) => (
+            <div
+              key={String(hit.objectID)}
+              ref={(el) => {
+                itemRefs.current[i] = el;
+              }}
+            >
+              <HitCard hit={hit} collectionName={collectionName} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -663,8 +635,15 @@ function SearchPageContent() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [navIsFirst, setNavIsFirst] = useState(true);
+  const [navIsLast, setNavIsLast] = useState(true);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<NavHandle>({ prev: () => {}, next: () => {} });
+
+  const handleNavStateChange = useCallback((isFirst: boolean, isLast: boolean) => {
+    setNavIsFirst(isFirst);
+    setNavIsLast(isLast);
+  }, []);
 
   const selectedCollection = searchParams.get("collection") ?? "";
 
@@ -854,6 +833,36 @@ function SearchPageContent() {
               )}
               <div className="flex-1" />
               <ShortcutsHelp />
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  disabled={navIsFirst}
+                  onClick={() => navRef.current?.prev()}
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    navIsFirst
+                      ? "text-muted-foreground/25 cursor-not-allowed"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  )}
+                  title="Previous document"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={navIsLast}
+                  onClick={() => navRef.current?.next()}
+                  className={cn(
+                    "p-1.5 rounded-md transition-colors",
+                    navIsLast
+                      ? "text-muted-foreground/25 cursor-not-allowed"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  )}
+                  title="Next document"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
               <ExportButton collectionName={selectedCollection} queryBy={queryBy} />
             </div>
             <div className="flex min-h-0 flex-1 flex-col sm:flex-row gap-4 sm:gap-6 overflow-hidden">
@@ -893,7 +902,11 @@ function SearchPageContent() {
                   ))}
                 </aside>
               )}
-              <HitsWithNav navRef={navRef} collectionName={selectedCollection} />
+              <HitsWithNav
+                navRef={navRef}
+                collectionName={selectedCollection}
+                onNavStateChange={handleNavStateChange}
+              />
             </div>
             <Pagination
               classNames={{
