@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.27.0] - 2026-05-23
+
+### Features
+
+- Default page and header logo now redirect to search (COP-482) (`793c78e`)
+
 ## [1.26.0] - 2026-05-23
 
 ### Features
