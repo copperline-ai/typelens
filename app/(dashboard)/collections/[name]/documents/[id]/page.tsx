@@ -68,22 +68,6 @@ export default function DocumentViewPage({
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div className="flex items-center gap-1.5 min-w-0 text-sm text-muted-foreground">
-          <Link href="/collections" className="hover:text-foreground transition-colors shrink-0">
-            collections
-          </Link>
-          <span className="shrink-0">/</span>
-          <Link
-            href={`/collections/${encodeURIComponent(collectionName)}`}
-            className="hover:text-foreground transition-colors font-mono truncate max-w-[10rem] sm:max-w-xs"
-          >
-            {collectionName}
-          </Link>
-          <span className="shrink-0">/</span>
-          <span className="font-mono truncate max-w-[10rem] sm:max-w-xs text-foreground font-medium">
-            {documentId}
-          </span>
-        </div>
         <div className="ml-auto shrink-0 flex items-center gap-1.5">
           <CopyButton text={documentId} label="Copy ID" />
           <Button
