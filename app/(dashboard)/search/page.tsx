@@ -810,8 +810,8 @@ function SearchPageContent() {
                 <aside
                   className={cn(
                     "shrink-0 space-y-5",
-                    "sm:w-44 sm:block",
-                    filtersOpen ? "block" : "hidden sm:block",
+                    "sm:w-44 sm:block sm:overflow-y-auto",
+                    filtersOpen ? "block max-h-64 overflow-y-auto" : "hidden sm:block",
                   )}
                 >
                   <div className="flex items-center justify-between">
