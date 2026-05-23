@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.25.0] - 2026-05-23
+
+### Features
+
+- Add mobile swipe gestures for pagination and lightbox in search (COP-478) (`9cea2bb`)
+
 ## [1.24.0] - 2026-05-23
 
 ### Features
