@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.24.0] - 2026-05-23
+
+### Features
+
+- Add Copy JSON and Delete actions to document view (`998f271`)
+
 ## [1.23.2] - 2026-05-23
 
 ### Bug Fixes
