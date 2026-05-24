@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   getCollection,
   deleteCollection,
@@ -282,8 +283,6 @@ function DocumentCard({
   );
 }
 
-const PER_PAGE = 10;
-
 function DocumentsSection({
   profile,
   collectionName,
@@ -293,6 +292,11 @@ function DocumentsSection({
   collectionName: string;
   fields: Collection["fields"];
 }) {
+  const isMobile = useIsMobile();
+  const [perPage, setPerPage] = useState(50);
+  useEffect(() => {
+    if (isMobile !== undefined) setPerPage(isMobile ? 20 : 50);
+  }, [isMobile]);
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [found, setFound] = useState<number | null>(null);
   const [page, setPage] = useState(1);
@@ -313,7 +317,7 @@ function DocumentsSection({
         collectionName,
         fields,
         p,
-        PER_PAGE,
+        perPage,
         controller.signal,
       );
       setFound(result.found);
@@ -331,9 +335,9 @@ function DocumentsSection({
     load(p);
   }
 
-  const totalPages = found !== null ? Math.ceil(found / PER_PAGE) : null;
-  const start = (page - 1) * PER_PAGE + 1;
-  const end = hits !== null ? (page - 1) * PER_PAGE + hits.length : 0;
+  const totalPages = found !== null ? Math.ceil(found / perPage) : null;
+  const start = (page - 1) * perPage + 1;
+  const end = hits !== null ? (page - 1) * perPage + hits.length : 0;
 
   return (
     <div className="p-4 space-y-3">
