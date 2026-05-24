@@ -23,6 +23,7 @@ export function useAppVersion() {
           setVersion(v);
         } else if (v !== baseline.current) {
           toast("Update available", {
+            id: "app-update",
             description: `v${v} is ready. Refresh to load the latest version.`,
             action: { label: "Refresh", onClick: () => window.location.reload() },
             duration: Infinity,
