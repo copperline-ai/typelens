@@ -19,6 +19,7 @@ import {
 import TypesenseInstantSearchAdapter from "typesense-instantsearch-adapter";
 import { ChevronDown, ChevronUp, Code2, Keyboard, SlidersHorizontal, X } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
+import { ConnectingState } from "@/components/connecting-state";
 import { listCollections, type Collection, type CollectionField } from "@/lib/typesense-client";
 import {
   Select,
