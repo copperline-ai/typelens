@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.29.0] - 2026-05-24
+
+### Features
+
+- Auto-select collection and persist to localStorage in search (`c2a5e10`) (COP-484)
+- Move API Keys from nav to settings dropdown (`779bf2f`) (COP-485)
+
 ## [1.28.0] - 2026-05-24
 
 ### Features
