@@ -529,6 +529,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
 
       {status === "connecting" && <ConnectingState profile={activeProfile} />}
 
+
       {isLoading && (
         <div className="space-y-4">
           <Skeleton className="h-8 w-64" />

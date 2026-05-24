@@ -9,5 +9,6 @@ export function useCollections() {
     queryKey: queryKeys.collections.list(),
     queryFn: () => ky!.get("collections").json<Collection[]>(),
     enabled: ky !== null,
+    refetchInterval: 30_000,
   });
 }
