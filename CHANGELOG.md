@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.28.0] - 2026-05-24
+
+### Features
+
+- Show connecting state on search screen (`a830100`) (COP-483)
+
 ## [1.27.0] - 2026-05-23
 
 ### Features
