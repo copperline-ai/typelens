@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const NAV_ROUTES = ["/search", "/collections", "/settings/connection"];
-const EDGE_THRESHOLD = 0.25; // left/right 25% of screen
+// Skip only the iOS native back/forward gesture zone (~10% from each edge)
+const EDGE_SKIP_ZONE = 0.1;
 const MIN_SWIPE_PX = 60; // min horizontal distance
 
 export function useSwipeNavigation(pathname: string) {
@@ -19,6 +20,9 @@ export function useSwipeNavigation(pathname: string) {
   const touchStartY = useRef(0);
 
   useEffect(() => {
+    // Search page handles its own swipe for pagination — don't also route-navigate
+    if (pathname.startsWith("/search")) return;
+
     function onTouchStart(e: TouchEvent) {
       const touch = e.touches[0];
       if (!touch) return;
@@ -31,12 +35,12 @@ export function useSwipeNavigation(pathname: string) {
       const touch = e.changedTouches[0];
       if (!touch) return;
 
-      // Edge-only: ignore touches that started in the center 50%
+      // Skip the iOS native gesture zone (outermost ~10% from each edge)
       const screenW = window.innerWidth;
-      const isEdge =
-        touchStartX.current < screenW * EDGE_THRESHOLD ||
-        touchStartX.current > screenW * (1 - EDGE_THRESHOLD);
-      if (!isEdge) return;
+      const isNativeZone =
+        touchStartX.current < screenW * EDGE_SKIP_ZONE ||
+        touchStartX.current > screenW * (1 - EDGE_SKIP_ZONE);
+      if (isNativeZone) return;
 
       const dx = touch.clientX - touchStartX.current;
       const dy = touch.clientY - touchStartY.current;
