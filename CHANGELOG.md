@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.35.1] - 2026-05-24
+
+### Bug Fixes
+
+- Remove double padding on search page (COP-497) (`7f226f0`)
+
 ## [1.35.0] - 2026-05-24
 
 ### Features
