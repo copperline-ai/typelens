@@ -100,86 +100,92 @@ export default function DocumentViewPage({
   return (
     <div className="space-y-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center gap-1.5 min-w-0">
-        <Link href={`/collections/${encodeURIComponent(collectionName)}`}>
-          <Button variant="ghost" size="icon" title="Back to collection">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        {/* Export — left side */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleCopyJson}
-          disabled={!document}
-          title="Copy JSON"
-        >
-          <Clipboard className="h-4 w-4" />
-        </Button>
-        {/* Right side */}
-        <div className="ml-auto shrink-0 flex items-center gap-1.5">
-          <CopyButton text={documentId} label="Copy ID" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={fetchData}
-            disabled={loading}
-            title="Refresh"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={deleting || !document}
-                title="Delete document"
-                className="text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete document?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Permanently delete document{" "}
-                  <span className="font-mono font-medium text-foreground">{documentId}</span>. This
-                  cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  onClick={handleDelete}
-                  disabled={deleting}
+      <div className="flex flex-col gap-2">
+        {/* Row 1: Back | right: Copy ID, Refresh, Delete, Export */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Link href={`/collections/${encodeURIComponent(collectionName)}`}>
+            <Button variant="ghost" size="icon" title="Back to collection">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div className="ml-auto shrink-0 flex items-center gap-1.5">
+            <CopyButton text={documentId} label="Copy ID" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={fetchData}
+              disabled={loading}
+              title="Refresh"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={deleting || !document}
+                  title="Delete document"
+                  className="text-muted-foreground hover:text-destructive"
                 >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          {prevId && (
-            <Link
-              href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(prevId)}`}
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete document?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Permanently delete document{" "}
+                    <span className="font-mono font-medium text-foreground">{documentId}</span>.
+                    This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCopyJson}
+              disabled={!document}
+              title="Copy JSON"
             >
-              <Button variant="ghost" size="icon" title="Previous document">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-          {nextId && (
-            <Link
-              href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(nextId)}`}
-            >
-              <Button variant="ghost" size="icon" title="Next document">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
+              <Clipboard className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
+        {/* Row 2: Prev/Next nav buttons — right-aligned, bigger targets */}
+        {(prevId || nextId) && (
+          <div className="flex justify-end gap-1.5">
+            {prevId && (
+              <Link
+                href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(prevId)}`}
+              >
+                <Button variant="ghost" size="icon" className="h-10 w-10" title="Previous document">
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+            {nextId && (
+              <Link
+                href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(nextId)}`}
+              >
+                <Button variant="ghost" size="icon" className="h-10 w-10" title="Next document">
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Loading */}
