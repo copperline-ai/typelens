@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import { ToastProvider } from "@/components/async-boundary";
 import { HydrateStore } from "@/components/hydrate-store";
 import { KeepAlive } from "@/components/keep-alive";
+import { SwipeNav } from "@/components/swipe-nav";
 import { SESSION_COOKIE } from "@/lib/auth-session";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <HydrateStore />
       <KeepAlive />
       <div className="flex h-dvh overflow-hidden">
+        <SwipeNav />
         <Sidebar authEnabled={authEnabled} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header authEnabled={authEnabled} />
