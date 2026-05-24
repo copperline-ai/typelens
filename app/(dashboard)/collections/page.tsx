@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
+import { ConnectingState } from "@/components/connecting-state";
 import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
@@ -159,12 +160,7 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && status === "connecting" && (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-          <p className="text-sm font-medium">Connecting to server…</p>
-          <p className="text-xs text-muted-foreground mt-1">This may take a moment.</p>
-        </div>
-      )}
+      {activeProfile && status === "connecting" && <ConnectingState profile={activeProfile} />}
 
       {activeProfile && status === "error" && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-12 text-center">

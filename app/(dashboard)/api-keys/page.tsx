@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
+import { ConnectingState } from "@/components/connecting-state";
 import { listApiKeys, deleteApiKey, type ApiKey } from "@/lib/typesense-client";
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { Skeleton } from "@/components/async-boundary";
@@ -208,12 +209,7 @@ export default function ApiKeysPage() {
         </div>
       )}
 
-      {activeProfile && status === "connecting" && (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-          <p className="text-sm font-medium">Connecting to server…</p>
-          <p className="text-xs text-muted-foreground mt-1">This may take a moment.</p>
-        </div>
-      )}
+      {activeProfile && status === "connecting" && <ConnectingState profile={activeProfile} />}
 
       {activeProfile && status === "error" && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-12 text-center">
