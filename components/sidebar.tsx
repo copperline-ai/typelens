@@ -149,7 +149,12 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
               <Settings className="h-4 w-4" />
             </button>
           </PopoverTrigger>
-          <PopoverContent side="top" align={collapsed ? "center" : "end"} className="w-44 p-1">
+          <PopoverContent
+            side="top"
+            align={collapsed ? "center" : "end"}
+            className="w-44 p-1"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <button
               onClick={cycleTheme}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
