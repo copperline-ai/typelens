@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-const POLL_INTERVAL = 5 * 60 * 1000;
+const POLL_INTERVAL = 60 * 1000;
+
+function normalizeVersion(v: string) {
+  return v.replace(/^v/, "");
+}
 
 export function useAppVersion() {
   const [version, setVersion] = useState<string | null>(null);
@@ -18,13 +22,15 @@ export function useAppVersion() {
         const v = data.version;
         if (!v) return;
 
+        const normalized = normalizeVersion(v);
+
         if (baseline.current === null) {
-          baseline.current = v;
-          setVersion(v);
-        } else if (v !== baseline.current) {
+          baseline.current = normalized;
+          setVersion(normalized);
+        } else if (normalized !== baseline.current) {
           toast("Update available", {
             id: "app-update",
-            description: `v${v} is ready. Refresh to load the latest version.`,
+            description: `v${normalized} is ready. Refresh to load the latest version.`,
             action: { label: "Refresh", onClick: () => window.location.reload() },
             duration: Infinity,
           });
@@ -36,7 +42,18 @@ export function useAppVersion() {
 
     poll();
     const id = setInterval(poll, POLL_INTERVAL);
-    return () => clearInterval(id);
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        poll();
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   return version;
