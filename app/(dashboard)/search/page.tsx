@@ -689,13 +689,27 @@ function SearchPageContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("collection", name);
     router.replace(`/search?${params.toString()}`);
+    if (profile) {
+      localStorage.setItem(`typelens_collection_${profile.id}`, name);
+    }
   }
 
   useEffect(() => {
     if (!profile) return;
     setLoading(true);
     listCollections(profile)
-      .then(setCollections)
+      .then((cols) => {
+        setCollections(cols);
+        const urlCollection = searchParams.get("collection");
+        if (!urlCollection) {
+          const saved = localStorage.getItem(`typelens_collection_${profile.id}`);
+          if (saved && cols.some((c) => c.name === saved)) {
+            setSelectedCollection(saved);
+          } else if (cols.length === 1) {
+            setSelectedCollection(cols[0].name);
+          }
+        }
+      })
       .catch(() => setCollections([]))
       .finally(() => setLoading(false));
   }, [profile]);
