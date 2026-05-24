@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.30.0] - 2026-05-24
+
+### Features
+
+- Add copy connection button in connections module (COP-486) (`7894154`)
+
 ## [1.29.0] - 2026-05-24
 
 ### Features
