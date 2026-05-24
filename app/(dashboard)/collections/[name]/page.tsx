@@ -16,10 +16,11 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
-import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
+import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
+import { ConnectingState } from "@/components/connecting-state";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCollection } from "@/lib/hooks/use-collection";
 import {
-  getCollection,
   deleteCollection,
   deleteDocument,
   exportDocuments,
@@ -430,10 +431,16 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const { name } = use(params);
   const collectionName = decodeURIComponent(name);
   const activeProfile = useConnectionStore(selectActiveProfile);
+  const status = useConnectionStore(selectStatus);
   const router = useRouter();
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    data: collection,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    refetch,
+  } = useCollection(collectionName);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -443,6 +450,8 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [addEmbeddingOpen, setAddEmbeddingOpen] = useState(false);
   const [truncating, setTruncating] = useState(false);
   const [truncateError, setTruncateError] = useState<string | null>(null);
+
+  const errorMessage = error instanceof Error ? error.message : String(error);
 
   function handleExportSchema() {
     if (!collection) return;
@@ -498,31 +507,13 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
     setTruncateError(null);
     try {
       await truncateDocuments(activeProfile, collectionName);
-      fetchCollection();
+      refetch();
     } catch (err) {
       setTruncateError(err instanceof Error ? err.message : String(err));
     } finally {
       setTruncating(false);
     }
   }
-
-  async function fetchCollection() {
-    if (!activeProfile) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getCollection(activeProfile, collectionName);
-      setCollection(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchCollection();
-  }, [activeProfile?.id, collectionName]);
 
   const facetCount = collection?.fields.filter((f) => f.facet).length ?? 0;
 
@@ -536,7 +527,9 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
         </Link>
       </div>
 
-      {loading && (
+      {status === "connecting" && <ConnectingState profile={activeProfile} />}
+
+      {isLoading && (
         <div className="space-y-4">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-4 w-32" />
@@ -544,17 +537,17 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
         </div>
       )}
 
-      {error && (
+      {isError && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load collection</p>
-          <p className="text-xs text-muted-foreground mt-1">{error}</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={fetchCollection}>
+          <p className="text-xs text-muted-foreground mt-1">{errorMessage}</p>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
             Try again
           </Button>
         </div>
       )}
 
-      {!loading && !error && collection && (
+      {!isLoading && !isError && collection && (
         <>
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
@@ -571,11 +564,11 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               <Button
                 variant="outline"
                 size="icon"
-                onClick={fetchCollection}
-                disabled={loading}
+                onClick={() => refetch()}
+                disabled={isFetching}
                 title="Refresh"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
 
               <Button
@@ -767,7 +760,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           collection={collection}
           open={editSchemaOpen}
           onOpenChange={setEditSchemaOpen}
-          onUpdated={fetchCollection}
+          onUpdated={() => refetch()}
           onRenamed={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
         />
       )}
@@ -777,7 +770,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           collection={collection}
           open={importOpen}
           onOpenChange={setImportOpen}
-          onImported={fetchCollection}
+          onImported={() => refetch()}
         />
       )}
 
@@ -786,7 +779,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           collection={collection}
           open={addEmbeddingOpen}
           onOpenChange={setAddEmbeddingOpen}
-          onAdded={fetchCollection}
+          onAdded={() => refetch()}
         />
       )}
     </div>
