@@ -835,6 +835,16 @@ function SearchPageContent() {
 
   return (
     <div className="flex h-full flex-col gap-4">
+      {searchOptionsCollapsed && (
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
+          <span className="text-sm text-muted-foreground">
+            {selectedCollection ?? "No collection"}
+            {" · "}
+            {pageSize} per page
+          </span>
+        </div>
+      )}
       <div
         className="grid transition-all duration-300 ease-in-out"
         style={{ gridTemplateRows: searchOptionsCollapsed ? "0fr" : "1fr" }}
