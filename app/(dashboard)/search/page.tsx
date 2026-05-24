@@ -20,6 +20,8 @@ import TypesenseInstantSearchAdapter from "typesense-instantsearch-adapter";
 import {
   ChevronDown,
   ChevronUp,
+  ChevronsDown,
+  ChevronsUp,
   Code2,
   Keyboard,
   PanelLeftClose,
@@ -745,6 +747,19 @@ function SearchPageContent() {
     });
   };
 
+  const [searchOptionsCollapsed, setSearchOptionsCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("typelens-search-options-collapsed") === "true";
+  });
+
+  const toggleSearchOptionsCollapsed = () => {
+    setSearchOptionsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("typelens-search-options-collapsed", String(next));
+      return next;
+    });
+  };
+
   const activeCollection = collections.find((c) => c.name === selectedCollection) ?? null;
 
   // Reset field config whenever the user switches to a different collection
@@ -820,51 +835,58 @@ function SearchPageContent() {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-        <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
-        {loading ? (
-          <div className="h-10 w-48 animate-pulse rounded-md border bg-muted" />
-        ) : (
-          <Select value={selectedCollection} onValueChange={setSelectedCollection}>
-            <SelectTrigger className="w-full sm:w-72">
-              <SelectValue placeholder="Select a collection…" />
-            </SelectTrigger>
-            <SelectContent>
-              {collections.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        {selectedCollection && activeCollection && (
-          <div className="flex flex-wrap items-center gap-2">
-            <SearchFieldsPopover
-              fields={activeCollection.fields}
-              searchMode={searchMode}
-              onSearchModeChange={setSearchMode}
-              customQueryFields={customQueryFields}
-              onCustomQueryFieldsChange={setCustomQueryFields}
-              autoQueryFields={autoQueryFields}
-            />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Per page</span>
-              <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                <SelectTrigger className="h-6 w-16 px-2 text-xs">
-                  <SelectValue />
+      <div
+        className="grid transition-all duration-300 ease-in-out"
+        style={{ gridTemplateRows: searchOptionsCollapsed ? "0fr" : "1fr" }}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
+            {loading ? (
+              <div className="h-10 w-48 animate-pulse rounded-md border bg-muted" />
+            ) : (
+              <Select value={selectedCollection} onValueChange={setSelectedCollection}>
+                <SelectTrigger className="w-full sm:w-72">
+                  <SelectValue placeholder="Select a collection…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[10, 20, 50, 100].map((n) => (
-                    <SelectItem key={n} value={String(n)} className="text-xs">
-                      {n}
+                  {collections.map((c) => (
+                    <SelectItem key={c.name} value={c.name}>
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            )}
+            {selectedCollection && activeCollection && (
+              <div className="flex flex-wrap items-center gap-2">
+                <SearchFieldsPopover
+                  fields={activeCollection.fields}
+                  searchMode={searchMode}
+                  onSearchModeChange={setSearchMode}
+                  customQueryFields={customQueryFields}
+                  onCustomQueryFieldsChange={setCustomQueryFields}
+                  autoQueryFields={autoQueryFields}
+                />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-muted-foreground">Per page</span>
+                  <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                    <SelectTrigger className="h-6 w-16 px-2 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[10, 20, 50, 100].map((n) => (
+                        <SelectItem key={n} value={String(n)} className="text-xs">
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {!selectedCollection && !loading && (
@@ -881,27 +903,46 @@ function SearchPageContent() {
           <KeyboardShortcuts searchWrapperRef={searchWrapperRef} navRef={navRef} />
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             <SearchError />
-            <div ref={searchWrapperRef}>
-              <SearchBox
-                classNames={{
-                  root: "w-full",
-                  form: "relative flex items-center",
-                  input: cn(
-                    "flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-9 py-2 text-sm",
-                    "ring-offset-background placeholder:text-muted-foreground",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "[&::-webkit-search-cancel-button]:hidden",
-                  ),
-                  submit:
-                    "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/50",
-                  reset:
-                    "absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors",
-                  submitIcon: "h-4 w-4 fill-current",
-                  resetIcon: "h-3.5 w-3.5 fill-current",
-                }}
-              />
+            <div
+              className="grid transition-all duration-300 ease-in-out"
+              style={{ gridTemplateRows: searchOptionsCollapsed ? "0fr" : "1fr" }}
+            >
+              <div className="overflow-hidden">
+                <div ref={searchWrapperRef}>
+                  <SearchBox
+                    classNames={{
+                      root: "w-full",
+                      form: "relative flex items-center",
+                      input: cn(
+                        "flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-9 py-2 text-sm",
+                        "ring-offset-background placeholder:text-muted-foreground",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        "[&::-webkit-search-cancel-button]:hidden",
+                      ),
+                      submit:
+                        "absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground/50",
+                      reset:
+                        "absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors",
+                      submitIcon: "h-4 w-4 fill-current",
+                      resetIcon: "h-3.5 w-3.5 fill-current",
+                    }}
+                  />
+                </div>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={toggleSearchOptionsCollapsed}
+                className="flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+                title={searchOptionsCollapsed ? "Expand search options" : "Collapse search options"}
+              >
+                {searchOptionsCollapsed ? (
+                  <ChevronsDown className="h-3.5 w-3.5 shrink-0" />
+                ) : (
+                  <ChevronsUp className="h-3.5 w-3.5 shrink-0" />
+                )}
+              </button>
               {facetFields.length > 0 && (
                 <button
                   type="button"
