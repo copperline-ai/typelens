@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, Edit2, Lock, Loader2, Trash2, Wifi, XCircle } from "lucide-react";
+import { CheckCircle, Copy, Edit2, Lock, Loader2, Trash2, Wifi, XCircle } from "lucide-react";
 import { type Profile, selectActions, useConnectionStore } from "@/lib/stores/connection";
 import {
   AlertDialog,
@@ -27,9 +27,10 @@ interface Props {
   profile: Profile;
   isActive: boolean;
   onEdit: () => void;
+  onCopy?: (profile: Profile) => void;
 }
 
-export function ProfileCard({ profile, isActive, onEdit }: Props) {
+export function ProfileCard({ profile, isActive, onEdit, onCopy }: Props) {
   const { removeProfile, setActiveProfile, testConnection } = useConnectionStore(selectActions);
   const [testState, setTestState] = useState<TestState>({ status: "idle" });
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -92,6 +93,15 @@ export function ProfileCard({ profile, isActive, onEdit }: Props) {
                 disabled={isReadOnly}
               >
                 <Edit2 className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onCopy?.(profile)}
+                title="Copy"
+                disabled={isReadOnly}
+              >
+                <Copy className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"

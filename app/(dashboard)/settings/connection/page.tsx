@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   CheckCircle,
+  Copy,
   Edit2,
   LayoutGrid,
   LayoutList,
@@ -46,10 +47,12 @@ function ProfileRow({
   profile,
   isActive,
   onEdit,
+  onCopy,
 }: {
   profile: Profile;
   isActive: boolean;
   onEdit: () => void;
+  onCopy?: (profile: Profile) => void;
 }) {
   const { removeProfile, setActiveProfile, testConnection } = useConnectionStore(selectActions);
   const [testState, setTestState] = useState<TestState>({ status: "idle" });
@@ -142,6 +145,16 @@ function ProfileRow({
           <Button
             size="icon"
             variant="ghost"
+            onClick={() => onCopy?.(profile)}
+            title="Copy"
+            disabled={isReadOnly}
+            className="h-8 w-8"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
             className="h-8 w-8 text-destructive hover:text-destructive"
             onClick={() => setDeleteOpen(true)}
             title="Delete"
@@ -185,6 +198,7 @@ export default function ConnectionSettingsPage() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<Profile | undefined>(undefined);
+  const [profileToCopy, setProfileToCopy] = useState<Profile | null>(null);
   const [viewMode, setViewMode] = useState<"card" | "list">(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("connections-view") as "card" | "list") ?? "card";
@@ -211,9 +225,18 @@ export default function ConnectionSettingsPage() {
     setFormOpen(true);
   }
 
+  function handleCopy(profile: Profile) {
+    setEditingProfile(undefined);
+    setProfileToCopy(profile);
+    setFormOpen(true);
+  }
+
   function handleFormClose(open: boolean) {
     setFormOpen(open);
-    if (!open) setEditingProfile(undefined);
+    if (!open) {
+      setEditingProfile(undefined);
+      setProfileToCopy(null);
+    }
   }
 
   return (
@@ -268,6 +291,7 @@ export default function ConnectionSettingsPage() {
               profile={profile}
               isActive={profile.id === activeProfileId}
               onEdit={() => handleEdit(profile)}
+              onCopy={handleCopy}
             />
           ))}
         </div>
@@ -279,12 +303,28 @@ export default function ConnectionSettingsPage() {
               profile={profile}
               isActive={profile.id === activeProfileId}
               onEdit={() => handleEdit(profile)}
+              onCopy={handleCopy}
             />
           ))}
         </div>
       )}
 
-      <ProfileFormDialog open={formOpen} onOpenChange={handleFormClose} profile={editingProfile} />
+      <ProfileFormDialog
+        open={formOpen}
+        onOpenChange={handleFormClose}
+        profile={editingProfile}
+        initialValues={
+          profileToCopy
+            ? {
+                name: `${profileToCopy.name} (copy)`,
+                host: profileToCopy.host,
+                port: profileToCopy.port,
+                protocol: profileToCopy.protocol,
+                apiKey: profileToCopy.apiKey,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
