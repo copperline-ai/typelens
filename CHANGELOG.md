@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.39.0] - 2026-05-24
+
+### Features
+
+- Fire Paperclip webhook on CI pipeline failure (COP-502) (`1a56bec`)
+
 ## [1.38.0] - 2026-05-24
 
 ### Features
