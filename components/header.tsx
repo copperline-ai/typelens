@@ -20,7 +20,6 @@ import { ReleaseNotesModal } from "@/components/release-notes-modal";
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
-  { href: "/api-keys", label: "API Keys", icon: Key },
   { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 
@@ -139,6 +138,13 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
               <span>Log out</span>
             </button>
           )}
+          <Link
+            href="/api-keys"
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Key className="h-4 w-4 shrink-0" />
+            <span>API Keys</span>
+          </Link>
           <div className="border-t mt-1 pt-1 px-2 pb-0.5">
             <button
               onClick={() => setReleaseNotesOpen(true)}
