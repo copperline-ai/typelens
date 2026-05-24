@@ -56,6 +56,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile?: Profile;
+  initialValues?: Partial<Omit<Profile, "id">>;
 }
 
 const defaultValues = {
@@ -66,9 +67,10 @@ const defaultValues = {
   apiKey: "",
 };
 
-export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
+export function ProfileFormDialog({ open, onOpenChange, profile, initialValues }: Props) {
   const { addProfile, updateProfile, testConnection } = useConnectionStore(selectActions);
   const isEdit = !!profile;
+  const isCopy = !profile && !!initialValues;
   const [testState, setTestState] = useState<TestState>({ status: "idle" });
 
   const form = useForm<FormValues>({
@@ -78,20 +80,25 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
 
   useEffect(() => {
     if (open) {
-      form.reset(
-        profile
-          ? {
-              name: profile.name,
-              host: profile.host,
-              protocol: profile.protocol,
-              port: profile.port,
-              apiKey: profile.apiKey,
-            }
-          : (defaultValues as FormValues),
-      );
+      if (profile) {
+        form.reset({
+          name: profile.name,
+          host: profile.host,
+          protocol: profile.protocol,
+          port: profile.port,
+          apiKey: profile.apiKey,
+        });
+      } else if (initialValues) {
+        form.reset({
+          ...defaultValues,
+          ...initialValues,
+        } as FormValues);
+      } else {
+        form.reset(defaultValues as FormValues);
+      }
       setTestState({ status: "idle" });
     }
-  }, [open, profile, form]);
+  }, [open, profile, initialValues, form]);
 
   async function handleTest() {
     const isValid = await form.trigger(["host", "protocol", "port", "apiKey"]);
@@ -126,7 +133,9 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Connection" : "Add Connection"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Connection" : isCopy ? "Copy Connection" : "Add Connection"}
+          </DialogTitle>
           <DialogDescription>
             <a
               href="https://typesense.org/docs/30.2/api/authentication.html"
@@ -290,7 +299,9 @@ export function ProfileFormDialog({ open, onOpenChange, profile }: Props) {
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">{isEdit ? "Save Changes" : "Add Connection"}</Button>
+                <Button type="submit">
+                  {isEdit ? "Save Changes" : isCopy ? "Save Copy" : "Add Connection"}
+                </Button>
               </div>
             </DialogFooter>
           </form>
