@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.45.0] - 2026-05-24
+
+### Features
+
+- Swipe up to collapse search options on mobile (`7b8add8`, `869b8a6`)
+
 ## [1.44.0] - 2026-05-24
 
 ### Features
