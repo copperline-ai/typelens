@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.43.1] - 2026-05-24
+
+### Bug Fixes
+
+- Improve release toast detection sensitivity (`83f275b`)
+
 ## [1.43.0] - 2026-05-24
 
 ### Features
