@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.33.0] - 2026-05-24
+
+### Features
+
+- Hide keyboard shortcuts on mobile devices in the search feature (`8158e84`) (COP-491)
+
 ## [1.32.0] - 2026-05-24
 
 ### Features
