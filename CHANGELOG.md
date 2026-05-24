@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.35.0] - 2026-05-24
+
+### Features
+
+- Move export to right row and enlarge prev/next buttons in doc navigation ([`219bf47`](219bf47))
+
 ## [1.34.1] - 2026-05-24
 
 ### Bug Fixes
