@@ -9,5 +9,6 @@ export function useCollection(name: string | undefined) {
     queryKey: queryKeys.collections.detail(name ?? ""),
     queryFn: () => ky!.get(`collections/${encodeURIComponent(name!)}`).json<Collection>(),
     enabled: ky !== null && !!name,
+    refetchInterval: 30_000,
   });
 }

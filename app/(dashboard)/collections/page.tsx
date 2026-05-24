@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState, type ElementType } from "react";
+import { Fragment, useState, type ElementType } from "react";
 import Link from "next/link";
 import {
   ArrowDownAZ,
@@ -10,9 +10,12 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { ConnectingState } from "@/components/connecting-state";
-import { listCollections, deleteCollection, type Collection } from "@/lib/typesense-client";
+import { deleteCollection, type Collection } from "@/lib/typesense-client";
+import { useCollections } from "@/lib/hooks/use-collections";
+import { queryKeys } from "@/lib/api/query-keys";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
 import { Skeleton } from "@/components/async-boundary";
@@ -57,36 +60,16 @@ export default function CollectionsPage() {
   const activeProfile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore((s) => s.status);
   const actions = useConnectionStore(selectActions);
-  const [collections, setCollections] = useState<Collection[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [skeletonCount, setSkeletonCount] = useState(3);
+  const queryClient = useQueryClient();
+  const { data: collections, isLoading, isError, error, isFetching, refetch } = useCollections();
   const [createOpen, setCreateOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name-asc");
 
-  async function fetchCollections() {
-    if (!activeProfile) return;
-    setLoading(true);
-    setError(null);
+  const errorMessage = error instanceof Error ? error.message : String(error);
 
-    const fetchPromise = listCollections(activeProfile);
-    const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 1000));
-    const quick = await Promise.race([fetchPromise.catch(() => null), timeoutPromise]);
-    if (quick !== null && quick.length > 0) setSkeletonCount(quick.length);
-
-    try {
-      const data = await fetchPromise;
-      setCollections(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
+  function invalidateCollections() {
+    queryClient.invalidateQueries({ queryKey: queryKeys.collections.list() });
   }
-
-  useEffect(() => {
-    if (status === "connected" && activeProfile) fetchCollections();
-  }, [activeProfile?.id, status]);
 
   return (
     <div className="space-y-6">
@@ -105,11 +88,11 @@ export default function CollectionsPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={fetchCollections}
-                disabled={loading}
+                onClick={() => refetch()}
+                disabled={isFetching}
                 title="Refresh"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
             )}
             {activeProfile && (
@@ -182,25 +165,24 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && status === "connected" && loading && (
-        <CollectionsSkeleton count={skeletonCount} />
-      )}
+      {activeProfile && status === "connected" && isLoading && <CollectionsSkeleton count={3} />}
 
-      {activeProfile && status === "connected" && error && (
+      {activeProfile && status === "connected" && isError && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load collections</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {error.includes("Not Ready or Lagging") || error.includes("unavailable after retries")
+            {errorMessage.includes("Not Ready or Lagging") ||
+            errorMessage.includes("unavailable after retries")
               ? "Server unavailable. Click Try again to retry."
-              : error}
+              : errorMessage}
           </p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={fetchCollections}>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
             Try again
           </Button>
         </div>
       )}
 
-      {activeProfile && !loading && !error && collections?.length === 0 && (
+      {activeProfile && !isLoading && !isError && collections?.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <p className="text-sm font-medium">No collections yet</p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -209,7 +191,7 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && !loading && !error && collections && collections.length > 0 && (
+      {activeProfile && !isLoading && !isError && collections && collections.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sortCollections(collections, sortKey).map((c) => (
             <CollectionCard
@@ -217,9 +199,9 @@ export default function CollectionsPage() {
               collection={c}
               onDelete={async () => {
                 await deleteCollection(activeProfile!, c.name);
-                setCollections((prev) => prev?.filter((col) => col.name !== c.name) ?? null);
+                invalidateCollections();
               }}
-              onClone={fetchCollections}
+              onClone={invalidateCollections}
             />
           ))}
         </div>
@@ -228,7 +210,7 @@ export default function CollectionsPage() {
       <CreateCollectionDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onCreated={fetchCollections}
+        onCreated={invalidateCollections}
       />
     </div>
   );
