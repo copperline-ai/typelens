@@ -17,7 +17,16 @@ import {
   useSearchBox,
 } from "react-instantsearch";
 import TypesenseInstantSearchAdapter from "typesense-instantsearch-adapter";
-import { ChevronDown, ChevronUp, Code2, Keyboard, SlidersHorizontal, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Code2,
+  Keyboard,
+  PanelLeftClose,
+  PanelLeftOpen,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
 import { ConnectingState } from "@/components/connecting-state";
 import { listCollections, type Collection, type CollectionField } from "@/lib/typesense-client";
@@ -723,7 +732,18 @@ function SearchPageContent() {
 
   const [searchMode, setSearchMode] = useState<SearchMode>("auto");
   const [customQueryFields, setCustomQueryFields] = useState<string[]>([]);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("typelens-filters-collapsed") === "true";
+  });
+
+  const toggleFiltersCollapsed = () => {
+    setFiltersCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("typelens-filters-collapsed", String(next));
+      return next;
+    });
+  };
 
   const activeCollection = collections.find((c) => c.name === selectedCollection) ?? null;
 
@@ -885,12 +905,15 @@ function SearchPageContent() {
               {facetFields.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setFiltersOpen((o) => !o)}
-                  className="flex sm:hidden items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+                  onClick={toggleFiltersCollapsed}
+                  className="flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
+                  title={filtersCollapsed ? "Show filters" : "Hide filters"}
                 >
-                  <SlidersHorizontal className="h-3 w-3 shrink-0" />
-                  Filters
-                  {filtersOpen ? <X className="h-3 w-3" /> : null}
+                  {filtersCollapsed ? (
+                    <PanelLeftOpen className="h-3.5 w-3.5 shrink-0" />
+                  ) : (
+                    <PanelLeftClose className="h-3.5 w-3.5 shrink-0" />
+                  )}
                 </button>
               )}
               <div className="flex-1" />
@@ -935,8 +958,9 @@ function SearchPageContent() {
                 <aside
                   className={cn(
                     "shrink-0 space-y-5",
-                    "sm:w-44 sm:block sm:overflow-y-auto",
-                    filtersOpen ? "block max-h-64 overflow-y-auto" : "hidden sm:block",
+                    filtersCollapsed
+                      ? "hidden"
+                      : "block sm:w-44 overflow-y-auto max-h-64 sm:max-h-none",
                   )}
                 >
                   <div className="flex items-center justify-between">
