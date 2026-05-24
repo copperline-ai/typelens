@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.42.2] - 2026-05-24
+
+### Other
+
+- Improve Docker build performance by adding layer caching and trimming build context (COP-507) (`6234044`)
+
 ## [1.42.1] - 2026-05-24
 
 ### Bug Fixes
