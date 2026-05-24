@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.46.0] - 2026-05-24
+
+### Features
+
+- Add swipe-down-to-expand for collapsed search options (`9b553c1`)
+
 ## [1.45.0] - 2026-05-24
 
 ### Features
