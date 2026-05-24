@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.34.0] - 2026-05-24
+
+### Features
+- Force card view and remove layout switcher ([`ae4f190`](ae4f190))
+- Add previous/next navigation between documents ([`92f67b4`](92f67b4))
+
 ## [1.33.0] - 2026-05-24
 
 ### Features
