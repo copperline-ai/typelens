@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.38.0] - 2026-05-24
+
+### Features
+
+- Replace manual refresh with 30s auto-polling in collections (COP-499) (`6cdc6fd`)
+
 ## [1.37.0] - 2026-05-24
 
 ### Features
