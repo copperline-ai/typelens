@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.37.0] - 2026-05-24
+
+### Features
+
+- Add click-to-reveal popover for truncated field names in field-tooltips (COP-500) (`50d950d`)
+
 ## [1.36.0] - 2026-05-24
 
 ### Features
