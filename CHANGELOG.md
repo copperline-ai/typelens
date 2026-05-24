@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.41.0] - 2026-05-24
+
+### Features
+
+- Add collapsible filters sidebar with localStorage persistence in search (COP-504) (`5bac70e`)
+
 ## [1.40.0] - 2026-05-24
 
 ### Features
