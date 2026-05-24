@@ -111,3 +111,31 @@ jobs:
       contents: read
       packages: write
     secrets: inherit
+
+  notify-failure:
+    if: failure()
+    needs: [release, docker]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Paperclip on CI failure
+        env:
+          PAPERCLIP_WEBHOOK_URL: ${{ secrets.PAPERCLIP_WEBHOOK_URL }}
+          PAPERCLIP_WEBHOOK_SECRET: ${{ secrets.PAPERCLIP_WEBHOOK_SECRET }}
+        run: |
+          if [ -z "$PAPERCLIP_WEBHOOK_URL" ] || [ -z "$PAPERCLIP_WEBHOOK_SECRET" ]; then
+            echo "PAPERCLIP_WEBHOOK_URL or PAPERCLIP_WEBHOOK_SECRET not set — skipping notification"
+            exit 0
+          fi
+          PAYLOAD=$(jq -n \
+            --arg source "github_actions" \
+            --arg workflow "${{ github.workflow }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg branch "${{ github.ref_name }}" \
+            --arg commit_sha "${{ github.sha }}" \
+            --arg commit_message "${{ github.event.head_commit.message }}" \
+            '{source: $source, workflow: $workflow, run_id: $run_id, run_url: $run_url, branch: $branch, commit_sha: $commit_sha, commit_message: $commit_message}')
+          curl -sf -X POST "$PAPERCLIP_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $PAPERCLIP_WEBHOOK_SECRET" \
+            -d "$PAYLOAD"
