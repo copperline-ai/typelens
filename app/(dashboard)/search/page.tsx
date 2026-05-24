@@ -671,9 +671,13 @@ function SearchPageContent() {
   const profile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore(selectStatus);
 
+  const isMobile = useIsMobile();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(50);
+  useEffect(() => {
+    if (isMobile !== undefined) setPageSize(isMobile ? 20 : 50);
+  }, [isMobile]);
   const [navIsFirst, setNavIsFirst] = useState(true);
   const [navIsLast, setNavIsLast] = useState(true);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
