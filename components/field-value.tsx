@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, ExternalLink } from "lucide-react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/captions.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Captions from "yet-another-react-lightbox/plugins/captions";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
 
@@ -81,6 +84,47 @@ function tryParseJsonObject(s: string): object | null {
   return null;
 }
 
+function getCaption(fieldName?: string, document?: Record<string, unknown>): string | undefined {
+  const CAPTION_FIELDS = ["name", "title", "label", "caption", "description"];
+  if (document) {
+    for (const f of CAPTION_FIELDS) {
+      if (typeof document[f] === "string" && document[f]) return document[f] as string;
+    }
+  }
+  return fieldName || undefined;
+}
+
+function LightboxCopyButton({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+  return (
+    <button onClick={copy} className="yarl__button" title={copied ? "Copied!" : "Copy URL"}>
+      {copied ? (
+        <Check style={{ width: 16, height: 16, color: "#22c55e" }} />
+      ) : (
+        <Copy style={{ width: 16, height: 16 }} />
+      )}
+    </button>
+  );
+}
+
+function OpenInNewTabButton({ url }: { url: string }) {
+  return (
+    <button
+      onClick={() => window.open(url, "_blank", "noreferrer")}
+      className="yarl__button"
+      title="Open in new tab"
+    >
+      <ExternalLink style={{ width: 16, height: 16 }} />
+    </button>
+  );
+}
+
 export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   function copy(e: React.MouseEvent) {
@@ -101,7 +145,15 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
   );
 }
 
-export function FieldValue({ value }: { value: unknown }) {
+export function FieldValue({
+  value,
+  fieldName,
+  document,
+}: {
+  value: unknown;
+  fieldName?: string;
+  document?: Record<string, unknown>;
+}) {
   const [showRaw, setShowRaw] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -153,8 +205,24 @@ export function FieldValue({ value }: { value: unknown }) {
           <Lightbox
             open={lightboxOpen}
             close={() => setLightboxOpen(false)}
-            slides={[{ src: value }]}
-            controller={{ closeOnPullDown: true }}
+            slides={[{ src: value, title: getCaption(fieldName, document) }]}
+            plugins={[Zoom, Captions]}
+            zoom={{
+              maxZoomPixelRatio: 4,
+              zoomInMultiplier: 2,
+              doubleTapDelay: 300,
+              doubleClickDelay: 300,
+              doubleClickMaxStops: 2,
+              scrollToZoom: true,
+            }}
+            toolbar={{
+              buttons: [
+                <LightboxCopyButton key="copy" url={value} />,
+                <OpenInNewTabButton key="open" url={value} />,
+                "close",
+              ],
+            }}
+            controller={{ closeOnPullDown: true, closeOnBackdropClick: true }}
           />
         </>
       );
