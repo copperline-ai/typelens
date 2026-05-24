@@ -140,12 +140,16 @@ function DocumentCard({
   collectionName,
   profile,
   onDeleted,
+  prevId,
+  nextId,
 }: {
   hit: SearchHit;
   fields: Collection["fields"];
   collectionName: string;
   profile: NonNullable<ReturnType<typeof useConnectionStore.getState>["profiles"][number]>;
   onDeleted?: () => void;
+  prevId?: string;
+  nextId?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -194,7 +198,14 @@ function DocumentCard({
         <span className="text-xs text-muted-foreground font-mono shrink-0">id</span>
         {docId ? (
           <Link
-            href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(docId)}`}
+            href={(() => {
+              const base = `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(docId)}`;
+              const params = new URLSearchParams();
+              if (prevId) params.set("prevId", prevId);
+              if (nextId) params.set("nextId", nextId);
+              const qs = params.toString();
+              return qs ? `${base}?${qs}` : base;
+            })()}
             onClick={(e) => e.stopPropagation()}
             className="text-xs font-mono font-medium truncate text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
           >
@@ -355,6 +366,12 @@ function DocumentsSection({
                   collectionName={collectionName}
                   profile={profile}
                   onDeleted={() => load(page)}
+                  prevId={i > 0 ? (hits[i - 1]?.document["id"] as string | undefined) : undefined}
+                  nextId={
+                    i < hits.length - 1
+                      ? (hits[i + 1]?.document["id"] as string | undefined)
+                      : undefined
+                  }
                 />
               ))}
             </div>

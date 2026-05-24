@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Clipboard, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Clipboard, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
@@ -28,10 +28,13 @@ import { CopyButton, FieldValue } from "@/components/field-value";
 
 export default function DocumentViewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ name: string; id: string }>;
+  searchParams: Promise<{ prevId?: string; nextId?: string }>;
 }) {
   const { name, id } = use(params);
+  const { prevId, nextId } = use(searchParams);
   const collectionName = decodeURIComponent(name);
   const documentId = decodeURIComponent(id);
 
@@ -97,23 +100,25 @@ export default function DocumentViewPage({
   return (
     <div className="space-y-6 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-1.5 min-w-0">
         <Link href={`/collections/${encodeURIComponent(collectionName)}`}>
           <Button variant="ghost" size="icon" title="Back to collection">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
+        {/* Export — left side */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleCopyJson}
+          disabled={!document}
+          title="Copy JSON"
+        >
+          <Clipboard className="h-4 w-4" />
+        </Button>
+        {/* Right side */}
         <div className="ml-auto shrink-0 flex items-center gap-1.5">
           <CopyButton text={documentId} label="Copy ID" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleCopyJson}
-            disabled={!document}
-            title="Copy JSON"
-          >
-            <Clipboard className="h-4 w-4" />
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -156,6 +161,24 @@ export default function DocumentViewPage({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          {prevId && (
+            <Link
+              href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(prevId)}`}
+            >
+              <Button variant="ghost" size="icon" title="Previous document">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
+          {nextId && (
+            <Link
+              href={`/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(nextId)}`}
+            >
+              <Button variant="ghost" size="icon" title="Next document">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
