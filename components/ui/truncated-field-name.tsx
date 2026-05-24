@@ -21,7 +21,13 @@ export function TruncatedFieldName({ name, className }: TruncatedFieldNameProps)
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(o) => {
+        if (o && !isTruncated()) return;
+        setOpen(o);
+      }}
+    >
       <PopoverTrigger asChild>
         <span ref={spanRef} className={className} onClick={handleClick}>
           {name}
