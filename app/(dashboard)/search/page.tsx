@@ -46,6 +46,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CopyButton, FieldValue } from "@/components/field-value";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TruncatedFieldName } from "@/components/ui/truncated-field-name";
 
 function getQueryBy(fields: CollectionField[]): string {
   const stringFields = fields.filter((f) => f.type === "string" || f.type === "string[]");
@@ -112,7 +113,7 @@ function SearchFieldsPopover({
           className="flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted hover:text-foreground"
         >
           <SlidersHorizontal className="h-3 w-3 shrink-0" />
-          <span className="max-w-[18rem] truncate">{displayLabel}</span>
+          <TruncatedFieldName name={displayLabel} className="max-w-[18rem] truncate" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="start">
@@ -179,7 +180,7 @@ function SearchFieldsPopover({
                     <span className="w-4 shrink-0 text-right text-[10px] text-muted-foreground/40">
                       {i + 1}
                     </span>
-                    <span className="flex-1 truncate text-xs font-mono">{name}</span>
+                    <TruncatedFieldName name={name} className="flex-1 truncate text-xs font-mono" />
                     <div className="flex shrink-0 items-center gap-0.5">
                       <button
                         type="button"
