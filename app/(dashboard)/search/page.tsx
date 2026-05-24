@@ -894,7 +894,9 @@ function SearchPageContent() {
                 </button>
               )}
               <div className="flex-1" />
-              <ShortcutsHelp />
+              <div className="hidden md:block">
+                <ShortcutsHelp />
+              </div>
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
