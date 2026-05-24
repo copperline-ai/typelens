@@ -207,6 +207,7 @@ export function FieldValue({
             close={() => setLightboxOpen(false)}
             slides={[{ src: value, title: getCaption(fieldName, document) }]}
             plugins={[Zoom, Captions]}
+            render={{ buttonPrev: () => null, buttonNext: () => null }}
             zoom={{
               maxZoomPixelRatio: 4,
               zoomInMultiplier: 2,
