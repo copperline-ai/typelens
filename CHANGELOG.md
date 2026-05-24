@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.30.1] - 2026-05-24
+
+### Bug Fixes
+
+- Fix settings dropdown order to API Keys, Theme, Log out (`ecb8280`)
+
 ## [1.30.0] - 2026-05-24
 
 ### Features
