@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.44.0] - 2026-05-24
+
+### Features
+
+- Show summary line when search options are collapsed (`09ece4a`) (COP-513)
+
 ## [1.43.2] - 2026-05-24
 
 ### Bug Fixes
