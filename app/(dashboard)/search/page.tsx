@@ -543,8 +543,12 @@ function KeyboardShortcuts({
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
       if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) {
-        if (isMobileRef.current && Math.abs(dy) > Math.abs(dx) && dy < -80) {
-          if (!collapsedRef.current) toggleRef.current();
+        if (isMobileRef.current && Math.abs(dy) > Math.abs(dx)) {
+          if (dy < -80) {
+            if (!collapsedRef.current) toggleRef.current();
+          } else if (dy > 80) {
+            if (collapsedRef.current) toggleRef.current();
+          }
         }
         return;
       }
