@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.34.1] - 2026-05-24
+
+### Bug Fixes
+
+- fix(popover): prevent auto-focus blue ring on settings dropdown open (COP-493) (`c51c1a4`)
+
 ## [1.34.0] - 2026-05-24
 
 ### Features
