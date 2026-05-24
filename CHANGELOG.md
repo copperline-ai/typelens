@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.43.0] - 2026-05-24
+
+### Features
+
+- Add collapsible search options with grid animation (COP-508) (`bc76ab2`)
+
 ## [1.42.2] - 2026-05-24
 
 ### Other
