@@ -447,9 +447,13 @@ type NavHandle = { prev: () => void; next: () => void };
 function KeyboardShortcuts({
   searchWrapperRef,
   navRef,
+  searchOptionsCollapsed,
+  toggleSearchOptionsCollapsed,
 }: {
   searchWrapperRef: React.RefObject<HTMLDivElement | null>;
   navRef: React.RefObject<NavHandle>;
+  searchOptionsCollapsed: boolean;
+  toggleSearchOptionsCollapsed: () => void;
 }) {
   const { refine: refineQuery } = useSearchBox();
   const { currentRefinement, nbPages, refine: refinePage } = usePagination();
@@ -458,6 +462,8 @@ function KeyboardShortcuts({
   const queryRef = useRef(refineQuery);
   const pageRef = useRef({ current: currentRefinement, total: nbPages, refine: refinePage });
   const isMobileRef = useRef(isMobile);
+  const searchOptionsCollapsedRef = useRef(searchOptionsCollapsed);
+  const toggleSearchOptionsCollapsedRef = useRef(toggleSearchOptionsCollapsed);
   useEffect(() => {
     queryRef.current = refineQuery;
   }, [refineQuery]);
@@ -467,6 +473,12 @@ function KeyboardShortcuts({
   useEffect(() => {
     isMobileRef.current = isMobile;
   }, [isMobile]);
+  useEffect(() => {
+    searchOptionsCollapsedRef.current = searchOptionsCollapsed;
+  }, [searchOptionsCollapsed]);
+  useEffect(() => {
+    toggleSearchOptionsCollapsedRef.current = toggleSearchOptionsCollapsed;
+  }, [toggleSearchOptionsCollapsed]);
 
   useEffect(() => {
     function getInput() {
@@ -530,6 +542,10 @@ function KeyboardShortcuts({
       if (!touch) return;
       const dx = touch.clientX - touchStartX;
       const dy = touch.clientY - touchStartY;
+      if (Math.abs(dy) > Math.abs(dx) && dy < -80) {
+        if (!searchOptionsCollapsedRef.current) toggleSearchOptionsCollapsedRef.current();
+        return;
+      }
       if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) return;
       if (dx < 0) {
         if (pageRef.current.current < pageRef.current.total - 1)
@@ -900,7 +916,12 @@ function SearchPageContent() {
       {adapter && selectedCollection && (
         <InstantSearch indexName={selectedCollection} searchClient={adapter.searchClient}>
           <Configure hitsPerPage={pageSize} />
-          <KeyboardShortcuts searchWrapperRef={searchWrapperRef} navRef={navRef} />
+          <KeyboardShortcuts
+            searchWrapperRef={searchWrapperRef}
+            navRef={navRef}
+            searchOptionsCollapsed={searchOptionsCollapsed}
+            toggleSearchOptionsCollapsed={toggleSearchOptionsCollapsed}
+          />
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             <SearchError />
             <div
