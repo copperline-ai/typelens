@@ -793,16 +793,11 @@ function SearchPageContent() {
   }
 
   if (status === "connecting") {
-    return (
-      <div className="flex h-full items-center justify-center gap-2">
-        <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-500" />
-        <p className="text-sm text-muted-foreground">Connecting…</p>
-      </div>
-    );
+    return <ConnectingState profile={profile} fullPage />;
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4 sm:p-6">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
         {loading ? (
