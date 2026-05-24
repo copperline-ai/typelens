@@ -18,7 +18,7 @@ import {
 } from "react-instantsearch";
 import TypesenseInstantSearchAdapter from "typesense-instantsearch-adapter";
 import { ChevronDown, ChevronUp, Code2, Keyboard, SlidersHorizontal, X } from "lucide-react";
-import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
+import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
 import { listCollections, type Collection, type CollectionField } from "@/lib/typesense-client";
 import {
   Select,
@@ -669,6 +669,7 @@ function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const profile = useConnectionStore(selectActiveProfile);
+  const status = useConnectionStore(selectStatus);
 
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
@@ -769,6 +770,15 @@ function SearchPageContent() {
         <p className="text-sm text-muted-foreground">
           No active connection. Configure one in Settings → Connections.
         </p>
+      </div>
+    );
+  }
+
+  if (status === "connecting") {
+    return (
+      <div className="flex h-full items-center justify-center gap-2">
+        <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-500" />
+        <p className="text-sm text-muted-foreground">Connecting…</p>
       </div>
     );
   }

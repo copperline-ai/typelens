@@ -255,3 +255,4 @@ export const selectLastCollectionCount = (s: ReturnType<typeof useConnectionStor
   s.lastCollectionCount;
 export const selectLastTestedAt = (s: ReturnType<typeof useConnectionStore.getState>) =>
   s.lastTestedAt;
+export const selectStatus = (s: ReturnType<typeof useConnectionStore.getState>) => s.status;
