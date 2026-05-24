@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.36.0] - 2026-05-24
+
+### Features
+
+- Unify connecting display across all screens (COP-496) (`35660c2`)
+
 ## [1.35.1] - 2026-05-24
 
 ### Bug Fixes
