@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.40.0] - 2026-05-24
+
+### Features
+
+- Add edge-swipe page navigation for mobile (COP-503) (`3008407`)
+
 ## [1.39.0] - 2026-05-24
 
 ### Features
