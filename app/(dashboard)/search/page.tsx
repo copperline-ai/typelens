@@ -885,7 +885,6 @@ function SearchPageContent() {
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <Stats classNames={{ root: "text-xs text-muted-foreground" }} />
               {facetFields.length > 0 && (
                 <button
                   type="button"
@@ -932,6 +931,7 @@ function SearchPageContent() {
                 </button>
               </div>
               <ExportButton collectionName={selectedCollection} queryBy={queryBy} />
+              <Stats classNames={{ root: "text-xs text-muted-foreground" }} />
             </div>
             <div className="flex min-h-0 flex-1 flex-col sm:flex-row gap-4 sm:gap-6 overflow-hidden">
               {facetFields.length > 0 && (
