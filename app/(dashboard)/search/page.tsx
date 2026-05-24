@@ -736,11 +736,23 @@ function SearchPageContent() {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("typelens-filters-collapsed") === "true";
   });
+  const [headerCollapsed, setHeaderCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("typelens-search-header-collapsed") === "true";
+  });
 
   const toggleFiltersCollapsed = () => {
     setFiltersCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem("typelens-filters-collapsed", String(next));
+      return next;
+    });
+  };
+
+  const toggleHeaderCollapsed = () => {
+    setHeaderCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("typelens-search-header-collapsed", String(next));
       return next;
     });
   };
@@ -820,51 +832,74 @@ function SearchPageContent() {
 
   return (
     <div className="flex h-full flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-        <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
-        {loading ? (
-          <div className="h-10 w-48 animate-pulse rounded-md border bg-muted" />
-        ) : (
-          <Select value={selectedCollection} onValueChange={setSelectedCollection}>
-            <SelectTrigger className="w-full sm:w-72">
-              <SelectValue placeholder="Select a collection…" />
-            </SelectTrigger>
-            <SelectContent>
-              {collections.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        {selectedCollection && activeCollection && (
-          <div className="flex flex-wrap items-center gap-2">
-            <SearchFieldsPopover
-              fields={activeCollection.fields}
-              searchMode={searchMode}
-              onSearchModeChange={setSearchMode}
-              customQueryFields={customQueryFields}
-              onCustomQueryFieldsChange={setCustomQueryFields}
-              autoQueryFields={autoQueryFields}
-            />
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Per page</span>
-              <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-                <SelectTrigger className="h-6 w-16 px-2 text-xs">
-                  <SelectValue />
+      <div className="relative">
+        <div
+          className={cn(
+            "overflow-hidden transition-[max-height] duration-300 ease-in-out",
+            headerCollapsed ? "max-h-10" : "max-h-48",
+          )}
+        >
+          <div className="flex flex-wrap items-center gap-2 pr-10 sm:gap-4">
+            {!headerCollapsed && <h1 className="shrink-0 text-2xl font-semibold">Search</h1>}
+            {loading ? (
+              <div className="h-10 w-48 animate-pulse rounded-md border bg-muted" />
+            ) : (
+              <Select value={selectedCollection} onValueChange={setSelectedCollection}>
+                <SelectTrigger className="w-full sm:w-72">
+                  <SelectValue placeholder="Select a collection…" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[10, 20, 50, 100].map((n) => (
-                    <SelectItem key={n} value={String(n)} className="text-xs">
-                      {n}
+                  {collections.map((c) => (
+                    <SelectItem key={c.name} value={c.name}>
+                      {c.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            )}
+            {selectedCollection && activeCollection && (
+              <div className="flex flex-wrap items-center gap-2">
+                <SearchFieldsPopover
+                  fields={activeCollection.fields}
+                  searchMode={searchMode}
+                  onSearchModeChange={setSearchMode}
+                  customQueryFields={customQueryFields}
+                  onCustomQueryFieldsChange={setCustomQueryFields}
+                  autoQueryFields={autoQueryFields}
+                />
+                {!headerCollapsed && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground">Per page</span>
+                    <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                      <SelectTrigger className="h-6 w-16 px-2 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[10, 20, 50, 100].map((n) => (
+                          <SelectItem key={n} value={String(n)} className="text-xs">
+                            {n}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        <button
+          type="button"
+          onClick={toggleHeaderCollapsed}
+          className="absolute right-0 top-0 flex h-10 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title={headerCollapsed ? "Expand header" : "Collapse header"}
+        >
+          {headerCollapsed ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronUp className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       {!selectedCollection && !loading && (
