@@ -793,16 +793,11 @@ function SearchPageContent() {
   }
 
   if (status === "connecting") {
-    return (
-      <div className="flex h-full items-center justify-center gap-2">
-        <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-500" />
-        <p className="text-sm text-muted-foreground">Connecting…</p>
-      </div>
-    );
+    return <ConnectingState profile={profile} fullPage />;
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-4 sm:p-6">
+    <div className="flex h-full flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         <h1 className="shrink-0 text-2xl font-semibold">Search</h1>
         {loading ? (
@@ -885,7 +880,6 @@ function SearchPageContent() {
               />
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <Stats classNames={{ root: "text-xs text-muted-foreground" }} />
               {facetFields.length > 0 && (
                 <button
                   type="button"
@@ -932,6 +926,7 @@ function SearchPageContent() {
                 </button>
               </div>
               <ExportButton collectionName={selectedCollection} queryBy={queryBy} />
+              <Stats classNames={{ root: "text-xs text-muted-foreground" }} />
             </div>
             <div className="flex min-h-0 flex-1 flex-col sm:flex-row gap-4 sm:gap-6 overflow-hidden">
               {facetFields.length > 0 && (
