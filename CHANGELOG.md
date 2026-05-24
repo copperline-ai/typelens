@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.31.0] - 2026-05-24
+
+### Features
+- Add copy connection button in connections panel (`cb65c3e`)
+
+### Bug Fixes
+- Deduplicate refresh toast notifications using stable id (`4037b15`)
+
 ## [1.30.1] - 2026-05-24
 
 ### Bug Fixes
