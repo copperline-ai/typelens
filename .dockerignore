@@ -3,3 +3,23 @@ node_modules
 .git
 .env*
 *.local
+
+# docs & meta
+README.md
+CHANGELOG.md
+*.md
+LICENSE
+
+# CI
+.github/
+
+# tests
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+
+# dev tools
+.husky/
+.commitlintrc*
+.release-it*
+vitest.config*
