@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.42.1] - 2026-05-24
+
+### Bug Fixes
+
+- Fix double-fire issue on swipe for search and full-screen navigation (`1681d53`)
+
 ## [1.42.0] - 2026-05-24
 
 ### Features
