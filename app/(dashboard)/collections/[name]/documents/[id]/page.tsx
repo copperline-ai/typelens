@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { CopyButton, FieldValue } from "@/components/field-value";
+import { TruncatedFieldName } from "@/components/ui/truncated-field-name";
 
 export default function DocumentViewPage({
   params,
@@ -219,7 +220,10 @@ export default function DocumentViewPage({
                 className="flex items-start gap-3 px-4 py-3 hover:bg-muted/20 transition-colors"
               >
                 <div className="w-36 shrink-0 pt-px">
-                  <span className="text-xs font-mono text-muted-foreground">{key}</span>
+                  <TruncatedFieldName
+                    name={key}
+                    className="truncate text-xs font-mono text-muted-foreground"
+                  />
                   {fieldDef && (
                     <span className="block text-[10px] text-muted-foreground/50 leading-none mt-0.5">
                       {fieldDef.type}
