@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.32.0] - 2026-05-24
+
+### Features
+
+- Use Drawer on mobile and Dialog on desktop for release notes (COP-489) (`7398b12`)
+
 ## [1.31.0] - 2026-05-24
 
 ### Features
