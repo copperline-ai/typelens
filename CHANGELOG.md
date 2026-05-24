@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.43.2] - 2026-05-24
+
+### Bug Fixes
+
+- Fix lightbox navigation to hide previous/next buttons when there is only a single image (`5cdcf94`)
+
 ## [1.43.1] - 2026-05-24
 
 ### Bug Fixes
