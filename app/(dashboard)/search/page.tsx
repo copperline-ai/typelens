@@ -292,7 +292,7 @@ function HitCard({
                 {value}
               </Link>
             ) : (
-              <FieldValue value={value} />
+              <FieldValue value={value} fieldName={key} document={hit} />
             )}
             {key === "id" && typeof value === "string" && (
               <CopyButton text={value} label="Copy ID" />

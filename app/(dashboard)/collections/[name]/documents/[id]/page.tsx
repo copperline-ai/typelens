@@ -231,7 +231,7 @@ export default function DocumentViewPage({
                   )}
                 </div>
                 <div className="flex-1 min-w-0 pt-px flex items-start gap-1.5">
-                  <FieldValue value={value} />
+                  <FieldValue value={value} fieldName={key} document={document} />
                   {key === "id" && typeof value === "string" && (
                     <CopyButton text={value} label="Copy ID" />
                   )}

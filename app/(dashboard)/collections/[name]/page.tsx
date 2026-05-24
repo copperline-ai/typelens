@@ -272,7 +272,7 @@ function DocumentCard({
                   )}
                 </div>
                 <div className="flex-1 min-w-0 pt-px flex items-start gap-1.5">
-                  <FieldValue value={value} />
+                  <FieldValue value={value} fieldName={key} document={doc} />
                   {key === "id" && typeof value === "string" && <CopyButton text={value} />}
                 </div>
               </div>
@@ -528,7 +528,6 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       </div>
 
       {status === "connecting" && <ConnectingState profile={activeProfile} />}
-
 
       {isLoading && (
         <div className="space-y-4">
