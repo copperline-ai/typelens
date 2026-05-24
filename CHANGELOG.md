@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.42.0] - 2026-05-24
+
+### Features
+
+- Lightbox enhancements: zoom, captions, copy URL, open in new tab ([`9c218ab`](https://github.com/your-repo/typelens/commit/9c218ab))
+
 ## [1.41.0] - 2026-05-24
 
 ### Features
