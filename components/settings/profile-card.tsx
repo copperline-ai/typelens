@@ -49,71 +49,25 @@ export function ProfileCard({ profile, isActive, onEdit, onCopy }: Props) {
   return (
     <>
       <Card className={isActive ? "border-primary/50 bg-primary/5" : ""}>
-        <CardContent className="pt-4">
-          <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
-            <div className="space-y-0.5 min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium">{profile.name}</span>
-                {isActive && <Badge className="h-5 px-1.5 text-[10px]">Active</Badge>}
-                {isReadOnly && (
-                  <Badge variant="secondary" className="h-5 gap-1 px-1.5 text-[10px]">
-                    <Lock className="h-2.5 w-2.5" />
-                    Pre-configured
-                  </Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {profile.protocol}://{profile.host}:{profile.port}
-              </p>
-              <p className="font-mono text-xs text-muted-foreground">
-                API Key: {profile.apiKey.slice(0, 4)}
-                {"•".repeat(8)}
-              </p>
-            </div>
-            <div className="flex items-center gap-1 shrink-0 ml-auto">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={handleTest}
-                disabled={testState.status === "testing"}
-                title="Test connection"
-              >
-                <Wifi className="h-4 w-4" />
-              </Button>
-              {!isActive && (
-                <Button size="sm" variant="outline" onClick={() => setActiveProfile(profile.id)}>
-                  Set Active
-                </Button>
+        <CardContent className="flex flex-col gap-0 pt-4">
+          <div className="space-y-0.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium">{profile.name}</span>
+              {isActive && <Badge className="h-5 px-1.5 text-[10px]">Active</Badge>}
+              {isReadOnly && (
+                <Badge variant="secondary" className="h-5 gap-1 px-1.5 text-[10px]">
+                  <Lock className="h-2.5 w-2.5" />
+                  Pre-configured
+                </Badge>
               )}
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={onEdit}
-                title="Edit"
-                disabled={isReadOnly}
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onCopy?.(profile)}
-                title="Copy"
-                disabled={isReadOnly}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-destructive hover:text-destructive"
-                onClick={() => setDeleteOpen(true)}
-                title="Delete"
-                disabled={isReadOnly}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
+            <p className="text-sm text-muted-foreground">
+              {profile.protocol}://{profile.host}:{profile.port}
+            </p>
+            <p className="font-mono text-xs text-muted-foreground">
+              API Key: {profile.apiKey.slice(0, 4)}
+              {"•".repeat(8)}
+            </p>
           </div>
 
           {testState.status !== "idle" && (
@@ -138,6 +92,52 @@ export function ProfileCard({ profile, isActive, onEdit, onCopy }: Props) {
               )}
             </div>
           )}
+
+          <div className="mt-3 pt-3 border-t flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleTest}
+                disabled={testState.status === "testing"}
+                title="Test connection"
+              >
+                <Wifi className="h-3.5 w-3.5 mr-1.5" />
+                Test
+              </Button>
+              {!isActive && (
+                <Button size="sm" variant="outline" onClick={() => setActiveProfile(profile.id)}>
+                  Set Active
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              {!isReadOnly && (
+                <>
+                  <Button size="icon" variant="ghost" onClick={onEdit} title="Edit">
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => onCopy?.(profile)}
+                    title="Copy"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setDeleteOpen(true)}
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
