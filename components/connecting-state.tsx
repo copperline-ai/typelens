@@ -19,11 +19,7 @@ export function ConnectingState({
           <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-500" />
           <p className="text-sm text-muted-foreground">Connecting…</p>
         </div>
-        {profile && (
-          <p className="text-xs text-muted-foreground">
-            {profile.protocol}://{profile.host}:{profile.port}
-          </p>
-        )}
+        {profile && <p className="text-xs text-muted-foreground">Connecting to {profile.name}…</p>}
       </div>
     </div>
   );

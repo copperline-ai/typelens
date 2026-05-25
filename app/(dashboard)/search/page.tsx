@@ -850,7 +850,7 @@ function SearchPageContent() {
     );
   }
 
-  if (status === "connecting") {
+  if (status === "connecting" && collections.length === 0) {
     return <ConnectingState profile={profile} fullPage />;
   }
 
