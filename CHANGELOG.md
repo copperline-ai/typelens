@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.0] - 2026-05-25
+
+### Features
+
+- Sidebar persistence, accurate doc counts, and removal of aliases page (`02037c8`)
+
 ## [1.49.0] - 2026-05-25
 
 ### Features
