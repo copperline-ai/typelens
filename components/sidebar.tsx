@@ -13,7 +13,6 @@ import {
   Search,
   Settings,
   Sun,
-  ArrowLeftRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -26,7 +25,6 @@ import { ReleaseNotesModal } from "@/components/release-notes-modal";
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
-  { href: "/aliases", label: "Aliases", icon: ArrowLeftRight },
   { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 
@@ -96,7 +94,14 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <img src="/logo.png" alt="typelens icon" width={36} height={36} className="h-9 w-9" />
+            <span
+              className="text-2xl font-semibold leading-none tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+              aria-label="typelens icon"
+            >
+              <span style={{ color: "#0067a3" }}>t</span>
+              <span style={{ color: "#00d2da" }}>l</span>
+            </span>
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}
@@ -157,6 +162,13 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             className="w-44 p-1"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
+            <Link
+              href="/api-keys"
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Key className="h-4 w-4 shrink-0" />
+              <span>API Keys</span>
+            </Link>
             <button
               onClick={cycleTheme}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -173,13 +185,6 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
                 <span>Log out</span>
               </button>
             )}
-            <Link
-              href="/api-keys"
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Key className="h-4 w-4 shrink-0" />
-              <span>API Keys</span>
-            </Link>
           </PopoverContent>
         </Popover>
       </div>
