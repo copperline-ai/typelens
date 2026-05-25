@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.3] - 2026-05-25
+
+### Bug Fixes
+
+- Close settings popover when an item is clicked (`921c749`)
+
 ## [1.50.2] - 2026-05-25
 
 ### Other
