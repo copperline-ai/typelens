@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.50.5] - 2026-05-25
+
+### Bug Fixes
+- Remove highlight ring from search input and collections dropdown (`e6f6c1b`, `356ae80`)
+
+### Other
+- Refactor responsive connections card with footer action row in settings (`c34896c`)
+
 ## [1.50.4] - 2026-05-25
 
 ### Bug Fixes
