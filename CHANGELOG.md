@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.1] - 2026-05-25
+
+### Bug Fixes
+- Fix race condition: hide ConnectingState when data already loaded (`934c8a1`, `4de06b4`)
+- Show 'Connecting to [server name]...' instead of raw host address (`d19d864`)
+
 ## [1.50.0] - 2026-05-25
 
 ### Features
