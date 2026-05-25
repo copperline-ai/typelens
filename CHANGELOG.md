@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.48.1] - 2026-05-25
+
+Trigger deploy of alias management UI
+
+### Other
+
+- Manual release (no commits since last tag in this app's path filter).
+
 ## [1.48.0] - 2026-05-25
 
 ### Features
