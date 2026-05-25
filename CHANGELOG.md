@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.49.0] - 2026-05-25
+
+### Features
+
+- Add alias management UI page with create/delete (`9292019`)
+
 ## [1.48.1] - 2026-05-25
 
 Trigger deploy of alias management UI
