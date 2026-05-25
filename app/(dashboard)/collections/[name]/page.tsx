@@ -13,7 +13,6 @@ import {
   FileJson,
   Layers,
   Pencil,
-  RefreshCw,
   Trash2,
 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
@@ -433,14 +432,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const activeProfile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore(selectStatus);
   const router = useRouter();
-  const {
-    data: collection,
-    isLoading,
-    isError,
-    error,
-    isFetching,
-    refetch,
-  } = useCollection(collectionName);
+  const { data: collection, isLoading, isError, error, refetch } = useCollection(collectionName);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -561,16 +553,6 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                title="Refresh"
-              >
-                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-              </Button>
-
               <Button
                 variant="outline"
                 size="icon"
