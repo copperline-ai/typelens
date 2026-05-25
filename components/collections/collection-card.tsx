@@ -23,12 +23,15 @@ const fmt = new Intl.NumberFormat();
 
 interface Props {
   collection: Collection;
+  /** Accurate document count from a `q=*` search; falls back to `num_documents`. */
+  count?: number;
   onDelete?: () => Promise<void>;
   onClone?: (newName: string) => void;
 }
 
-export function CollectionCard({ collection, onDelete, onClone }: Props) {
+export function CollectionCard({ collection, count, onDelete, onClone }: Props) {
   const { name, num_documents, fields, default_sorting_field } = collection;
+  const docCount = count ?? num_documents;
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
@@ -56,7 +59,7 @@ export function CollectionCard({ collection, onDelete, onClone }: Props) {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-1.5 min-w-0">
             <Badge variant="secondary">
-              {fmt.format(num_documents)} {num_documents === 1 ? "doc" : "docs"}
+              {fmt.format(docCount)} {docCount === 1 ? "doc" : "docs"}
             </Badge>
             <Badge variant="secondary">{fields.length} fields</Badge>
             {default_sorting_field && (
@@ -99,8 +102,8 @@ export function CollectionCard({ collection, onDelete, onClone }: Props) {
               <AlertDialogDescription>
                 This will permanently delete{" "}
                 <span className="font-mono font-medium text-foreground">{name}</span> and all{" "}
-                {fmt.format(num_documents)} {num_documents === 1 ? "document" : "documents"}. This
-                action cannot be undone.
+                {fmt.format(docCount)} {docCount === 1 ? "document" : "documents"}. This action
+                cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
