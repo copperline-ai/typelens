@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.50.4] - 2026-05-25
+
+### Bug Fixes
+
+- Consolidate connecting messages to a single line with conditional text (`4b245d0`)
+- Fix connecting message with duplicate ellipsis (`a7fabe2`)
+
 ## [1.50.3] - 2026-05-25
 
 ### Bug Fixes
