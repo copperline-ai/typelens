@@ -51,6 +51,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const theme = useThemeStore(selectTheme);
   const { setTheme } = useThemeStore(selectThemeActions);
   const appVersion = useAppVersion();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   useEffect(() => {
@@ -150,7 +151,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           </button>
         )}
         <ReleaseNotesModal open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen} />
-        <Popover>
+        <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
           <PopoverTrigger asChild>
             <button
               title="Settings"
@@ -167,7 +168,10 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <button
-              onClick={cycleTheme}
+              onClick={() => {
+                cycleTheme();
+                setSettingsOpen(false);
+              }}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <ThemeIcon className="h-4 w-4 shrink-0" />
@@ -175,7 +179,10 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             </button>
             {authEnabled && (
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  handleLogout();
+                  setSettingsOpen(false);
+                }}
                 className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <LogOut className="h-4 w-4 shrink-0" />
@@ -184,6 +191,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             )}
             <Link
               href="/api-keys"
+              onClick={() => setSettingsOpen(false)}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Key className="h-4 w-4 shrink-0" />
