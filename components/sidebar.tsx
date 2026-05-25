@@ -13,6 +13,7 @@ import {
   Search,
   Settings,
   Sun,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ import { ReleaseNotesModal } from "@/components/release-notes-modal";
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
+  { href: "/aliases", label: "Aliases", icon: ArrowLeftRight },
   { href: "/settings/connection", label: "Connections", icon: Cable },
 ];
 
