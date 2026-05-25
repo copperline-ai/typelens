@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.48.0] - 2026-05-25
+
+### Features
+- Enhance image detection with field-name heuristics, data URI support, and content-type probing (`7a35ba1`)
+
 ## [1.47.0] - 2026-05-25
 
 ### Features
