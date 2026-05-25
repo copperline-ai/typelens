@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Cable, Database, Key, LogOut, Moon, Monitor, Search, Settings, Sun } from "lucide-react";
+import { Database, Key, LogOut, Moon, Monitor, Search, Server, Settings, Sun } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
@@ -20,7 +20,7 @@ import { ReleaseNotesModal } from "@/components/release-notes-modal";
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
-  { href: "/settings/connection", label: "Connections", icon: Cable },
+  { href: "/settings/connection", label: "Connections", icon: Server },
 ];
 
 const statusDot: Record<ConnectionStatus, string> = {
