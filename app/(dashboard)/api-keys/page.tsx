@@ -209,7 +209,9 @@ export default function ApiKeysPage() {
         </div>
       )}
 
-      {activeProfile && status === "connecting" && <ConnectingState profile={activeProfile} />}
+      {activeProfile && status === "connecting" && !keys && (
+        <ConnectingState profile={activeProfile} />
+      )}
 
       {activeProfile && status === "error" && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-destructive/20 bg-destructive/5 p-12 text-center">

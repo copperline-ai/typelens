@@ -519,7 +519,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
         </Link>
       </div>
 
-      {status === "connecting" && <ConnectingState profile={activeProfile} />}
+      {status === "connecting" && !collection && <ConnectingState profile={activeProfile} />}
 
       {isLoading && (
         <div className="space-y-4">
