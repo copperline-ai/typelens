@@ -11,7 +11,14 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "lib/**/*.test.tsx", "app/**/*.test.ts", "app/**/*.test.tsx"],
+    include: [
+      "lib/**/*.test.ts",
+      "lib/**/*.test.tsx",
+      "app/**/*.test.ts",
+      "app/**/*.test.tsx",
+      "components/**/*.test.ts",
+      "components/**/*.test.tsx",
+    ],
     passWithNoTests: true,
   },
   resolve: {
