@@ -11,6 +11,8 @@ export {
 export type { Theme } from "./stores/theme";
 export { useThemeStore, selectTheme, selectThemeActions } from "./stores/theme";
 
+export { useSidebarStore, selectSidebarCollapsed, selectSidebarActions } from "./stores/sidebar";
+
 import { useConnectionStore, selectActiveProfile } from "./stores/connection";
 
 export function useActiveProfile() {

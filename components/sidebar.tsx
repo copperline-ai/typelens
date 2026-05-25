@@ -17,7 +17,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
+import {
+  useThemeStore,
+  selectTheme,
+  selectThemeActions,
+  useSidebarStore,
+  selectSidebarCollapsed,
+  selectSidebarActions,
+} from "@/lib/store";
 import type { Theme } from "@/lib/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppVersion } from "@/lib/hooks/use-app-version";
@@ -41,18 +48,16 @@ const themeOrder: Theme[] = ["system", "light", "dark"];
 export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = useSidebarStore(selectSidebarCollapsed);
+  const { toggleCollapsed, hydrateFromStorage } = useSidebarStore(selectSidebarActions);
   const theme = useThemeStore(selectTheme);
   const { setTheme } = useThemeStore(selectThemeActions);
   const appVersion = useAppVersion();
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   useEffect(() => {
-    const check = () => {
-      if (window.innerWidth < 768) setCollapsed(true);
-    };
-    check();
-  }, []);
+    hydrateFromStorage();
+  }, [hydrateFromStorage]);
 
   function cycleTheme() {
     const idx = themeOrder.indexOf(theme);
@@ -91,12 +96,18 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           </span>
         )}
         <button
-          onClick={() => setCollapsed((c) => !c)}
+          onClick={toggleCollapsed}
           className="text-muted-foreground transition-colors hover:text-foreground"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <img src="/logo.png" alt="typelens icon" width={36} height={36} className="h-9 w-9" />
+            <span
+              className="text-xl font-semibold leading-none tracking-tight"
+              style={{ fontFamily: "'Space Grotesk', Inter, system-ui, sans-serif" }}
+            >
+              <span style={{ color: "#0067a3" }}>t</span>
+              <span style={{ color: "#00d2da" }}>l</span>
+            </span>
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}

@@ -8,6 +8,7 @@ import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/st
 import { ConnectingState } from "@/components/connecting-state";
 import { deleteCollection, type Collection } from "@/lib/typesense-client";
 import { useCollections } from "@/lib/hooks/use-collections";
+import { useCollectionCounts } from "@/lib/hooks/use-collection-counts";
 import { queryKeys } from "@/lib/api/query-keys";
 import { CollectionCard } from "@/components/collections/collection-card";
 import { CreateCollectionDialog } from "@/components/collections/create-collection-dialog";
@@ -55,6 +56,7 @@ export default function CollectionsPage() {
   const actions = useConnectionStore(selectActions);
   const queryClient = useQueryClient();
   const { data: collections, isLoading, isError, error, refetch } = useCollections();
+  const { data: counts } = useCollectionCounts(collections?.map((c) => c.name) ?? []);
   const [createOpen, setCreateOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name-asc");
 
@@ -179,6 +181,7 @@ export default function CollectionsPage() {
             <CollectionCard
               key={c.name}
               collection={c}
+              count={counts?.[c.name]}
               onDelete={async () => {
                 await deleteCollection(activeProfile!, c.name);
                 invalidateCollections();
