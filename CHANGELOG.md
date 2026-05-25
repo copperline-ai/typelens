@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.50.2] - 2026-05-25
+
+### Other
+
+- Change connections nav icon from Cable to Server (`d9da43a`, `d31029d`)
+- Refactor CreateCollectionDialog to use Drawer on mobile and Dialog on desktop (`58883a1`)
+
 ## [1.50.1] - 2026-05-25
 
 ### Bug Fixes
