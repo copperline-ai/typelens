@@ -2,14 +2,7 @@
 
 import { Fragment, useState, type ElementType } from "react";
 import Link from "next/link";
-import {
-  ArrowDownAZ,
-  ArrowUpAZ,
-  CalendarArrowDown,
-  CalendarArrowUp,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, CalendarArrowDown, CalendarArrowUp, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { ConnectingState } from "@/components/connecting-state";
@@ -61,7 +54,7 @@ export default function CollectionsPage() {
   const status = useConnectionStore((s) => s.status);
   const actions = useConnectionStore(selectActions);
   const queryClient = useQueryClient();
-  const { data: collections, isLoading, isError, error, isFetching, refetch } = useCollections();
+  const { data: collections, isLoading, isError, error, refetch } = useCollections();
   const [createOpen, setCreateOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name-asc");
 
@@ -84,17 +77,6 @@ export default function CollectionsPage() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {activeProfile && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                title="Refresh"
-              >
-                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-              </Button>
-            )}
             {activeProfile && (
               <Button size="icon" onClick={() => setCreateOpen(true)} title="New Collection">
                 <Plus className="h-4 w-4" />
