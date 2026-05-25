@@ -59,6 +59,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
 
   const appVersion = useAppVersion();
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const ThemeIcon = themeIcons[theme];
   const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
@@ -112,7 +113,7 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
           </button>
         }
       />
-      <Popover>
+      <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
         <PopoverTrigger asChild>
           <button
             className="md:hidden flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -129,13 +130,17 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
         >
           <Link
             href="/api-keys"
+            onClick={() => setSettingsOpen(false)}
             className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <Key className="h-4 w-4 shrink-0" />
             <span>API Keys</span>
           </Link>
           <button
-            onClick={cycleTheme}
+            onClick={() => {
+              cycleTheme();
+              setSettingsOpen(false);
+            }}
             className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ThemeIcon className="h-4 w-4 shrink-0" />
@@ -143,7 +148,10 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
           </button>
           {authEnabled && (
             <button
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setSettingsOpen(false);
+              }}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <LogOut className="h-4 w-4 shrink-0" />
@@ -152,7 +160,10 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
           )}
           <div className="border-t mt-1 pt-1 px-2 pb-0.5">
             <button
-              onClick={() => setReleaseNotesOpen(true)}
+              onClick={() => {
+                setReleaseNotesOpen(true);
+                setSettingsOpen(false);
+              }}
               className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
               title="View release notes"
             >
