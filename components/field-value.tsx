@@ -19,10 +19,43 @@ export function isUrl(s: string): boolean {
   }
 }
 
-export function isImageUrl(s: string): boolean {
+const IMAGE_FIELD_NAMES = [
+  "photo",
+  "image",
+  "picture",
+  "avatar",
+  "thumbnail",
+  "cover",
+  "screenshot",
+  "img",
+  "icon",
+  "logo",
+  "banner",
+  "hero",
+];
+
+export function isImageUrl(s: string, fieldName?: string): boolean {
+  if (fieldName && IMAGE_FIELD_NAMES.some((name) => name === fieldName.toLowerCase())) {
+    return true;
+  }
+  if (s.startsWith("data:image/")) {
+    return true;
+  }
   try {
     const { pathname } = new URL(s);
-    return /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i.test(pathname);
+    if (/\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i.test(pathname)) return true;
+    if (/\/(photo|image|img)(\/|[-_])/.test(pathname)) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export async function probeImageUrl(url: string): Promise<boolean> {
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    const contentType = res.headers.get("content-type");
+    return contentType?.startsWith("image/") ?? false;
   } catch {
     return false;
   }
@@ -185,7 +218,7 @@ export function FieldValue({
     return <span className="text-xs font-mono text-blue-600 dark:text-blue-400">{value}</span>;
   }
   if (typeof value === "string") {
-    if (isImageUrl(value)) {
+    if (isImageUrl(value, fieldName)) {
       return (
         <>
           <button
