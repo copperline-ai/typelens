@@ -15,13 +15,9 @@ import {
 import { inferFieldsFromRecords } from "@/lib/schema-utils";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { useMobile } from "@/lib/hooks/use-mobile";
 import {
   Form,
   FormControl,
@@ -248,6 +244,7 @@ interface Props {
 }
 
 export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props) {
+  const isMobile = useMobile();
   const activeProfile = useConnectionStore(selectActiveProfile);
   const [mode, setMode] = useState<Mode>("auto");
   const [parsedRecords, setParsedRecords] = useState<Record<string, unknown>[]>([]);
@@ -459,6 +456,187 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
 
   const isSubmitting = submitState.status === "creating" || submitState.status === "importing";
 
+  const content = (
+    <>
+      <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
+        {(["auto", "manual", "file"] as Mode[]).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setMode(m)}
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors capitalize ${
+              mode === m
+                ? "bg-background shadow-sm font-medium"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {m === "auto" ? "Auto" : m === "manual" ? "Manual" : "File"}
+          </button>
+        ))}
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className={`grid grid-cols-1 gap-4 ${mode !== "auto" ? "sm:grid-cols-2" : ""}`}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Collection Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="my_collection" className="font-mono" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {mode !== "auto" && (
+              <FormField
+                control={form.control}
+                name="default_sorting_field"
+                render={({ field }) => {
+                  const fieldNames = form
+                    .watch("fields")
+                    .map((f) => f.name)
+                    .filter(Boolean);
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Default Sort Field{" "}
+                        <span className="text-muted-foreground font-normal">(optional)</span>{" "}
+                        <a
+                          href="https://typesense.org/docs/30.2/api/collections.html#schema-parameters"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
+                        >
+                          Learn more
+                        </a>
+                      </FormLabel>
+                      <Select
+                        onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
+                        value={field.value || "__none__"}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="font-mono">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="__none__" className="text-muted-foreground italic">
+                            None
+                          </SelectItem>
+                          {fieldNames.map((name) => (
+                            <SelectItem key={name} value={name} className="font-mono">
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            )}
+          </div>
+
+          {mode === "auto" && (
+            <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Auto schema detection</p>
+              <p>
+                Typesense will automatically detect field types when documents are added. Every
+                field in your documents will be indexed for search and filtering.{" "}
+                <a
+                  href="https://typesense.org/docs/30.2/api/collections.html#with-auto-schema-detection"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Learn more
+                </a>
+              </p>
+            </div>
+          )}
+
+          {mode === "file" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium">Upload File</label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Schema JSON, data JSON/JSONL/NDJSON, or CSV — schema files are loaded directly;
+                  data files have fields inferred from records
+                </p>
+              </div>
+              <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  {fileInfo
+                    ? fileInfo.count > 0
+                      ? `${fileInfo.name} — ${fileInfo.count.toLocaleString()} records`
+                      : `${fileInfo.name} — schema loaded`
+                    : "Click to choose a .json, .jsonl, .ndjson, or .csv file"}
+                </span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.jsonl,.ndjson,.csv"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+
+              {fileInfo && fileInfo.count > 0 && (
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={importRecords}
+                    onChange={(e) => setImportRecords(e.target.checked)}
+                    className="h-4 w-4 rounded border-border accent-primary"
+                  />
+                  Also import all {fileInfo.count.toLocaleString()} records into the collection
+                </label>
+              )}
+            </div>
+          )}
+
+          {mode !== "auto" && <FieldsTable form={form} />}
+
+          {submitState.status === "error" && (
+            <p className="text-sm text-destructive">{submitState.message}</p>
+          )}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting || !activeProfile}>
+              {submitState.status === "creating"
+                ? "Creating…"
+                : submitState.status === "importing"
+                  ? `Importing ${submitState.imported.toLocaleString()} / ${submitState.total.toLocaleString()}…`
+                  : "Create Collection"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent className="max-h-[85vh] flex flex-col px-4 pb-6">
+          <DrawerHeader className="text-left px-0">
+            <DrawerTitle>New Collection</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-y-auto flex-1">{content}</div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
@@ -468,170 +646,7 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
         <DialogHeader>
           <DialogTitle>New Collection</DialogTitle>
         </DialogHeader>
-
-        <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
-          {(["auto", "manual", "file"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              className={`px-3 py-1.5 text-sm rounded-md transition-colors capitalize ${
-                mode === m
-                  ? "bg-background shadow-sm font-medium"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {m === "auto" ? "Auto" : m === "manual" ? "Manual" : "File"}
-            </button>
-          ))}
-        </div>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className={`grid grid-cols-1 gap-4 ${mode !== "auto" ? "sm:grid-cols-2" : ""}`}>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Collection Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="my_collection" className="font-mono" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {mode !== "auto" && (
-                <FormField
-                  control={form.control}
-                  name="default_sorting_field"
-                  render={({ field }) => {
-                    const fieldNames = form
-                      .watch("fields")
-                      .map((f) => f.name)
-                      .filter(Boolean);
-                    return (
-                      <FormItem>
-                        <FormLabel>
-                          Default Sort Field{" "}
-                          <span className="text-muted-foreground font-normal">(optional)</span>{" "}
-                          <a
-                            href="https://typesense.org/docs/30.2/api/collections.html#schema-parameters"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs font-normal text-muted-foreground underline hover:text-foreground"
-                          >
-                            Learn more
-                          </a>
-                        </FormLabel>
-                        <Select
-                          onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
-                          value={field.value || "__none__"}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="font-mono">
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="__none__" className="text-muted-foreground italic">
-                              None
-                            </SelectItem>
-                            {fieldNames.map((name) => (
-                              <SelectItem key={name} value={name} className="font-mono">
-                                {name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
-              )}
-            </div>
-
-            {mode === "auto" && (
-              <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground space-y-1">
-                <p className="font-medium text-foreground">Auto schema detection</p>
-                <p>
-                  Typesense will automatically detect field types when documents are added. Every
-                  field in your documents will be indexed for search and filtering.{" "}
-                  <a
-                    href="https://typesense.org/docs/30.2/api/collections.html#with-auto-schema-detection"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-foreground"
-                  >
-                    Learn more
-                  </a>
-                </p>
-              </div>
-            )}
-
-            {mode === "file" && (
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium">Upload File</label>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Schema JSON, data JSON/JSONL/NDJSON, or CSV — schema files are loaded directly;
-                    data files have fields inferred from records
-                  </p>
-                </div>
-                <label className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
-                  <Upload className="h-6 w-6 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {fileInfo
-                      ? fileInfo.count > 0
-                        ? `${fileInfo.name} — ${fileInfo.count.toLocaleString()} records`
-                        : `${fileInfo.name} — schema loaded`
-                      : "Click to choose a .json, .jsonl, .ndjson, or .csv file"}
-                  </span>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json,.jsonl,.ndjson,.csv"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </label>
-
-                {fileInfo && fileInfo.count > 0 && (
-                  <label className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input
-                      type="checkbox"
-                      checked={importRecords}
-                      onChange={(e) => setImportRecords(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-primary"
-                    />
-                    Also import all {fileInfo.count.toLocaleString()} records into the collection
-                  </label>
-                )}
-              </div>
-            )}
-
-            {mode !== "auto" && <FieldsTable form={form} />}
-
-            {submitState.status === "error" && (
-              <p className="text-sm text-destructive">{submitState.message}</p>
-            )}
-
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting || !activeProfile}>
-                {submitState.status === "creating"
-                  ? "Creating…"
-                  : submitState.status === "importing"
-                    ? `Importing ${submitState.imported.toLocaleString()} / ${submitState.total.toLocaleString()}…`
-                    : "Create Collection"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        {content}
       </DialogContent>
     </Dialog>
   );
