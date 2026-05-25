@@ -7,8 +7,4 @@ export const queryKeys = {
     documents: (collectionName: string) =>
       [...queryKeys.collections.all(), "documents", collectionName] as const,
   },
-  aliases: {
-    all: () => ["aliases"] as const,
-    list: () => [...queryKeys.aliases.all(), "list"] as const,
-  },
 } as const;

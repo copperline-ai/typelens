@@ -311,25 +311,13 @@ export function truncateDocuments(profile: Profile, collectionName: string) {
 
 export type CollectionAlias = { name: string; collection_name: string };
 
-export function listAliases(profile: Profile) {
-  return typesenseFetch<{ aliases: CollectionAlias[] }>(profile, "/aliases");
-}
-
+// Used by the collection schema-migration flow to point an alias at a new collection.
 export function upsertAlias(profile: Profile, aliasName: string, collectionName: string) {
   return typesenseFetch<CollectionAlias>(
     profile,
     `/aliases/${encodeURIComponent(aliasName)}`,
     undefined,
     { method: "PUT", body: JSON.stringify({ collection_name: collectionName }) },
-  );
-}
-
-export function deleteAlias(profile: Profile, aliasName: string) {
-  return typesenseFetch<CollectionAlias>(
-    profile,
-    `/aliases/${encodeURIComponent(aliasName)}`,
-    undefined,
-    { method: "DELETE" },
   );
 }
 
