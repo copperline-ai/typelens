@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.47.0] - 2026-05-25
+
+### Features
+
+- Auto-refresh collections every 3 seconds and remove the manual refresh button (`ee4461f`, `7a11c30`)
+
 ## [1.46.0] - 2026-05-24
 
 ### Features
