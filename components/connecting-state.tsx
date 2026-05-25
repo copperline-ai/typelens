@@ -17,9 +17,12 @@ export function ConnectingState({
       <div className="flex flex-col items-center gap-2 text-center">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-500" />
-          <p className="text-sm text-muted-foreground">Connecting…</p>
+          {profile ? (
+            <p className="text-sm text-muted-foreground">Connecting to {profile.name}…</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Connecting…</p>
+          )}
         </div>
-        {profile && <p className="text-xs text-muted-foreground">Connecting to {profile.name}…</p>}
       </div>
     </div>
   );
