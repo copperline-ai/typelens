@@ -167,6 +167,14 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             className="w-44 p-1"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
+            <Link
+              href="/api-keys"
+              onClick={() => setSettingsOpen(false)}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Key className="h-4 w-4 shrink-0" />
+              <span>API Keys</span>
+            </Link>
             <button
               onClick={() => {
                 cycleTheme();
@@ -189,14 +197,6 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
                 <span>Log out</span>
               </button>
             )}
-            <Link
-              href="/api-keys"
-              onClick={() => setSettingsOpen(false)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Key className="h-4 w-4 shrink-0" />
-              <span>API Keys</span>
-            </Link>
           </PopoverContent>
         </Popover>
       </div>
