@@ -33,6 +33,8 @@ type Actions = {
   testConnectionOnce: (profile: Profile) => Promise<TestConnectionResult>;
   /** Call inside a useEffect on mount to hydrate from localStorage (avoids SSR mismatch). */
   hydrateFromStorage: () => Promise<void>;
+  /** Re-run the retry loop only if status is currently "error". */
+  testConnectionIfNeeded: () => Promise<void>;
 };
 
 export const useConnectionStore = create<State & { actions: Actions }>((set) => ({
@@ -238,6 +240,15 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         set({ status: "error", lastTestedAt: new Date() });
         return { ok: false, error };
       }
+    },
+
+    async testConnectionIfNeeded() {
+      const { status, activeProfileId, profiles } = useConnectionStore.getState();
+      if (status !== "error") return;
+      if (!activeProfileId) return;
+      const profile = profiles.find((p) => p.id === activeProfileId);
+      if (!profile) return;
+      await useConnectionStore.getState().actions.testConnection(profile);
     },
   },
 }));
