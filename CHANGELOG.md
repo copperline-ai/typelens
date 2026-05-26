@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.52.1] - 2026-05-26
+
+### Bug Fixes
+
+- Fix proxy to return JSON 401 for unauthenticated /api/* requests instead of redirecting to /login (`421b57b`)
+
 ## [1.52.0] - 2026-05-26
 
 ### Features
