@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.12] - 2026-05-26
+
+### Other
+
+- Manual release (no commits since last tag in this app's path filter).
+
 ## [1.50.11] - 2026-05-26
 
 Release triggered by CTO after setup-bun fix
