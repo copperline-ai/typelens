@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.15] - 2026-05-26
+
+### Bug Fixes
+
+- Replace all docker/* actions with inline commands to fix codeload 404 errors (`98c952f`, `f6c9494`)
+
 ## [1.50.14] - 2026-05-26
 
 Fix: inline docker metadata to bypass codeload 404
