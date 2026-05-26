@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.52.2] - 2026-05-26
+
+### Bug Fixes
+
+- Fix auth to use relative Location for /api/auth/demo redirects (`7c7e4cd`)
+
 ## [1.52.1] - 2026-05-26
 
 ### Bug Fixes
