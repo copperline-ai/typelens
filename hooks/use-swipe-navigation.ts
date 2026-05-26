@@ -4,9 +4,12 @@ import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const NAV_ROUTES = ["/search", "/collections", "/settings/connection"];
-// Skip only the iOS native back/forward gesture zone (~10% from each edge)
 const EDGE_SKIP_ZONE = 0.1;
-const MIN_SWIPE_PX = 60; // min horizontal distance
+const MIN_SWIPE_PX = 60;
+
+// Shared flag so the search page's pagination swipe can tell the navigation
+// handler "I already handled this touch" and prevent double-firing.
+export const searchSwipeConsumedRef = { current: false };
 
 export function useSwipeNavigation(pathname: string) {
   const router = useRouter();
@@ -20,9 +23,6 @@ export function useSwipeNavigation(pathname: string) {
   const touchStartY = useRef(0);
 
   useEffect(() => {
-    // Search page handles its own swipe for pagination — don't also route-navigate
-    if (pathname.startsWith("/search")) return;
-
     function onTouchStart(e: TouchEvent) {
       const touch = e.touches[0];
       if (!touch) return;
@@ -35,7 +35,12 @@ export function useSwipeNavigation(pathname: string) {
       const touch = e.changedTouches[0];
       if (!touch) return;
 
-      // Skip the iOS native gesture zone (outermost ~10% from each edge)
+      // If the search page's pagination handler already processed this touch, skip
+      if (searchSwipeConsumedRef.current) {
+        searchSwipeConsumedRef.current = false;
+        return;
+      }
+
       const screenW = window.innerWidth;
       const isNativeZone =
         touchStartX.current < screenW * EDGE_SKIP_ZONE ||
@@ -46,7 +51,6 @@ export function useSwipeNavigation(pathname: string) {
       const dy = touch.clientY - touchStartY.current;
       if (Math.abs(dx) < MIN_SWIPE_PX || Math.abs(dx) <= Math.abs(dy)) return;
 
-      // Find current route index (match prefix for nested routes like /collections/[name])
       const currentIndex = NAV_ROUTES.findIndex(
         (r) => pathname === r || pathname.startsWith(r + "/"),
       );
