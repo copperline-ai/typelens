@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.6] - 2026-05-26
+
+### Other
+
+- Improved search page reconnecting logic (`1c6939c`)
+
 ## [1.50.5] - 2026-05-25
 
 ### Bug Fixes
