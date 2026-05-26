@@ -4,8 +4,6 @@ import { createSessionToken, SESSION_COOKIE } from "@/lib/auth-session";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const origin = request.nextUrl.origin;
-
   let username: string | undefined;
   let password: string | undefined;
   try {
@@ -28,13 +26,16 @@ export async function POST(request: NextRequest) {
     password === expectedPassword;
 
   if (!ok) {
-    return NextResponse.redirect(new URL("/login?error=demo", origin), 303);
+    return new NextResponse(null, {
+      status: 303,
+      headers: { Location: "/login?error=demo" },
+    });
   }
 
   const token = await createSessionToken(username!);
   const res = new NextResponse(null, {
     status: 303,
-    headers: { Location: new URL("/collections", origin).toString() },
+    headers: { Location: "/collections" },
   });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
