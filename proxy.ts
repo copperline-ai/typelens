@@ -3,7 +3,13 @@ import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth-session";
 
 const AUTH_ENABLED = !!(process.env.AUTH_USERNAME && process.env.AUTH_PASSWORD);
 
-const PUBLIC_PATHS = ["/login", "/unauthorized", "/api/auth/login", "/api/healthz"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/unauthorized",
+  "/api/auth/login",
+  "/api/auth/demo",
+  "/api/healthz",
+];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));

@@ -14,10 +14,11 @@ export default function LoginForm({ basicEnabled }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/collections";
+  const initialError = searchParams.get("error") === "demo" ? "Invalid credentials." : null;
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
