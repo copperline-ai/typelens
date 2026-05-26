@@ -9,7 +9,8 @@
     "tagMatch": "typelens-v*"
   },
   "npm": {
-    "publish": false
+    "publish": false,
+    "version": false
   },
   "github": {
     "release": true,
