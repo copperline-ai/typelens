@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
+import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 
 const PING_INTERVAL_MS = 25_000;
 
 export function KeepAlive() {
   const activeProfile = useConnectionStore(selectActiveProfile);
+  const { testConnectionIfNeeded } = useConnectionStore(selectActions);
 
   useEffect(() => {
     if (!activeProfile) return;
@@ -21,7 +22,9 @@ export function KeepAlive() {
           "X-Ts-Api-Key": profile.apiKey,
         },
         signal: AbortSignal.timeout(10_000),
-      }).catch(() => {});
+      }).catch(() => {
+        testConnectionIfNeeded();
+      });
     }
 
     ping();
