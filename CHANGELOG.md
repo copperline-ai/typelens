@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.53.2] - 2026-05-26
+
+### Bug Fixes
+
+- Fix Docker URL in release notes drawer links to use `?tag=` query parameter (`1479fb3`)
+
 ## [1.53.1] - 2026-05-26
 
 ### Other
