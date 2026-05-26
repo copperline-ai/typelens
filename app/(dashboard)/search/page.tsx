@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { searchSwipeConsumedRef } from "@/hooks/use-swipe-navigation";
 import {
   Configure,
   InstantSearch,
@@ -557,6 +558,7 @@ function KeyboardShortcuts({
         }
         return;
       }
+      searchSwipeConsumedRef.current = true;
       if (dx < 0) {
         if (pageRef.current.current < pageRef.current.total - 1)
           pageRef.current.refine(pageRef.current.current + 1);
@@ -565,8 +567,8 @@ function KeyboardShortcuts({
       }
     }
 
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true, capture: true });
 
     return () => {
       window.removeEventListener("keydown", onKey);
