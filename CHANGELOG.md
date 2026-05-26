@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.7] - 2026-05-26
+
+### Other
+
+- Render release notes body as markdown instead of raw pre text (`f05d5fa`)
+
 ## [1.50.6] - 2026-05-26
 
 ### Other
