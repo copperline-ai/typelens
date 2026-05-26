@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.13] - 2026-05-26
+
+### Bug Fixes
+
+- Replace docker/metadata-action with inline bash to fix codeload 404 error (`4c41da3`, `f1c7a35`)
+
 ## [1.50.12] - 2026-05-26
 
 ### Other
