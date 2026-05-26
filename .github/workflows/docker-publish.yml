@@ -21,12 +21,14 @@ jobs:
 
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/copperline-ai/typelens
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }}
+        shell: bash
+        run: |
+          TAGS="ghcr.io/copperline-ai/typelens:latest"
+          if [ -n "${{ inputs.version }}" ]; then
+            TAGS="$TAGS,ghcr.io/copperline-ai/typelens:${{ inputs.version }}"
+          fi
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          echo "labels=org.opencontainers.image.source=https://github.com/copperline-ai/typelens" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
