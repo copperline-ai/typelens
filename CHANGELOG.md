@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.53.0] - 2026-05-26
+
+### Features
+
+- cap /api/auth/demo sessions at 15 minutes with countdown banner (`1a7cf18`)
+
 ## [1.52.2] - 2026-05-26
 
 ### Bug Fixes
