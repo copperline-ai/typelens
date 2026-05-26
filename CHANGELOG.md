@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.9] - 2026-05-26
+
+### Bug Fixes
+- Fix link in release notes title to point to Docker image instead of GitHub release page (`9031e57`)
+- Replace oven-sh/setup-bun with direct curl install (`c8708e8`, `c46687d`)
+
 ## [1.50.8] - 2026-05-26
 
 ### Bug Fixes
