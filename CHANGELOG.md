@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.50.8] - 2026-05-26
+
+### Bug Fixes
+
+- Fix swipe right on search page not working (`ed4ca87`)
+
 ## [1.50.7] - 2026-05-26
 
 ### Other
