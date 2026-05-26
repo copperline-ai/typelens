@@ -12,6 +12,7 @@ type Release = {
   body: string | null;
   published_at: string | null;
   html_url: string;
+  docker_url: string;
 };
 
 function ReleaseNotesList({
@@ -33,7 +34,7 @@ function ReleaseNotesList({
           <div key={release.tag_name} className="space-y-2 border-b pb-6 last:border-0">
             <div className="flex items-baseline justify-between gap-2">
               <a
-                href={release.html_url}
+                href={release.docker_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-semibold hover:underline"
