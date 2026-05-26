@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.51.0] - 2026-05-26
+
+Minor bump to avoid tag conflict; replace docker/* actions with inline commands
+
+### Bug Fixes
+
+- Replace all docker/* actions with inline commands to fix codeload 404 errors (`98c952f`, `f6c9494`)
+
+### Other
+
+- Release v1.50.15 (`2f66a89`)
+
 ## [1.50.15] - 2026-05-26
 
 ### Bug Fixes
