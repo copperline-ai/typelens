@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.50.14] - 2026-05-26
+
+Fix: inline docker metadata to bypass codeload 404
+
+### Other
+
+- Manual release (no commits since last tag in this app's path filter).
+
 ## [1.50.13] - 2026-05-26
 
 ### Bug Fixes
