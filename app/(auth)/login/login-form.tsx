@@ -15,6 +15,7 @@ export default function LoginForm({ basicEnabled }: Props) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/collections";
   const initialError = searchParams.get("error") === "demo" ? "Invalid credentials." : null;
+  const expiredDemo = searchParams.get("expired") === "demo";
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -48,6 +49,11 @@ export default function LoginForm({ basicEnabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {expiredDemo && !error && (
+        <p className="text-sm text-muted-foreground">
+          Your demo session has ended. Sign in to continue.
+        </p>
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="username">Username</Label>
         <Input

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSessionToken, SESSION_COOKIE } from "@/lib/auth-session";
+import { createSessionToken, DEMO_TTL_SECONDS, SESSION_COOKIE } from "@/lib/auth-session";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const token = await createSessionToken(username!);
+  const token = await createSessionToken(username!, { isDemo: true });
   const res = new NextResponse(null, {
     status: 303,
     headers: { Location: "/collections" },
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: DEMO_TTL_SECONDS,
   });
   return res;
 }

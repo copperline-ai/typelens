@@ -1,5 +1,6 @@
 export const SESSION_COOKIE = "__dashboard_session";
 const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+export const DEMO_TTL_SECONDS = 60 * 15; // 15 minutes
 
 function signingSecret(): string {
   const s = process.env.AUTH_PASSWORD;
@@ -19,15 +20,29 @@ async function hmac(data: string, secret: string): Promise<string> {
   return btoa(String.fromCharCode(...new Uint8Array(buf)));
 }
 
-export async function createSessionToken(username: string): Promise<string> {
-  const payload = btoa(
-    JSON.stringify({ u: username, exp: Math.floor(Date.now() / 1000) + TTL_SECONDS }),
-  );
+export async function createSessionToken(
+  username: string,
+  opts?: { isDemo?: boolean },
+): Promise<string> {
+  const isDemo = !!opts?.isDemo;
+  const ttl = isDemo ? DEMO_TTL_SECONDS : TTL_SECONDS;
+  const claims: { u: string; exp: number; d?: 1 } = {
+    u: username,
+    exp: Math.floor(Date.now() / 1000) + ttl,
+  };
+  if (isDemo) claims.d = 1;
+  const payload = btoa(JSON.stringify(claims));
   const sig = await hmac(payload, signingSecret());
   return `${payload}.${sig}`;
 }
 
-export async function verifySessionToken(token: string): Promise<string | null> {
+export interface SessionPayload {
+  user: string;
+  exp: number;
+  isDemo: boolean;
+}
+
+export async function decodeSessionToken(token: string): Promise<SessionPayload | null> {
   try {
     const dot = token.lastIndexOf(".");
     if (dot === -1) return null;
@@ -35,10 +50,15 @@ export async function verifySessionToken(token: string): Promise<string | null> 
     const sig = token.slice(dot + 1);
     const expected = await hmac(payload, signingSecret());
     if (expected !== sig) return null;
-    const data = JSON.parse(atob(payload)) as { u: string; exp: number };
+    const data = JSON.parse(atob(payload)) as { u: string; exp: number; d?: 1 };
     if (data.exp < Math.floor(Date.now() / 1000)) return null;
-    return data.u;
+    return { user: data.u, exp: data.exp, isDemo: data.d === 1 };
   } catch {
     return null;
   }
+}
+
+export async function verifySessionToken(token: string): Promise<string | null> {
+  const decoded = await decodeSessionToken(token);
+  return decoded ? decoded.user : null;
 }
