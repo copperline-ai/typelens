@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useMobile } from "@/lib/hooks/use-mobile";
@@ -46,9 +47,9 @@ function ReleaseNotesList({
               )}
             </div>
             {release.body ? (
-              <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-sans leading-relaxed">
-                {release.body}
-              </pre>
+              <div className="text-xs text-muted-foreground [&_h1]:text-sm [&_h1]:font-bold [&_h1]:mb-1 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:mb-1 [&_h3]:font-semibold [&_h3]:mb-0.5 [&_p]:mb-2 [&_p]:leading-relaxed [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mb-0.5 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_pre]:rounded [&_pre]:bg-muted [&_pre]:p-2 [&_pre]:overflow-x-auto [&_pre]:mb-2 [&_blockquote]:border-l-2 [&_blockquote]:border-muted-foreground/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_strong]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_hr]:border-border [&_hr]:my-2">
+                <ReactMarkdown>{release.body}</ReactMarkdown>
+              </div>
             ) : (
               <p className="text-xs text-muted-foreground italic">No release notes provided.</p>
             )}
