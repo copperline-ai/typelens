@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.53.1] - 2026-05-26
+
+### Other
+
+- Reordered desktop settings popover to API Keys, Theme, Log out (`2fd52ed`)
+
 ## [1.53.0] - 2026-05-26
 
 ### Features
