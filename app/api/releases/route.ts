@@ -17,7 +17,7 @@ export async function GET() {
         body: r.body ?? null,
         published_at: r.published_at ?? null,
         html_url: r.html_url,
-        docker_url: `https://github.com/copperline-ai/typelens/pkgs/container/typelens/${r.tag_name.replace(/^typelens-v/, "")}`,
+        docker_url: `https://github.com/copperline-ai/typelens/pkgs/container/typelens?tag=${r.tag_name.replace(/^typelens-v/, "")}`,
       }))
       .sort((a, b) => {
         if (!a.published_at && !b.published_at) return 0;
