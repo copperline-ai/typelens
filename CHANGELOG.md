@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.52.0] - 2026-05-26
+
+### Features
+
+- Accept POST credentials at `/api/auth/demo` for marketing-site "Try the live demo" CTA (`4e80d71`)
+
 ## [1.51.0] - 2026-05-26
 
 Minor bump to avoid tag conflict; replace docker/* actions with inline commands
