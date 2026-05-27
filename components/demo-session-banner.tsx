@@ -56,6 +56,7 @@ export function DemoSessionBanner({ expiresAt }: Props) {
         <Clock className="h-4 w-4 shrink-0" />
         <span className="truncate">
           Demo session — expires in <span className="font-mono tabular-nums">{label}</span>
+          <span className="hidden sm:inline">{" · "}Connections are read-only</span>
         </span>
       </div>
       <Link href="/login" className="shrink-0 font-medium text-foreground hover:underline">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cloneCollection } from "@/lib/typesense-client";
+import { cloneCollection, TypesenseAuthError } from "@/lib/typesense-client";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,7 +56,15 @@ export function CloneCollectionDialog({ sourceName, open, onOpenChange, onCloned
       onCloned(newName.trim());
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Clone failed");
+      setError(
+        err instanceof TypesenseAuthError
+          ? err.status === 401
+            ? "Your Typesense API key is invalid."
+            : "Your Typesense API key lacks the required permissions for this operation."
+          : err instanceof Error
+            ? err.message
+            : "Clone failed",
+      );
     } finally {
       setCloning(false);
     }

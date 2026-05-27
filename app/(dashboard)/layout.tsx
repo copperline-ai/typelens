@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const authEnabled = !!session;
   return (
     <ToastProvider>
-      <HydrateStore />
+      <HydrateStore isDemo={session?.isDemo ?? false} />
       <KeepAlive />
       <div className="flex h-dvh flex-col overflow-hidden">
         {session?.isDemo && <DemoSessionBanner expiresAt={session.exp * 1000} />}
