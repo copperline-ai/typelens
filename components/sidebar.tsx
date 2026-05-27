@@ -11,6 +11,7 @@ import {
   PanelLeftClose,
   Search,
   Server,
+  ServerCog,
   Settings,
   Sun,
 } from "lucide-react";
@@ -174,6 +175,14 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             >
               <Key className="h-4 w-4 shrink-0" />
               <span>API Keys</span>
+            </Link>
+            <Link
+              href="/settings/mcp"
+              onClick={() => setSettingsOpen(false)}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <ServerCog className="h-4 w-4 shrink-0" />
+              <span>MCP Server</span>
             </Link>
             <button
               onClick={() => {
