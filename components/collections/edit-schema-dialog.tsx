@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AlertTriangle, ArrowRight, Plus, Trash2 } from "lucide-react";
 import {
   TYPESENSE_FIELD_TYPES,
+  TypesenseAuthError,
   updateCollectionSchema,
   createCollection,
   upsertAlias,
@@ -231,7 +233,14 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated, on
     } catch (err) {
       setSubmitState({
         status: "error",
-        message: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof TypesenseAuthError
+            ? err.status === 401
+              ? "Your Typesense API key is invalid."
+              : "Your Typesense API key lacks the required permissions for this operation."
+            : err instanceof Error
+              ? err.message
+              : String(err),
       });
     }
   }
@@ -327,7 +336,14 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated, on
     } catch (err) {
       setSubmitState({
         status: "error",
-        message: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof TypesenseAuthError
+            ? err.status === 401
+              ? "Your Typesense API key is invalid."
+              : "Your Typesense API key lacks the required permissions for this operation."
+            : err instanceof Error
+              ? err.message
+              : String(err),
       });
     }
   }
@@ -574,7 +590,18 @@ export function EditSchemaDialog({ collection, open, onOpenChange, onUpdated, on
             )}
 
             {submitState.status === "error" && (
-              <p className="text-sm text-destructive">{submitState.message}</p>
+              <div>
+                <p className="text-sm text-destructive">{submitState.message}</p>
+                {(submitState.message.includes("API key is invalid") ||
+                  submitState.message.includes("lacks the required permissions")) && (
+                  <Link
+                    href="/settings/connection"
+                    className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                  >
+                    Update API key in Settings
+                  </Link>
+                )}
+              </div>
             )}
 
             <DialogFooter className="pt-2">

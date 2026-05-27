@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check, Copy } from "lucide-react";
 import {
   TYPESENSE_KEY_ACTIONS,
+  TypesenseAuthError,
   createApiKey,
   type ApiKey,
   type ApiKeyCreateSchema,
@@ -163,7 +165,15 @@ export function CreateApiKeyDialog({
       setPhase("reveal");
       onCreated(key);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create key");
+      setError(
+        err instanceof TypesenseAuthError
+          ? err.status === 401
+            ? "Your Typesense API key is invalid."
+            : "Your Typesense API key lacks the required permissions for this operation."
+          : err instanceof Error
+            ? err.message
+            : "Failed to create key",
+      );
     } finally {
       setSaving(false);
     }
@@ -248,7 +258,20 @@ export function CreateApiKeyDialog({
                 </Select>
               </div>
 
-              {error && <p className="text-xs text-destructive">{error}</p>}
+              {error && (
+                <div>
+                  <p className="text-xs text-destructive">{error}</p>
+                  {(error.includes("API key is invalid") ||
+                    error.includes("lacks the required permissions")) && (
+                    <Link
+                      href="/settings/connection"
+                      className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                    >
+                      Update API key in Settings
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => handleOpenChange(false)}>

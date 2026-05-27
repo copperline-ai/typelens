@@ -9,6 +9,7 @@ import {
   getCollection,
   getDocument,
   deleteDocument,
+  TypesenseAuthError,
   type Collection,
 } from "@/lib/typesense-client";
 import { Button } from "@/components/ui/button";
@@ -45,16 +46,19 @@ export default function DocumentViewPage({
   const [document, setDocument] = useState<Record<string, unknown> | null>(null);
   const [collection, setCollection] = useState<Collection | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [deleteError, setDeleteError] = useState<unknown>(null);
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
     if (!activeProfile) return;
     setDeleting(true);
+    setDeleteError(null);
     try {
       await deleteDocument(activeProfile, collectionName, documentId);
       router.push(`/collections/${encodeURIComponent(collectionName)}`);
-    } finally {
+    } catch (err) {
+      setDeleteError(err);
       setDeleting(false);
     }
   }
@@ -76,7 +80,7 @@ export default function DocumentViewPage({
       setDocument(doc);
       setCollection(col);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -141,6 +145,25 @@ export default function DocumentViewPage({
                     This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
+                {deleteError instanceof TypesenseAuthError ? (
+                  <div className="px-6 pb-2">
+                    <p className="text-xs text-destructive">
+                      {deleteError.status === 401
+                        ? "Your Typesense API key is invalid."
+                        : "Your Typesense API key lacks the required permissions."}
+                    </p>
+                    <Link
+                      href="/settings/connection"
+                      className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                    >
+                      Update API key in Settings
+                    </Link>
+                  </div>
+                ) : deleteError ? (
+                  <p className="px-6 pb-2 text-xs text-destructive">
+                    {deleteError instanceof Error ? deleteError.message : String(deleteError)}
+                  </p>
+                ) : null}
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
@@ -199,13 +222,33 @@ export default function DocumentViewPage({
       )}
 
       {/* Error */}
-      {!loading && error && (
+      {!loading && error != null && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load document</p>
-          <p className="text-xs text-muted-foreground mt-1">{error}</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={fetchData}>
-            Try again
-          </Button>
+          {error instanceof TypesenseAuthError ? (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-muted-foreground">
+                {error.status === 401
+                  ? "Your Typesense API key is invalid."
+                  : "Your Typesense API key lacks the required permissions for this operation."}
+              </p>
+              <Link
+                href="/settings/connection"
+                className="inline-block text-xs underline underline-offset-2 text-primary"
+              >
+                Update API key in Settings
+              </Link>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">
+              {error instanceof Error ? error.message : String(error)}
+            </p>
+          )}
+          {!(error instanceof TypesenseAuthError) && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={fetchData}>
+              Try again
+            </Button>
+          )}
         </div>
       )}
 

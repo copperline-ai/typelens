@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +9,7 @@ import Papa from "papaparse";
 import { Plus, Trash2, Upload } from "lucide-react";
 import {
   TYPESENSE_FIELD_TYPES,
+  TypesenseAuthError,
   createCollection,
   importDocuments,
   type ImportProgress,
@@ -413,7 +415,14 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
     } catch (err) {
       setSubmitState({
         status: "error",
-        message: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof TypesenseAuthError
+            ? err.status === 401
+              ? "Your Typesense API key is invalid."
+              : "Your Typesense API key lacks the required permissions for this operation."
+            : err instanceof Error
+              ? err.message
+              : String(err),
       });
       return;
     }
@@ -432,7 +441,15 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
       } catch (err) {
         setSubmitState({
           status: "error",
-          message: `Collection created but import failed: ${err instanceof Error ? err.message : String(err)}`,
+          message: `Collection created but import failed: ${
+            err instanceof TypesenseAuthError
+              ? err.status === 401
+                ? "Your Typesense API key is invalid."
+                : "Your Typesense API key lacks the required permissions for this operation."
+              : err instanceof Error
+                ? err.message
+                : String(err)
+          }`,
         });
         onCreated();
         return;
@@ -604,7 +621,18 @@ export function CreateCollectionDialog({ open, onOpenChange, onCreated }: Props)
           {mode !== "auto" && <FieldsTable form={form} />}
 
           {submitState.status === "error" && (
-            <p className="text-sm text-destructive">{submitState.message}</p>
+            <div>
+              <p className="text-sm text-destructive">{submitState.message}</p>
+              {(submitState.message.includes("API key is invalid") ||
+                submitState.message.includes("lacks the required permissions")) && (
+                <Link
+                  href="/settings/connection"
+                  className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                >
+                  Update API key in Settings
+                </Link>
+              )}
+            </div>
           )}
 
           <div className="flex justify-end gap-2 pt-2">
