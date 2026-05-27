@@ -197,6 +197,18 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
                 <span>Log out</span>
               </button>
             )}
+            <div className="border-t mt-1 pt-1 px-2 pb-0.5">
+              <button
+                onClick={() => {
+                  setReleaseNotesOpen(true);
+                  setSettingsOpen(false);
+                }}
+                className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                title="View release notes"
+              >
+                {appVersion ? `v${appVersion}` : ""}
+              </button>
+            </div>
           </PopoverContent>
         </Popover>
       </div>
