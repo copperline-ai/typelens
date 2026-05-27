@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.54.2] - 2026-05-27
+
+### Bug Fixes
+
+- Handle TypesenseAuthError across all UI operations with authentication guidance (`cba46b6`)
+
 ## [1.54.1] - 2026-05-27
 
 ### Other
