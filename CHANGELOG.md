@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.54.1] - 2026-05-27
+
+### Other
+
+- Show app version in collapsed sidebar settings popover (`b017767`)
+
 ## [1.54.0] - 2026-05-27
 
 ### Features
