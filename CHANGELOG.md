@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.54.0] - 2026-05-27
+
+### Features
+
+- Make connections read-only during demo sessions (`006f761`)
+
 ## [1.53.3] - 2026-05-27
 
 ### Bug Fixes
