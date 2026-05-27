@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.55.1] - 2026-05-27
+
+### Bug Fixes
+
+- Disable npm version step in release-it to prevent tag conflict (`f486b46`)
+
 ## [1.55.0] - 2026-05-27
 
 ### Features
