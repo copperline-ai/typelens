@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.55.0] - 2026-05-27
+
+### Features
+
+- Add MCP server with JWT token authentication on the same port (`593fc8a`)
+
 ## [1.54.2] - 2026-05-27
 
 ### Bug Fixes
