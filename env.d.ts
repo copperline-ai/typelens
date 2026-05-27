@@ -39,5 +39,14 @@ declare namespace NodeJS {
 
     /** Canonical URL of this app (used in server-to-browser CORS headers). */
     readonly NEXT_PUBLIC_APP_URL?: string;
+
+    // ── MCP / OAuth ─────────────────────────────────────────────────────────
+    /** HMAC signing secret for MCP tokens; also derives the AES-GCM key used
+     *  to encrypt Typesense API keys at rest in the OAuth grants table. */
+    readonly TYPELENS_MCP_SECRET?: string;
+
+    /** SQLite file path. Defaults to ./.data/typelens.db locally; set to a
+     *  persistent volume path (e.g. /data/typelens.db) on Railway. */
+    readonly TYPELENS_DB_PATH?: string;
   }
 }

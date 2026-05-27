@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mcpEnabled, verifyMcpToken } from "@/lib/api/mcp-auth";
-import { TOOLS, CORS, dispatchRpc, type JsonRpcRequest } from "@/lib/api/mcp-tools";
-import type { TypesenseProxyProfile } from "@/lib/api/proxy-typesense";
+import {
+  TOOLS,
+  CORS,
+  dispatchRpc,
+  mcpUnauthorizedResponse,
+  type JsonRpcRequest,
+} from "@/lib/api/mcp-tools";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
@@ -35,26 +40,23 @@ export async function POST(request: NextRequest) {
   const auth = request.headers.get("Authorization");
   const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
   if (!token) {
-    return NextResponse.json(
-      { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Authentication required" } },
-      { status: 401, headers: CORS },
-    );
+    return mcpUnauthorizedResponse(request, {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32001, message: "Authentication required" },
+    });
   }
 
-  const credentials = await verifyMcpToken(token);
-  if (!credentials) {
-    return NextResponse.json(
-      { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Invalid or expired token" } },
-      { status: 401, headers: CORS },
-    );
+  const verified = await verifyMcpToken(token);
+  if (!verified) {
+    return mcpUnauthorizedResponse(request, {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32001, message: "Invalid or expired token" },
+    });
   }
 
-  const profile: TypesenseProxyProfile = {
-    host: credentials.host,
-    port: credentials.port,
-    protocol: credentials.protocol,
-    apiKey: credentials.apiKey,
-  };
+  const profile = verified.profile;
 
   // Parse JSON-RPC body
   let rpc: JsonRpcRequest;

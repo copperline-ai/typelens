@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "./"),
+  serverExternalPackages: ["better-sqlite3"],
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version,
   },

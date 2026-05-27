@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mcpEnabled, verifyMcpToken } from "@/lib/api/mcp-auth";
 import { getSession } from "@/lib/api/mcp-session";
-import { dispatchRpc, jsonErr, CORS, type JsonRpcRequest } from "@/lib/api/mcp-tools";
+import {
+  dispatchRpc,
+  jsonErr,
+  CORS,
+  mcpUnauthorizedResponse,
+  type JsonRpcRequest,
+} from "@/lib/api/mcp-tools";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,18 +33,20 @@ export async function POST(request: NextRequest) {
   const auth = request.headers.get("Authorization");
   const token = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
   if (!token) {
-    return NextResponse.json(
-      { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Authentication required" } },
-      { status: 401, headers: CORS_MESSAGES },
-    );
+    return mcpUnauthorizedResponse(request, {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32001, message: "Authentication required" },
+    });
   }
 
-  const credentials = await verifyMcpToken(token);
-  if (!credentials) {
-    return NextResponse.json(
-      { jsonrpc: "2.0", id: null, error: { code: -32001, message: "Invalid or expired token" } },
-      { status: 401, headers: CORS_MESSAGES },
-    );
+  const verified = await verifyMcpToken(token);
+  if (!verified) {
+    return mcpUnauthorizedResponse(request, {
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32001, message: "Invalid or expired token" },
+    });
   }
 
   // Resolve session

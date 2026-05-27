@@ -9,8 +9,11 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/demo",
   "/api/healthz",
-  "/api/mcp/sse",
-  "/api/mcp/messages",
+  "/api/mcp",
+  "/api/oauth",
+  "/.well-known/oauth-authorization-server",
+  "/.well-known/oauth-protected-resource",
+  "/oauth/authorize",
 ];
 
 function isPublicPath(pathname: string) {

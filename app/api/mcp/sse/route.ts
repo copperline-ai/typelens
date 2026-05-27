@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { mcpEnabled, verifyMcpToken } from "@/lib/api/mcp-auth";
 import { createSession, deleteSession } from "@/lib/api/mcp-session";
-import type { TypesenseProxyProfile } from "@/lib/api/proxy-typesense";
+import { mcpUnauthorizedResponse } from "@/lib/api/mcp-tools";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,20 +23,17 @@ export async function GET(request: NextRequest) {
 
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
-    return new Response("Missing token query parameter", { status: 401, headers: CORS });
+    return mcpUnauthorizedResponse(request, "Missing token query parameter", {
+      contentType: "text",
+    });
   }
 
-  const credentials = await verifyMcpToken(token);
-  if (!credentials) {
-    return new Response("Invalid or expired token", { status: 401, headers: CORS });
+  const verified = await verifyMcpToken(token);
+  if (!verified) {
+    return mcpUnauthorizedResponse(request, "Invalid or expired token", { contentType: "text" });
   }
 
-  const profile: TypesenseProxyProfile = {
-    host: credentials.host,
-    port: credentials.port,
-    protocol: credentials.protocol,
-    apiKey: credentials.apiKey,
-  };
+  const profile = verified.profile;
 
   const encoder = new TextEncoder();
   let sessionId: string | null = null;

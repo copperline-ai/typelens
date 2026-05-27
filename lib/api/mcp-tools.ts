@@ -34,6 +34,48 @@ export const CORS = {
   "Access-Control-Allow-Headers": "Authorization, Content-Type",
 };
 
+// ── MCP unauthorized response (RFC 9728 — points clients at our OAuth metadata) ─
+
+function resolveBase(request: Request | null): string {
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL;
+  if (fromEnv) return fromEnv.replace(/\/+$/, "");
+  if (!request) return "";
+  const url = new URL(request.url);
+  const proto = request.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "");
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? url.host;
+  return `${proto}://${host}`;
+}
+
+/**
+ * Build a 401 response with the WWW-Authenticate header MCP clients
+ * (e.g. Claude Desktop) use to discover the OAuth authorization server
+ * per RFC 9728 § 5.
+ */
+export function mcpUnauthorizedResponse(
+  request: Request,
+  body: unknown,
+  init?: { contentType?: "json" | "text" },
+): Response {
+  const base = resolveBase(request);
+  const resourceMetadata = base ? `${base}/.well-known/oauth-protected-resource` : "";
+  const headers: Record<string, string> = {
+    ...CORS,
+    "WWW-Authenticate": resourceMetadata
+      ? `Bearer realm="typelens", resource_metadata="${resourceMetadata}"`
+      : `Bearer realm="typelens"`,
+  };
+  if (init?.contentType === "text") {
+    return new Response(typeof body === "string" ? body : JSON.stringify(body), {
+      status: 401,
+      headers: { ...headers, "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
+  return new Response(JSON.stringify(body), {
+    status: 401,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
+
 // ── Tool definitions ──────────────────────────────────────────────────────────
 
 export const TOOLS = [

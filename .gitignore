@@ -34,3 +34,10 @@ yarn-error.log*
 
 # Next.js auto-generated (do not edit — managed by Next.js)
 next-env.d.ts
+
+# SQLite (local dev — production uses a mounted volume)
+.data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
