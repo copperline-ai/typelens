@@ -205,6 +205,33 @@ export default function McpSettingsPage() {
             )}
           </div>
 
+          <div className="rounded-lg border p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ServerCog className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Claude Team / MCP connector</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Use this SSE URL to add TypeLens as a connector in your Claude Team workspace (
+              <span className="font-medium">Settings → Integrations → Add MCP server</span>
+              ). Generate a token above first.
+            </p>
+            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 font-mono text-sm">
+              <span className="flex-1 truncate">
+                {tokenState.status === "success"
+                  ? `${appUrl}/api/mcp/sse?token=${tokenState.token}`
+                  : `${appUrl}/api/mcp/sse?token=<your-token>`}
+              </span>
+              {tokenState.status === "success" && (
+                <CopyButton text={`${appUrl}/api/mcp/sse?token=${tokenState.token}`} />
+              )}
+            </div>
+            {tokenState.status !== "success" && (
+              <p className="text-xs text-muted-foreground">
+                Generate a token above to get a ready-to-use connector URL.
+              </p>
+            )}
+          </div>
+
           <div className="rounded-lg border p-4 space-y-2">
             <p className="text-sm font-medium">Available tools ({16})</p>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground font-mono">
