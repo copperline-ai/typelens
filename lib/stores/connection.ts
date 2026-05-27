@@ -170,7 +170,15 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           const latencyMs = Math.round(performance.now() - start);
           if (!res.ok) {
             const data = await res.json().catch(() => null);
-            const text = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
+            const raw = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
+            let text: string;
+            if (res.status === 401) {
+              text = "Invalid Typesense API key (401)";
+            } else if (res.status === 403) {
+              text = "API key lacks required permissions (403)";
+            } else {
+              text = raw;
+            }
             set({ status: "error" });
             return { ok: false, error: text };
           }
@@ -217,7 +225,15 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         const latencyMs = Math.round(performance.now() - start);
         if (!res.ok) {
           const data = await res.json().catch(() => null);
-          const text = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
+          const raw = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
+          let text: string;
+          if (res.status === 401) {
+            text = "Invalid Typesense API key (401)";
+          } else if (res.status === 403) {
+            text = "API key lacks required permissions (403)";
+          } else {
+            text = raw;
+          }
           set({ status: "error", lastTestedAt: new Date() });
           return { ok: false, error: text };
         }

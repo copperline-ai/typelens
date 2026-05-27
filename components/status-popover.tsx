@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import {
   useConnectionStore,
@@ -85,7 +86,20 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
         </dl>
 
         {testState === "fail" && errorMsg && (
-          <p className="rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">{errorMsg}</p>
+          <div>
+            <p className="rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">
+              {errorMsg.includes("API key") ? errorMsg : "Connection failed"}
+            </p>
+            {errorMsg.includes("API key") && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Update your key in{" "}
+                <Link href="/settings/connection" className="underline underline-offset-2">
+                  Settings
+                </Link>
+                .
+              </p>
+            )}
+          </div>
         )}
 
         <Button
@@ -103,7 +117,9 @@ export function StatusPopover({ trigger }: StatusPopoverProps) {
           {testState === "pass"
             ? "Connection OK"
             : testState === "fail"
-              ? "Connection failed"
+              ? errorMsg?.includes("API key")
+                ? "Invalid API key"
+                : "Connection failed"
               : "Test Connection"}
         </Button>
       </PopoverContent>

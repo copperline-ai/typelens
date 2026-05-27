@@ -237,10 +237,26 @@ export default function ApiKeysPage() {
       {activeProfile && status === "connected" && error && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load API keys</p>
-          <p className="text-xs text-muted-foreground mt-1">{error}</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={fetchKeys}>
-            Try again
-          </Button>
+          {error.includes("permissions") || error.includes("401") || error.includes("403") ? (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-muted-foreground">
+                Your Typesense API key lacks the required permissions to manage API keys.
+              </p>
+              <Link
+                href="/settings/connection"
+                className="inline-block text-xs underline underline-offset-2 text-primary"
+              >
+                Update API key in Settings
+              </Link>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">{error}</p>
+          )}
+          {!error.includes("permissions") && !error.includes("401") && !error.includes("403") && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={fetchKeys}>
+              Try again
+            </Button>
+          )}
         </div>
       )}
 
