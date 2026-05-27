@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.53.3] - 2026-05-27
+
+### Bug Fixes
+
+- Handle 401/403 Typesense API responses with authentication guidance (`98e2826`)
+
 ## [1.53.2] - 2026-05-26
 
 ### Bug Fixes
