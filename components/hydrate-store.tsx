@@ -1,14 +1,25 @@
 "use client";
 
 import { useEffect } from "react";
-import { useConnectionStore, selectActions } from "@/lib/stores/connection";
+import { useConnectionStore, selectActions, selectIsDemo } from "@/lib/stores/connection";
 
-export function HydrateStore() {
-  const { hydrateFromStorage } = useConnectionStore(selectActions);
+interface Props {
+  isDemo?: boolean;
+}
+
+export function HydrateStore({ isDemo = false }: Props) {
+  const { hydrateFromStorage, setDemo } = useConnectionStore(selectActions);
+  const currentIsDemo = useConnectionStore(selectIsDemo);
 
   useEffect(() => {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
+
+  useEffect(() => {
+    if (isDemo && !currentIsDemo) {
+      setDemo(true);
+    }
+  }, [isDemo, currentIsDemo, setDemo]);
 
   return null;
 }

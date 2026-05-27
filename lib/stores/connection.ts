@@ -21,6 +21,7 @@ type State = {
   lastLatencyMs: number | null;
   lastCollectionCount: number | null;
   lastTestedAt: Date | null;
+  isDemo: boolean;
 };
 
 type Actions = {
@@ -28,6 +29,7 @@ type Actions = {
   updateProfile: (id: string, updates: Partial<Omit<Profile, "id">>) => void;
   removeProfile: (id: string) => void;
   setActiveProfile: (id: string | null) => void;
+  setDemo: (isDemo: boolean) => void;
   testConnection: (profile: Profile) => Promise<TestConnectionResult>;
   /** Single-shot connection test for the popover button — no long retry loop. */
   testConnectionOnce: (profile: Profile) => Promise<TestConnectionResult>;
@@ -44,6 +46,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
   lastLatencyMs: null,
   lastCollectionCount: null,
   lastTestedAt: null,
+  isDemo: false,
 
   actions: {
     async hydrateFromStorage() {
@@ -92,6 +95,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     },
 
     addProfile(data) {
+      if (useConnectionStore.getState().isDemo) return;
       const profile: Profile = { ...data, id: crypto.randomUUID() };
       set((prev) => {
         const next = {
@@ -104,6 +108,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     },
 
     updateProfile(id, updates) {
+      if (useConnectionStore.getState().isDemo) return;
       set((prev) => {
         const next = {
           ...prev,
@@ -115,6 +120,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     },
 
     removeProfile(id) {
+      if (useConnectionStore.getState().isDemo) return;
       set((prev) => {
         const next = {
           profiles: prev.profiles.filter((p) => p.id !== id),
@@ -123,6 +129,10 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         writeProfiles(next);
         return next;
       });
+    },
+
+    setDemo(isDemo) {
+      set({ isDemo });
     },
 
     setActiveProfile(id) {
@@ -282,4 +292,5 @@ export const selectLastCollectionCount = (s: ReturnType<typeof useConnectionStor
   s.lastCollectionCount;
 export const selectLastTestedAt = (s: ReturnType<typeof useConnectionStore.getState>) =>
   s.lastTestedAt;
+export const selectIsDemo = (s: ReturnType<typeof useConnectionStore.getState>) => s.isDemo;
 export const selectStatus = (s: ReturnType<typeof useConnectionStore.getState>) => s.status;

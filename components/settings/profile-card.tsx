@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { CheckCircle, Copy, Edit2, Lock, Loader2, Trash2, Wifi, XCircle } from "lucide-react";
-import { type Profile, selectActions, useConnectionStore } from "@/lib/stores/connection";
+import {
+  type Profile,
+  selectActions,
+  selectIsDemo,
+  useConnectionStore,
+} from "@/lib/stores/connection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,9 +37,10 @@ interface Props {
 
 export function ProfileCard({ profile, isActive, onEdit, onCopy }: Props) {
   const { removeProfile, setActiveProfile, testConnection } = useConnectionStore(selectActions);
+  const isDemo = useConnectionStore(selectIsDemo);
   const [testState, setTestState] = useState<TestState>({ status: "idle" });
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const isReadOnly = profile.id === "env-config";
+  const isReadOnly = profile.id === "env-config" || isDemo;
 
   async function handleTest() {
     setTestState({ status: "testing" });
@@ -57,7 +63,7 @@ export function ProfileCard({ profile, isActive, onEdit, onCopy }: Props) {
               {isReadOnly && (
                 <Badge variant="secondary" className="h-5 gap-1 px-1.5 text-[10px]">
                   <Lock className="h-2.5 w-2.5" />
-                  Pre-configured
+                  {isDemo ? "Read-only (demo)" : "Pre-configured"}
                 </Badge>
               )}
             </div>
