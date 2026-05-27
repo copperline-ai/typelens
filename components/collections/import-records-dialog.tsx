@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { AlertTriangle, Check, Plus, Upload } from "lucide-react";
 import Papa from "papaparse";
 import {
   importDocumentsWithOptions,
+  TypesenseAuthError,
   updateCollectionSchema,
   type Collection,
   type ImportAction,
@@ -158,7 +160,15 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
       } catch (err) {
         setSubmitState({
           status: "error",
-          message: `Schema update failed: ${err instanceof Error ? err.message : String(err)}`,
+          message: `Schema update failed: ${
+            err instanceof TypesenseAuthError
+              ? err.status === 401
+                ? "Your Typesense API key is invalid."
+                : "Your Typesense API key lacks the required permissions for this operation."
+              : err instanceof Error
+                ? err.message
+                : String(err)
+          }`,
         });
         return;
       }
@@ -188,7 +198,14 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
     } catch (err) {
       setSubmitState({
         status: "error",
-        message: err instanceof Error ? err.message : String(err),
+        message:
+          err instanceof TypesenseAuthError
+            ? err.status === 401
+              ? "Your Typesense API key is invalid."
+              : "Your Typesense API key lacks the required permissions for this operation."
+            : err instanceof Error
+              ? err.message
+              : String(err),
       });
     }
   }
@@ -381,7 +398,18 @@ export function ImportRecordsDialog({ collection, open, onOpenChange, onImported
           )}
 
           {submitState.status === "error" && (
-            <p className="text-sm text-destructive">{submitState.message}</p>
+            <div>
+              <p className="text-sm text-destructive">{submitState.message}</p>
+              {(submitState.message.includes("API key is invalid") ||
+                submitState.message.includes("lacks the required permissions")) && (
+                <Link
+                  href="/settings/connection"
+                  className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                >
+                  Update API key in Settings
+                </Link>
+              )}
+            </div>
           )}
         </div>
 

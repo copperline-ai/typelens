@@ -37,7 +37,12 @@ import {
   selectActions,
 } from "@/lib/stores/connection";
 import { ConnectingState } from "@/components/connecting-state";
-import { listCollections, type Collection, type CollectionField } from "@/lib/typesense-client";
+import {
+  listCollections,
+  TypesenseAuthError,
+  type Collection,
+  type CollectionField,
+} from "@/lib/typesense-client";
 import {
   Select,
   SelectContent,
@@ -716,6 +721,7 @@ function SearchPageContent() {
   const isMobile = useIsMobile();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
+  const [collectionsError, setCollectionsError] = useState<unknown>(null);
   const [pageSize, setPageSize] = useState(50);
   useEffect(() => {
     if (isMobile !== undefined) setPageSize(isMobile ? 20 : 50);
@@ -744,6 +750,7 @@ function SearchPageContent() {
   useEffect(() => {
     if (!profile) return;
     setLoading(true);
+    setCollectionsError(null);
     listCollections(profile)
       .then((cols) => {
         setCollections(cols);
@@ -757,7 +764,10 @@ function SearchPageContent() {
           }
         }
       })
-      .catch(() => setCollections([]))
+      .catch((err) => {
+        setCollections([]);
+        setCollectionsError(err);
+      })
       .finally(() => setLoading(false));
   }, [profile]);
 
@@ -858,8 +868,28 @@ function SearchPageContent() {
     );
   }
 
-  if (status === "connecting" && collections.length === 0) {
+  if (status === "connecting" && collections.length === 0 && !collectionsError) {
     return <ConnectingState profile={profile} fullPage />;
+  }
+
+  if (collectionsError instanceof TypesenseAuthError) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center max-w-md">
+          <p className="text-sm font-medium text-destructive">
+            {collectionsError.status === 401
+              ? "Your Typesense API key is invalid."
+              : "Your Typesense API key lacks the required permissions."}
+          </p>
+          <Link
+            href="/settings/connection"
+            className="inline-block mt-3 text-xs underline underline-offset-2 text-primary"
+          >
+            Update API key in Settings
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

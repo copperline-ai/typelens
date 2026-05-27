@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
 import { ConnectingState } from "@/components/connecting-state";
-import { listApiKeys, deleteApiKey, type ApiKey } from "@/lib/typesense-client";
+import { listApiKeys, deleteApiKey, TypesenseAuthError, type ApiKey } from "@/lib/typesense-client";
 import { CreateApiKeyDialog } from "@/components/api-keys/create-api-key-dialog";
 import { Skeleton } from "@/components/async-boundary";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,7 @@ function ApiKeysSkeleton() {
 
 function ApiKeyRow({ apiKey, onDelete }: { apiKey: ApiKey; onDelete: () => Promise<void> }) {
   const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function handleDelete() {
     setDeleting(true);
@@ -63,7 +63,7 @@ function ApiKeyRow({ apiKey, onDelete }: { apiKey: ApiKey; onDelete: () => Promi
     try {
       await onDelete();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
+      setError(err);
       setDeleting(false);
     }
   }
@@ -121,7 +121,25 @@ function ApiKeyRow({ apiKey, onDelete }: { apiKey: ApiKey; onDelete: () => Promi
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                {error && <p className="text-xs text-destructive">{error}</p>}
+                {error instanceof TypesenseAuthError ? (
+                  <div className="px-0 pb-2 w-full">
+                    <p className="text-xs text-destructive">
+                      {error.status === 401
+                        ? "Your Typesense API key is invalid."
+                        : "Your Typesense API key lacks the required permissions."}
+                    </p>
+                    <Link
+                      href="/settings/connection"
+                      className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                    >
+                      Update API key in Settings
+                    </Link>
+                  </div>
+                ) : error ? (
+                  <p className="text-xs text-destructive">
+                    {error instanceof Error ? error.message : String(error)}
+                  </p>
+                ) : null}
                 <AlertDialogAction
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   onClick={handleDelete}
@@ -143,7 +161,7 @@ export default function ApiKeysPage() {
   const status = useConnectionStore((s) => s.status);
   const actions = useConnectionStore(selectActions);
   const [keys, setKeys] = useState<ApiKey[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -155,7 +173,7 @@ export default function ApiKeysPage() {
       const data = await listApiKeys(activeProfile);
       setKeys(data.keys);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -234,13 +252,15 @@ export default function ApiKeysPage() {
 
       {activeProfile && status === "connected" && loading && <ApiKeysSkeleton />}
 
-      {activeProfile && status === "connected" && error && (
+      {activeProfile && status === "connected" && error != null && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load API keys</p>
-          {error.includes("permissions") || error.includes("401") || error.includes("403") ? (
+          {error instanceof TypesenseAuthError ? (
             <div className="mt-1 space-y-1">
               <p className="text-xs text-muted-foreground">
-                Your Typesense API key lacks the required permissions to manage API keys.
+                {error.status === 401
+                  ? "Your Typesense API key is invalid."
+                  : "Your Typesense API key lacks the required permissions to manage API keys."}
               </p>
               <Link
                 href="/settings/connection"
@@ -250,9 +270,11 @@ export default function ApiKeysPage() {
               </Link>
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground mt-1">{error}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {error instanceof Error ? error.message : String(error)}
+            </p>
           )}
-          {!error.includes("permissions") && !error.includes("401") && !error.includes("403") && (
+          {!(error instanceof TypesenseAuthError) && (
             <Button variant="outline" size="sm" className="mt-4" onClick={fetchKeys}>
               Try again
             </Button>

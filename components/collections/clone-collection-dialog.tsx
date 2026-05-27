@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { cloneCollection, TypesenseAuthError } from "@/lib/typesense-client";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
@@ -98,7 +99,20 @@ export function CloneCollectionDialog({ sourceName, open, onOpenChange, onCloned
               disabled={cloning}
               autoFocus
             />
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && (
+              <div>
+                <p className="text-xs text-destructive">{error}</p>
+                {(error.includes("API key is invalid") ||
+                  error.includes("lacks the required permissions")) && (
+                  <Link
+                    href="/settings/connection"
+                    className="inline-block text-xs underline underline-offset-2 text-primary mt-0.5"
+                  >
+                    Update API key in Settings
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <DialogFooter>

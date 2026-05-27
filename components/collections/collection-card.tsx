@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Copy, Trash2 } from "lucide-react";
-import type { Collection } from "@/lib/typesense-client";
+import { TypesenseAuthError, type Collection } from "@/lib/typesense-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,7 +33,7 @@ export function CollectionCard({ collection, count, onDelete, onClone }: Props) 
   const { name, num_documents, fields, default_sorting_field } = collection;
   const docCount = count ?? num_documents;
   const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
 
   async function handleDelete() {
@@ -43,7 +43,7 @@ export function CollectionCard({ collection, count, onDelete, onClone }: Props) 
     try {
       await onDelete();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Delete failed");
+      setError(err);
       setDeleting(false);
     }
   }
@@ -108,7 +108,25 @@ export function CollectionCard({ collection, count, onDelete, onClone }: Props) 
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              {error && <p className="text-xs text-destructive">{error}</p>}
+              {error instanceof TypesenseAuthError ? (
+                <div className="px-6 pb-2">
+                  <p className="text-xs text-destructive">
+                    {error.status === 401
+                      ? "Your Typesense API key is invalid."
+                      : "Your Typesense API key lacks the required permissions for this operation."}
+                  </p>
+                  <Link
+                    href="/settings/connection"
+                    className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                  >
+                    Update API key in Settings
+                  </Link>
+                </div>
+              ) : error ? (
+                <p className="px-6 pb-2 text-xs text-destructive">
+                  {error instanceof Error ? error.message : String(error)}
+                </p>
+              ) : null}
               <AlertDialogAction
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                 onClick={handleDelete}

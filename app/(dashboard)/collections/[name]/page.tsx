@@ -155,6 +155,7 @@ function DocumentCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<unknown>(null);
   const doc = hit.document;
   const fieldMap = new Map(fields.map((f) => [f.name, f]));
 
@@ -177,9 +178,12 @@ function DocumentCard({
   async function handleDelete() {
     if (!docId) return;
     setDeleting(true);
+    setDeleteError(null);
     try {
       await deleteDocument(profile, collectionName, docId);
       onDeleted?.();
+    } catch (err) {
+      setDeleteError(err);
     } finally {
       setDeleting(false);
     }
@@ -241,6 +245,25 @@ function DocumentCard({
                 be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            {deleteError instanceof TypesenseAuthError ? (
+              <div className="px-6 pb-2">
+                <p className="text-xs text-destructive">
+                  {deleteError.status === 401
+                    ? "Your Typesense API key is invalid."
+                    : "Your Typesense API key lacks the required permissions."}
+                </p>
+                <Link
+                  href="/settings/connection"
+                  className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                >
+                  Update API key in Settings
+                </Link>
+              </div>
+            ) : deleteError ? (
+              <p className="px-6 pb-2 text-xs text-destructive">
+                {deleteError instanceof Error ? deleteError.message : String(deleteError)}
+              </p>
+            ) : null}
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
@@ -301,7 +324,7 @@ function DocumentsSection({
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [found, setFound] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -325,7 +348,7 @@ function DocumentsSection({
       setHits(result.hits ?? []);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : String(err));
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -349,12 +372,32 @@ function DocumentsSection({
           ))}
         </div>
       )}
-      {error && (
+      {error != null && (
         <div className="rounded-md border border-destructive/20 bg-destructive/5 p-4 text-center">
-          <p className="text-xs text-destructive">{error}</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => load(page)}>
-            Retry
-          </Button>
+          {error instanceof TypesenseAuthError ? (
+            <div className="space-y-1">
+              <p className="text-xs text-destructive">
+                {error.status === 401
+                  ? "Your Typesense API key is invalid."
+                  : "Your Typesense API key lacks the required permissions for this operation."}
+              </p>
+              <Link
+                href="/settings/connection"
+                className="inline-block text-xs underline underline-offset-2 text-primary"
+              >
+                Update API key in Settings
+              </Link>
+            </div>
+          ) : (
+            <p className="text-xs text-destructive">
+              {error instanceof Error ? error.message : String(error)}
+            </p>
+          )}
+          {!(error instanceof TypesenseAuthError) && (
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => load(page)}>
+              Retry
+            </Button>
+          )}
         </div>
       )}
       {!loading && !error && hits !== null && (
@@ -435,14 +478,15 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const router = useRouter();
   const { data: collection, isLoading, isError, error, refetch } = useCollection(collectionName);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<unknown>(null);
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<unknown>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [editSchemaOpen, setEditSchemaOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [addEmbeddingOpen, setAddEmbeddingOpen] = useState(false);
   const [truncating, setTruncating] = useState(false);
-  const [truncateError, setTruncateError] = useState<string | null>(null);
+  const [truncateError, setTruncateError] = useState<unknown>(null);
 
   const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -467,6 +511,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   async function handleExport() {
     if (!activeProfile || !collection) return;
     setExporting(true);
+    setExportError(null);
     try {
       const jsonl = await exportDocuments(activeProfile, collectionName);
       const blob = new Blob([jsonl], { type: "application/x-ndjson" });
@@ -476,6 +521,8 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       a.download = `${collectionName}.jsonl`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(err);
     } finally {
       setExporting(false);
     }
@@ -489,7 +536,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       await deleteCollection(activeProfile, collectionName);
       router.push("/collections");
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : String(err));
+      setDeleteError(err);
       setDeleting(false);
     }
   }
@@ -502,7 +549,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       await truncateDocuments(activeProfile, collectionName);
       refetch();
     } catch (err) {
-      setTruncateError(err instanceof Error ? err.message : String(err));
+      setTruncateError(err);
     } finally {
       setTruncating(false);
     }
@@ -652,7 +699,27 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                       without deleting the collection or its schema. This cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  {truncateError && <p className="text-xs text-destructive">{truncateError}</p>}
+                  {truncateError instanceof TypesenseAuthError ? (
+                    <div className="space-y-1">
+                      <p className="text-xs text-destructive">
+                        {truncateError.status === 401
+                          ? "Your Typesense API key is invalid."
+                          : "Your Typesense API key lacks the required permissions."}
+                      </p>
+                      <Link
+                        href="/settings/connection"
+                        className="inline-block text-xs underline underline-offset-2 text-primary"
+                      >
+                        Update API key in Settings
+                      </Link>
+                    </div>
+                  ) : truncateError ? (
+                    <p className="text-xs text-destructive">
+                      {truncateError instanceof Error
+                        ? truncateError.message
+                        : String(truncateError)}
+                    </p>
+                  ) : null}
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
@@ -691,7 +758,25 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                       cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  {deleteError && <p className="text-xs text-destructive">{deleteError}</p>}
+                  {deleteError instanceof TypesenseAuthError ? (
+                    <div className="px-6 pb-2">
+                      <p className="text-xs text-destructive">
+                        {deleteError.status === 401
+                          ? "Your Typesense API key is invalid."
+                          : "Your Typesense API key lacks the required permissions."}
+                      </p>
+                      <Link
+                        href="/settings/connection"
+                        className="inline-block text-xs underline underline-offset-2 text-primary mt-1"
+                      >
+                        Update API key in Settings
+                      </Link>
+                    </div>
+                  ) : deleteError ? (
+                    <p className="text-xs text-destructive">
+                      {deleteError instanceof Error ? deleteError.message : String(deleteError)}
+                    </p>
+                  ) : null}
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
@@ -706,6 +791,26 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               </AlertDialog>
             </div>
           </div>
+
+          {exportError instanceof TypesenseAuthError ? (
+            <div className="rounded-md border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm">
+              <p className="text-xs text-destructive">
+                {exportError.status === 401
+                  ? "Your Typesense API key is invalid."
+                  : "Your Typesense API key lacks the required permissions."}
+              </p>
+              <Link
+                href="/settings/connection"
+                className="inline-block text-xs underline underline-offset-2 text-primary mt-0.5"
+              >
+                Update API key in Settings
+              </Link>
+            </div>
+          ) : exportError ? (
+            <p className="text-xs text-destructive">
+              {exportError instanceof Error ? exportError.message : String(exportError)}
+            </p>
+          ) : null}
 
           {collection.default_sorting_field && (
             <div className="flex items-center gap-2 text-sm">
