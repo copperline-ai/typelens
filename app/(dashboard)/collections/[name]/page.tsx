@@ -20,6 +20,7 @@ import { ConnectingState } from "@/components/connecting-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCollection } from "@/lib/hooks/use-collection";
 import {
+  TypesenseAuthError,
   deleteCollection,
   deleteDocument,
   exportDocuments,
@@ -532,10 +533,28 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       {isError && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-6 text-center">
           <p className="text-sm font-medium text-destructive">Failed to load collection</p>
-          <p className="text-xs text-muted-foreground mt-1">{errorMessage}</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
-            Try again
-          </Button>
+          {error instanceof TypesenseAuthError ? (
+            <div className="mt-1 space-y-1">
+              <p className="text-xs text-muted-foreground">
+                {error.status === 401
+                  ? "Your Typesense API key is invalid."
+                  : "Your Typesense API key lacks the required permissions for this operation."}
+              </p>
+              <Link
+                href="/settings/connection"
+                className="inline-block text-xs underline underline-offset-2 text-primary"
+              >
+                Update API key in Settings
+              </Link>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-1">{errorMessage}</p>
+          )}
+          {!(error instanceof TypesenseAuthError) && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={() => refetch()}>
+              Try again
+            </Button>
+          )}
         </div>
       )}
 

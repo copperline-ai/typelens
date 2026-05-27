@@ -22,9 +22,13 @@ export function KeepAlive() {
           "X-Ts-Api-Key": profile.apiKey,
         },
         signal: AbortSignal.timeout(10_000),
-      }).catch(() => {
-        testConnectionIfNeeded();
-      });
+      })
+        .then((res) => {
+          if (res.status === 401 || res.status === 403) return;
+        })
+        .catch(() => {
+          testConnectionIfNeeded();
+        });
     }
 
     ping();

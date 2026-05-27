@@ -1,5 +1,14 @@
 import type { Profile } from "@/lib/stores/connection";
 
+export class TypesenseAuthError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "TypesenseAuthError";
+    this.status = status;
+  }
+}
+
 export type CollectionField = {
   name: string;
   type: string;
@@ -71,6 +80,12 @@ export async function typesenseFetch<T>(
       attempt < RETRY_DELAYS_MS.length
     )
       continue;
+
+    if (res.status === 401 || res.status === 403) {
+      const data = await res.json().catch(() => null);
+      const message = (data as { error?: string } | null)?.error ?? `Typesense ${res.status}`;
+      throw new TypesenseAuthError(res.status, message);
+    }
 
     if (!res.ok) {
       const data = await res.json().catch(() => null);
@@ -214,6 +229,11 @@ async function importBatch(
     )
       continue;
 
+    if (res.status === 401 || res.status === 403) {
+      const text = await res.text();
+      throw new TypesenseAuthError(res.status, text || `Typesense ${res.status}`);
+    }
+
     const text = await res.text();
     if (!res.ok && !text.trim()) throw new Error(`Import failed: HTTP ${res.status}`);
     return text
@@ -271,6 +291,12 @@ export async function exportDocuments(profile: Profile, collectionName: string):
     },
     signal: AbortSignal.timeout(60_000),
   });
+  if (res.status === 401 || res.status === 403) {
+    const data = await res.json().catch(() => null);
+    const message = (data as { error?: string } | null)?.error ?? `Typesense ${res.status}`;
+    throw new TypesenseAuthError(res.status, message);
+  }
+
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     const message =
