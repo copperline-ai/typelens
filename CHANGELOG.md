@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.56.0] - 2026-05-27
+
+### Features
+
+- Enable Claude Team MCP SSE support (`560f98f`)
+
 ## [1.55.1] - 2026-05-27
 
 ### Bug Fixes
