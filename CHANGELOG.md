@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.57.0] - 2026-05-28
+
+### Features
+
+- Unified settings page with Connections, API Keys, MCP, and Theme ([`93fce38`](93fce38))
+
 ## [1.56.0] - 2026-05-27
 
 ### Features
