@@ -1,7 +1,7 @@
 FROM oven/bun:1.3.13-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN --mount=type=cache,id=bun-install-cache,target=/root/.bun/install/cache \
+RUN --mount=type=cache,id=cacheKey-bun-install-cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile
 
 FROM oven/bun:1.3.13-alpine AS builder
