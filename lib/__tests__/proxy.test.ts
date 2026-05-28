@@ -1,8 +1,27 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-vi.stubEnv("AUTH_USERNAME", "admin");
-vi.stubEnv("AUTH_PASSWORD", "test-secret");
+const previousAuthUsername = process.env.AUTH_USERNAME;
+const previousAuthPassword = process.env.AUTH_PASSWORD;
+
+beforeEach(() => {
+  process.env.AUTH_USERNAME = "admin";
+  process.env.AUTH_PASSWORD = "test-secret";
+});
+
+afterEach(() => {
+  if (previousAuthUsername === undefined) {
+    delete process.env.AUTH_USERNAME;
+  } else {
+    process.env.AUTH_USERNAME = previousAuthUsername;
+  }
+
+  if (previousAuthPassword === undefined) {
+    delete process.env.AUTH_PASSWORD;
+  } else {
+    process.env.AUTH_PASSWORD = previousAuthPassword;
+  }
+});
 
 describe("proxy auth redirect", () => {
   it("preserves pathname and query params in redirect target", async () => {
