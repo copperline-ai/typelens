@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mcpEnabled, verifyMcpToken } from "@/lib/api/mcp-auth";
-import { getSession } from "@/lib/api/mcp-session";
+import { getSession, touchSession } from "@/lib/api/mcp-session";
 import { dispatchRpc, jsonErr, CORS, type JsonRpcRequest } from "@/lib/api/mcp-tools";
 
 export const runtime = "nodejs";
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       { status: 404, headers: CORS_MESSAGES },
     );
   }
+  touchSession(sessionId);
 
   // Parse JSON-RPC body
   let rpc: JsonRpcRequest;

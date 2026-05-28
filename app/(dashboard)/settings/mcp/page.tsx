@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Check, Copy, Loader2, RefreshCw, ServerCog, TriangleAlert } from "lucide-react";
 import { selectActiveProfile, useConnectionStore } from "@/lib/stores/connection";
 import { Button } from "@/components/ui/button";
+import { emitEvent } from "@/lib/telemetry";
 
 type TokenState =
   | { status: "idle" }
@@ -64,7 +65,9 @@ export default function McpSettingsPage() {
       if (!res.ok || !data.token) {
         setTokenState({ status: "error", message: data.error ?? `HTTP ${res.status}` });
       } else {
+        const isFirstToken = tokenState.status !== "success";
         setTokenState({ status: "success", token: data.token, expiresAt: data.expiresAt! });
+        void emitEvent("connector_configured", { isFirstToken });
       }
     } catch (e) {
       setTokenState({
@@ -208,10 +211,10 @@ export default function McpSettingsPage() {
           <div className="rounded-lg border p-4 space-y-3">
             <div className="flex items-center gap-2">
               <ServerCog className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Claude Team / MCP connector</span>
+              <span className="text-sm font-medium">Claude Team Connector</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Use this SSE URL to add TypeLens as a connector in your Claude Team workspace (
+              Use this connector URL to add TypeLens to your Claude Team workspace (
               <span className="font-medium">Settings → Integrations → Add MCP server</span>
               ). Generate a token above first.
             </p>

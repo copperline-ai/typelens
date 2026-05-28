@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { mcpEnabled, verifyMcpToken } from "@/lib/api/mcp-auth";
-import { createSession, deleteSession } from "@/lib/api/mcp-session";
+import { createSession, deleteSession, getSession } from "@/lib/api/mcp-session";
 import type { TypesenseProxyProfile } from "@/lib/api/proxy-typesense";
 
 export const runtime = "nodejs";
@@ -58,14 +58,23 @@ export async function GET(request: NextRequest) {
       const endpointPath = `/api/mcp/messages?sessionId=${sessionId}`;
       controller.enqueue(encoder.encode(`event: endpoint\ndata: ${endpointPath}\n\n`));
 
-      // Keep the connection alive
+      // Keep the connection alive and close idle sessions.
       pingTimer = setInterval(() => {
         try {
+          if (sessionId) {
+            const session = getSession(sessionId);
+            if (!session) {
+              controller.close();
+              if (pingTimer) clearInterval(pingTimer);
+              deleteSession(sessionId);
+              return;
+            }
+          }
           controller.enqueue(encoder.encode(": ping\n\n"));
         } catch {
           // stream closed — setInterval will be cleared on cancel
         }
-      }, 15_000);
+      }, 30_000);
     },
     cancel() {
       if (pingTimer) clearInterval(pingTimer);
