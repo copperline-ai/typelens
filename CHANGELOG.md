@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2] - 2026-05-28
+
+### Bug Fixes
+
+- Fix Docker cache mount id prefixing with CACHE_KEY to avoid conflicts (`ea6b153`)
+- Merge pull request #135 addressing cache key issues (`42f4690`)
+
 ## [2.0.1] - 2026-05-28
 
 ### Bug Fixes
