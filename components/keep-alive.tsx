@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { useConnectionStore, selectActiveProfile, selectActions } from "@/lib/stores/connection";
+import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 
 const PING_INTERVAL_MS = 25_000;
+const FAST_PING_INTERVAL_MS = 3_000;
 
 export function KeepAlive() {
   const activeProfile = useConnectionStore(selectActiveProfile);
-  const { testConnectionIfNeeded } = useConnectionStore(selectActions);
+  const status = useConnectionStore((s) => s.status);
+  const actions = useConnectionStore((s) => s.actions);
 
   useEffect(() => {
     if (!activeProfile) return;
     const profile = activeProfile;
+    const interval = status === "error" ? FAST_PING_INTERVAL_MS : PING_INTERVAL_MS;
 
     function ping() {
       fetch("/api/typesense/collections", {
@@ -24,17 +27,21 @@ export function KeepAlive() {
         signal: AbortSignal.timeout(10_000),
       })
         .then((res) => {
-          if (res.status === 401 || res.status === 403) return;
+          if (!res.ok && status === "error") {
+            actions.refreshHealth();
+          }
         })
         .catch(() => {
-          testConnectionIfNeeded();
+          if (status === "error") {
+            actions.testConnectionIfNeeded();
+          }
         });
     }
 
     ping();
-    const id = setInterval(ping, PING_INTERVAL_MS);
+    const id = setInterval(ping, interval);
     return () => clearInterval(id);
-  }, [activeProfile?.id]);
+  }, [activeProfile?.id, status]);
 
   return null;
 }
