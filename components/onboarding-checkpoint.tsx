@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { selectActiveProfile, useConnectionStore } from "@/lib/stores/connection";
+import { selectStatus, useConnectionStore } from "@/lib/stores/connection";
 import {
   completeOnboarding,
   getOnboardingState,
@@ -17,7 +17,7 @@ import {
 
 export function OnboardingCheckpoint() {
   const pathname = usePathname();
-  const activeProfile = useConnectionStore(selectActiveProfile);
+  const status = useConnectionStore(selectStatus);
   const [state, setState] = useState<OnboardingState | null>(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export function OnboardingCheckpoint() {
     let changed = false;
     let next = state;
 
-    if (activeProfile && !state.steps.connectTypesense) {
+    if (status === "connected" && !state.steps.connectTypesense) {
       next = markOnboardingStep("connectTypesense", true);
       changed = true;
     }
@@ -40,14 +40,8 @@ export function OnboardingCheckpoint() {
       changed = true;
     }
 
-    if (changed) {
-      if (next.steps.connectTypesense && next.steps.openSearch) {
-        setState(completeOnboarding());
-      } else {
-        setState(next);
-      }
-    }
-  }, [activeProfile, pathname, state]);
+    if (changed) setState(next);
+  }, [pathname, state, status]);
 
   const allDone = useMemo(
     () => !!state?.steps.connectTypesense && !!state?.steps.openSearch,
@@ -64,6 +58,11 @@ export function OnboardingCheckpoint() {
       <CardContent className="space-y-3">
         <Step done={state.steps.connectTypesense} label="Add and activate a Typesense connection" />
         <Step done={state.steps.openSearch} label="Open Search and run your first query" />
+        {!state.steps.connectTypesense && status === "error" && (
+          <p className="text-sm text-muted-foreground">
+            Connection failed. Open Connections to test again and verify host, port, and API key.
+          </p>
+        )}
 
         <div className="flex flex-wrap gap-2 pt-1">
           {!state.steps.connectTypesense && (
