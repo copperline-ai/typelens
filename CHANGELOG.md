@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1] - 2026-05-28
+
+### Bug Fixes
+
+- Improve authentication reliability and add regression coverage for Week 1 P0 issues (`0ba1d5a`)
+
 ## [2.0.0] - 2026-05-28
 
 ### Features
