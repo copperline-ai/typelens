@@ -53,20 +53,31 @@ export async function POST(request: NextRequest) {
   const tokenEndpointAuthMethod = m.token_endpoint_auth_method ?? "none";
   const scope = m.scope ?? "mcp";
 
-  getDb()
-    .insert(oauthClients)
-    .values({
-      clientId,
-      clientName,
-      redirectUris,
-      grantTypes,
-      responseTypes,
-      tokenEndpointAuthMethod,
-      scope,
-      softwareId: m.software_id ?? null,
-      softwareVersion: m.software_version ?? null,
-    })
-    .run();
+  try {
+    getDb()
+      .insert(oauthClients)
+      .values({
+        clientId,
+        clientName,
+        redirectUris,
+        grantTypes,
+        responseTypes,
+        tokenEndpointAuthMethod,
+        scope,
+        softwareId: m.software_id ?? null,
+        softwareVersion: m.software_version ?? null,
+      })
+      .run();
+  } catch (err) {
+    console.error("[oauth/register] failed to persist client:", err);
+    return NextResponse.json(
+      {
+        error: "server_error",
+        error_description: err instanceof Error ? err.message : String(err),
+      },
+      { status: 500, headers: OAUTH_CORS },
+    );
+  }
 
   return NextResponse.json(
     {

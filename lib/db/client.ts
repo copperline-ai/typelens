@@ -39,9 +39,17 @@ export function getDb(): Db {
   const db = drizzle(sqlite, { schema });
 
   const folder = migrationsFolder();
-  if (existsSync(folder)) {
-    migrate(db, { migrationsFolder: folder });
+  if (!existsSync(folder)) {
+    // A missing folder means the deploy bundle didn't ship the migrations —
+    // running on would leave the DB with no tables and 500 on first write.
+    // Fail loudly here so the cause is obvious in logs instead of cryptic
+    // "no such table" errors later.
+    throw new Error(
+      `Drizzle migrations folder not found at ${folder} (cwd=${process.cwd()}). ` +
+        `The deploy bundle is missing drizzle/ — see next.config.ts outputFileTracingIncludes.`,
+    );
   }
+  migrate(db, { migrationsFolder: folder });
 
   globalForDb._typelensDb = { db, sqlite, migratedAt: Date.now() };
   return db;
