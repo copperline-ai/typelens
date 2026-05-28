@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.0] - 2026-05-28
+
+### Features
+- Remove MCP server feature entirely (`15c5c92`)
+
 ## [1.57.0] - 2026-05-28
 
 ### Features
