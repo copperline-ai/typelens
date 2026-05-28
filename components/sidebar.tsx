@@ -2,30 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  Database,
-  Key,
-  LogOut,
-  Moon,
-  Monitor,
-  PanelLeftClose,
-  Search,
-  Server,
-  ServerCog,
-  Settings,
-  Sun,
-} from "lucide-react";
+import { Database, LogOut, PanelLeftClose, Search, Server, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import {
-  useThemeStore,
-  selectTheme,
-  selectThemeActions,
-  useSidebarStore,
-  selectSidebarCollapsed,
-  selectSidebarActions,
-} from "@/lib/store";
-import type { Theme } from "@/lib/store";
+import { useSidebarStore, selectSidebarCollapsed, selectSidebarActions } from "@/lib/store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppVersion } from "@/lib/hooks/use-app-version";
 import { ReleaseNotesModal } from "@/components/release-notes-modal";
@@ -36,21 +16,11 @@ const navItems = [
   { href: "/settings/connection", label: "Connections", icon: Server },
 ];
 
-const themeIcons: Record<Theme, React.ElementType> = {
-  system: Monitor,
-  light: Sun,
-  dark: Moon,
-};
-
-const themeOrder: Theme[] = ["system", "light", "dark"];
-
 export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const collapsed = useSidebarStore(selectSidebarCollapsed);
   const { toggleCollapsed, hydrateFromStorage } = useSidebarStore(selectSidebarActions);
-  const theme = useThemeStore(selectTheme);
-  const { setTheme } = useThemeStore(selectThemeActions);
   const appVersion = useAppVersion();
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -59,19 +29,11 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
     hydrateFromStorage();
   }, [hydrateFromStorage]);
 
-  function cycleTheme() {
-    const idx = themeOrder.indexOf(theme);
-    setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
-  }
-
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }
-
-  const ThemeIcon = themeIcons[theme];
-  const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
   return (
     <aside
@@ -169,31 +131,13 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <Link
-              href="/api-keys"
+              href="/settings"
               onClick={() => setSettingsOpen(false)}
               className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <Key className="h-4 w-4 shrink-0" />
-              <span>API Keys</span>
+              <Settings className="h-4 w-4 shrink-0" />
+              <span>Settings</span>
             </Link>
-            <Link
-              href="/settings/mcp"
-              onClick={() => setSettingsOpen(false)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <ServerCog className="h-4 w-4 shrink-0" />
-              <span>MCP Server</span>
-            </Link>
-            <button
-              onClick={() => {
-                cycleTheme();
-                setSettingsOpen(false);
-              }}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <ThemeIcon className="h-4 w-4 shrink-0" />
-              <span>Theme: {themeLabel}</span>
-            </button>
             {authEnabled && (
               <button
                 onClick={() => {

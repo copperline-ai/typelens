@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.0.1] - 2026-05-28
+
+### Bug Fixes
+
+- Improve authentication reliability and add regression coverage for Week 1 P0 issues (`0ba1d5a`)
+
+## [2.0.0] - 2026-05-28
+
+### Features
+- Remove MCP server feature entirely (`15c5c92`)
+
+## [1.57.0] - 2026-05-28
+
+### Features
+
+- Unified settings page with Connections, API Keys, MCP, and Theme ([`93fce38`](93fce38))
+
+## [1.56.0] - 2026-05-27
+
+### Features
+
+- Enable Claude Team MCP SSE support (`560f98f`)
+
 ## [1.55.1] - 2026-05-27
 
 ### Bug Fixes

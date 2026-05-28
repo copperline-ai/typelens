@@ -3,14 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Database, Key, LogOut, Moon, Monitor, Search, Server, Settings, Sun } from "lucide-react";
+import { Database, LogOut, Search, Server, Settings } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
   type ConnectionStatus,
 } from "@/lib/stores/connection";
-import { useThemeStore, selectTheme, selectThemeActions } from "@/lib/store";
-import type { Theme } from "@/lib/store";
 import { StatusPopover } from "@/components/status-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -30,26 +28,11 @@ const statusDot: Record<ConnectionStatus, string> = {
   idle: "bg-muted-foreground/50",
 };
 
-const themeIcons: Record<Theme, React.ElementType> = {
-  system: Monitor,
-  light: Sun,
-  dark: Moon,
-};
-
-const themeOrder: Theme[] = ["system", "light", "dark"];
-
 export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const activeProfile = useConnectionStore(selectActiveProfile);
   const status = useConnectionStore((s) => s.status);
-  const theme = useThemeStore(selectTheme);
-  const { setTheme } = useThemeStore(selectThemeActions);
-
-  function cycleTheme() {
-    const idx = themeOrder.indexOf(theme);
-    setTheme(themeOrder[(idx + 1) % themeOrder.length]!);
-  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -60,8 +43,6 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
   const appVersion = useAppVersion();
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const ThemeIcon = themeIcons[theme];
-  const themeLabel = theme === "system" ? "System" : theme === "light" ? "Light" : "Dark";
 
   return (
     <header className="flex h-14 items-center border-b bg-background px-4 gap-3">
@@ -129,23 +110,13 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Link
-            href="/api-keys"
+            href="/settings"
             onClick={() => setSettingsOpen(false)}
             className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <Key className="h-4 w-4 shrink-0" />
-            <span>API Keys</span>
+            <Settings className="h-4 w-4 shrink-0" />
+            <span>Settings</span>
           </Link>
-          <button
-            onClick={() => {
-              cycleTheme();
-              setSettingsOpen(false);
-            }}
-            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <ThemeIcon className="h-4 w-4 shrink-0" />
-            <span>Theme: {themeLabel}</span>
-          </button>
           {authEnabled && (
             <button
               onClick={() => {
