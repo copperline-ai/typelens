@@ -14,6 +14,20 @@ export type Profile = {
 
 export type TestConnectionResult = { ok: true; latencyMs: number } | { ok: false; error: string };
 
+export function normalizeConnectionError(error: unknown, status?: number): string {
+  if (status === 401) return "Invalid Typesense API key (401)";
+  if (status === 403) return "API key lacks required permissions (403)";
+  if (status === 502 || status === 503 || status === 504) {
+    return "Typesense server unavailable or timed out. Please retry.";
+  }
+
+  const text = typeof error === "string" ? error : error instanceof Error ? error.message : "";
+  if (/abort|timed out|timeout/i.test(text)) {
+    return "Typesense connection timed out. Please retry.";
+  }
+  return text || (status ? `HTTP ${status}` : "Connection failed");
+}
+
 type State = {
   profiles: Profile[];
   activeProfileId: string | null;
@@ -180,15 +194,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           const latencyMs = Math.round(performance.now() - start);
           if (!res.ok) {
             const data = await res.json().catch(() => null);
-            const raw = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-            let text: string;
-            if (res.status === 401) {
-              text = "Invalid Typesense API key (401)";
-            } else if (res.status === 403) {
-              text = "API key lacks required permissions (403)";
-            } else {
-              text = raw;
-            }
+            const raw = (data as { error?: string } | null)?.error ?? "";
+            const text = normalizeConnectionError(raw, res.status);
             set({ status: "error" });
             return { ok: false, error: text };
           }
@@ -210,8 +217,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
           // fetch() itself threw (timeout, network error to the Next.js server) — retry
           if (attempt < retryDelays.length) continue;
           set({ status: "error" });
-          const error = err instanceof Error ? err.message : String(err);
-          return { ok: false, error };
+          return { ok: false, error: normalizeConnectionError(err) };
         }
       }
 
@@ -235,15 +241,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         const latencyMs = Math.round(performance.now() - start);
         if (!res.ok) {
           const data = await res.json().catch(() => null);
-          const raw = (data as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-          let text: string;
-          if (res.status === 401) {
-            text = "Invalid Typesense API key (401)";
-          } else if (res.status === 403) {
-            text = "API key lacks required permissions (403)";
-          } else {
-            text = raw;
-          }
+          const raw = (data as { error?: string } | null)?.error ?? "";
+          const text = normalizeConnectionError(raw, res.status);
           set({ status: "error", lastTestedAt: new Date() });
           return { ok: false, error: text };
         }
@@ -262,9 +261,8 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
         });
         return { ok: true, latencyMs };
       } catch (err) {
-        const error = err instanceof Error ? err.message : String(err);
         set({ status: "error", lastTestedAt: new Date() });
-        return { ok: false, error };
+        return { ok: false, error: normalizeConnectionError(err) };
       }
     },
 
