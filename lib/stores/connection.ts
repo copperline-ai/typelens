@@ -49,8 +49,10 @@ type Actions = {
   testConnectionOnce: (profile: Profile) => Promise<TestConnectionResult>;
   /** Call inside a useEffect on mount to hydrate from localStorage (avoids SSR mismatch). */
   hydrateFromStorage: () => Promise<void>;
-  /** Re-run the retry loop only if status is currently "error". */
-  testConnectionIfNeeded: () => Promise<void>;
+/** Re-run the retry loop only if status is currently "error". */
+    testConnectionIfNeeded: () => Promise<void>;
+    /** Force an immediate connection check regardless of current status. */
+    refreshHealth: () => Promise<void>;
 };
 
 export const useConnectionStore = create<State & { actions: Actions }>((set) => ({
@@ -166,11 +168,12 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnection(profile) {
       set({ status: "connecting" });
       const start = performance.now();
+      const quickRetryDelay = 3000;
       const retryDelays = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
       for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
         if (attempt > 0) {
-          await new Promise<void>((r) => setTimeout(r, retryDelays[attempt - 1]!));
+          await new Promise<void>((r) => setTimeout(r, attempt === 1 ? quickRetryDelay : retryDelays[attempt - 1]!));
         }
 
         try {
@@ -181,7 +184,7 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
               "X-Ts-Protocol": profile.protocol,
               "X-Ts-Api-Key": profile.apiKey,
             },
-            signal: AbortSignal.timeout(25_000),
+            signal: AbortSignal.timeout(attempt === 1 ? 8000 : 25_000),
           });
 
           // 503 from Typesense or 502/504 from proxy (server can't reach Typesense) — retry
@@ -269,6 +272,14 @@ export const useConnectionStore = create<State & { actions: Actions }>((set) => 
     async testConnectionIfNeeded() {
       const { status, activeProfileId, profiles } = useConnectionStore.getState();
       if (status !== "error") return;
+      if (!activeProfileId) return;
+      const profile = profiles.find((p) => p.id === activeProfileId);
+      if (!profile) return;
+      await useConnectionStore.getState().actions.testConnection(profile);
+    },
+
+    async refreshHealth() {
+      const { activeProfileId, profiles } = useConnectionStore.getState();
       if (!activeProfileId) return;
       const profile = profiles.find((p) => p.id === activeProfileId);
       if (!profile) return;
