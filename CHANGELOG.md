@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.3] - 2026-05-28
+
+### Bug Fixes
+
+- Fix Docker setup to use hardcoded Railway service ID in cache mount (`c3236f9`)
+
 ## [2.0.2] - 2026-05-28
 
 ### Bug Fixes
