@@ -1,4 +1,9 @@
+import { eq } from "drizzle-orm";
+import { ACCESS_TOKEN_TTL } from "@/lib/api/oauth";
 import type { TypesenseProxyProfile } from "@/lib/api/proxy-typesense";
+import { getDb } from "@/lib/db/client";
+import { decryptApiKey } from "@/lib/db/encryption";
+import { oauthGrants } from "@/lib/db/schema";
 
 const MCP_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
@@ -65,6 +70,20 @@ export async function createMcpToken(
 }
 
 /**
+ * Mint a v2 (OAuth-issued) access token. Unlike legacy tokens, the payload
+ * carries no credentials — only the grant id. Verification looks the grant up
+ * and decrypts the stored apiKey, so revoking the grant kills every token.
+ */
+export async function createOauthAccessToken(
+  grantId: string,
+): Promise<{ token: string; expiresAt: string }> {
+  const exp = Math.floor(Date.now() / 1000) + ACCESS_TOKEN_TTL;
+  const encoded = btoa(JSON.stringify({ v: 2, gid: grantId, exp }));
+  const sig = await hmac(encoded, mcpSecret());
+  return { token: `${encoded}.${sig}`, expiresAt: new Date(exp * 1000).toISOString() };
+}
+
+/**
  * Verify and decode an MCP token. Returns the credentials needed to talk to
  * Typesense, plus a `kind` tag so callers can branch on legacy vs OAuth
  * provenance (e.g. for logging or future grant-aware behavior).
@@ -73,11 +92,23 @@ export async function verifyMcpToken(token: string): Promise<VerifiedToken | nul
   const decoded = await decodeAndVerify(token);
   if (!decoded) return null;
 
-  // v2 token (OAuth-issued) — currently no such tokens exist; PR2 will mint them
-  // and add the grant lookup here. Treat as invalid for now so a partial deploy
-  // doesn't accept malformed v2 tokens.
+  // v2 token (OAuth-issued) — resolve the grant for creds. A revoked or
+  // missing grant makes every token minted under it fail.
   if (isV2Payload(decoded)) {
-    return null;
+    const grant = getDb().select().from(oauthGrants).where(eq(oauthGrants.id, decoded.gid)).get();
+    if (!grant || grant.revokedAt) return null;
+    return {
+      kind: "oauth",
+      profile: {
+        host: grant.profileHost,
+        port: grant.profilePort,
+        protocol: grant.profileProtocol,
+        apiKey: decryptApiKey(grant.profileApiKeyEnc),
+      },
+      grantId: grant.id,
+      clientId: grant.clientId,
+      exp: decoded.exp,
+    };
   }
 
   // Legacy token — flat payload with creds.
@@ -109,8 +140,8 @@ function isLegacyPayload(p: AnyPayload): p is McpTokenPayload {
   );
 }
 
-function isV2Payload(p: AnyPayload): boolean {
-  return p.v === 2 && typeof p.gid === "string";
+function isV2Payload(p: AnyPayload): p is { v: 2; gid: string; exp: number } {
+  return p.v === 2 && typeof p.gid === "string" && typeof p.exp === "number";
 }
 
 async function decodeAndVerify(token: string): Promise<AnyPayload | null> {

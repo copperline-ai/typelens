@@ -1,7 +1,37 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createMcpToken, verifyMcpToken } from "@/lib/api/mcp-auth";
+import { createMcpToken, createOauthAccessToken, verifyMcpToken } from "@/lib/api/mcp-auth";
+import { _resetDbForTests, getDb } from "@/lib/db/client";
+import { encryptApiKey } from "@/lib/db/encryption";
+import { oauthClients, oauthGrants } from "@/lib/db/schema";
 
 const SECRET = "test-mcp-secret-do-not-use-in-prod";
+
+function seedGrant(grantId: string, opts: { revoked?: boolean } = {}) {
+  const db = getDb();
+  db.insert(oauthClients)
+    .values({
+      clientId: "tl_client",
+      clientName: "Test",
+      redirectUris: ["https://example.com/cb"],
+      grantTypes: ["authorization_code", "refresh_token"],
+      responseTypes: ["code"],
+    })
+    .run();
+  db.insert(oauthGrants)
+    .values({
+      id: grantId,
+      clientId: "tl_client",
+      userId: "admin",
+      profileId: "p1",
+      profileName: "Prod",
+      profileHost: "ts.example.com",
+      profilePort: 443,
+      profileProtocol: "https",
+      profileApiKeyEnc: encryptApiKey("secret-key"),
+      revokedAt: opts.revoked ? new Date() : null,
+    })
+    .run();
+}
 
 describe("verifyMcpToken (legacy branch)", () => {
   beforeEach(() => {
@@ -69,31 +99,44 @@ describe("verifyMcpToken (legacy branch)", () => {
 
 describe("verifyMcpToken (v2 OAuth branch)", () => {
   beforeEach(() => {
+    vi.unstubAllEnvs();
     vi.stubEnv("TYPELENS_MCP_SECRET", SECRET);
+    vi.stubEnv("TYPELENS_DB_PATH", ":memory:");
+    _resetDbForTests();
   });
 
-  // PR1 only wires the legacy branch. v2 tokens are explicitly rejected here
-  // so a malformed v2 deployment doesn't accept tokens before PR2 lands.
-  it("rejects a v2-shaped token until PR2 enables the grant lookup", async () => {
-    const payload = btoa(
-      JSON.stringify({
-        gid: "grant_1",
-        cid: "tl_x",
-        jti: "abcd",
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        v: 2,
-      }),
-    );
-    const key = await crypto.subtle.importKey(
-      "raw",
-      new TextEncoder().encode(SECRET),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"],
-    );
-    const buf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload));
-    const sig = btoa(String.fromCharCode(...new Uint8Array(buf)));
-    const token = `${payload}.${sig}`;
+  it("resolves a grant and returns its decrypted profile", async () => {
+    seedGrant("grant_ok");
+    const { token } = await createOauthAccessToken("grant_ok");
+    const v = await verifyMcpToken(token);
+    expect(v?.kind).toBe("oauth");
+    expect(v?.profile).toEqual({
+      host: "ts.example.com",
+      port: 443,
+      protocol: "https",
+      apiKey: "secret-key",
+    });
+    if (v?.kind === "oauth") {
+      expect(v.grantId).toBe("grant_ok");
+      expect(v.clientId).toBe("tl_client");
+    }
+  });
+
+  it("rejects a v2 token whose grant does not exist", async () => {
+    const { token } = await createOauthAccessToken("missing_grant");
+    expect(await verifyMcpToken(token)).toBeNull();
+  });
+
+  it("rejects a v2 token whose grant has been revoked", async () => {
+    seedGrant("grant_revoked", { revoked: true });
+    const { token } = await createOauthAccessToken("grant_revoked");
+    expect(await verifyMcpToken(token)).toBeNull();
+  });
+
+  it("rejects a v2 token signed with the wrong secret", async () => {
+    seedGrant("grant_sig");
+    const { token } = await createOauthAccessToken("grant_sig");
+    vi.stubEnv("TYPELENS_MCP_SECRET", "different-secret");
     expect(await verifyMcpToken(token)).toBeNull();
   });
 });
