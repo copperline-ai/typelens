@@ -1,11 +1,9 @@
 # syntax=docker/dockerfile:1.7
-ARG CACHE_KEY=local
 
 FROM oven/bun:1.3.13-alpine AS deps
-ARG CACHE_KEY
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN --mount=type=cache,id=${CACHE_KEY}-bun-install-cache,target=/root/.bun/install/cache \
+RUN --mount=type=cache,id=s/24c0ffe9-8d15-4aad-b9f0-dd66417cc233-/root/.bun/install/cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile
 
 FROM oven/bun:1.3.13-alpine AS builder
