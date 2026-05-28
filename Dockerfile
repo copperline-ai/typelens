@@ -3,8 +3,7 @@ WORKDIR /app
 # Build tools for native modules (better-sqlite3) — needed on musl when no prebuild matches.
 RUN apk add --no-cache python3 make g++ libc6-compat
 COPY package.json bun.lock ./
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    bun install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 FROM oven/bun:1.3.13-alpine AS builder
 WORKDIR /app
