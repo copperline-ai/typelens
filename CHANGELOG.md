@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.1.0] - 2026-05-28
+
+### Features
+- Added connection profiles and live health refresh functionality (`f895f93`, `05cd250`).
+
 ## [2.0.3] - 2026-05-28
 
 ### Bug Fixes
