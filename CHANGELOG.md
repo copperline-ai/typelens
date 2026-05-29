@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0] - 2026-05-29
+
+### Features
+
+- Add first-run empty-state flow (COP-638) (`6aacb6d`)
+
 ## [2.1.0] - 2026-05-28
 
 ### Features
