@@ -79,36 +79,45 @@ export function FirstRunOnboardingDialog() {
     }
   }, [activeProfile]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
-    useConnectionStore.getState().actions.addProfile({
+    const actions = useConnectionStore.getState().actions;
+
+    // Test before saving — gives immediate error feedback without persisting bad creds
+    const result = await actions.testConnectionOnce({
+      id: "temp",
       name: formData.name,
       host: formData.host,
       port: parseInt(formData.port, 10),
       protocol: formData.protocol,
       apiKey: formData.apiKey,
     });
-  }
 
-  useEffect(() => {
-    if (!saving) return;
-
-    if (connectionStatus === "connecting") return;
-
-    if (connectionStatus === "connected") {
-      markOnboardingStep("connectTypesense", true);
-      router.push("/collections");
+    if (!result.ok) {
+      setError(result.error || "Could not connect to Typesense. Check your host, port, and API key.");
+      setSaving(false);
       return;
     }
 
-    if (connectionStatus === "error") {
-      setError("Could not connect to Typesense. Check your host, port, and API key.");
-      setSaving(false);
+    // Connection succeeded — persist profile, set active, redirect
+    actions.addProfile({
+      name: formData.name,
+      host: formData.host,
+      port: parseInt(formData.port, 10),
+      protocol: formData.protocol,
+      apiKey: formData.apiKey,
+    });
+    const saved = useConnectionStore.getState().profiles;
+    const newProfile = saved[saved.length - 1];
+    if (newProfile) {
+      actions.setActiveProfile(newProfile.id);
     }
-  }, [connectionStatus, saving, router]);
+    markOnboardingStep("connectTypesense", true);
+    router.push("/collections");
+  }
 
   if (loading) return null;
   if (!isOpen) return null;
