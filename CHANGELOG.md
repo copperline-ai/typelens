@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.1] - 2026-05-29
+
+### Bug Fixes
+
+- Fixed issue in onboarding settings menu item (`199770f`)
+
 ## [2.2.0] - 2026-05-29
 
 ### Features
