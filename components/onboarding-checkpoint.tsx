@@ -12,13 +12,13 @@ import {
   getOnboardingState,
   markOnboardingStep,
   resetOnboarding,
-  type OnboardingState,
+  type LegacyOnboardingData,
 } from "@/lib/stores/onboarding";
 
 export function OnboardingCheckpoint() {
   const pathname = usePathname();
   const activeProfile = useConnectionStore(selectActiveProfile);
-  const [state, setState] = useState<OnboardingState | null>(null);
+  const [state, setState] = useState<LegacyOnboardingData | null>(null);
 
   useEffect(() => {
     setState(getOnboardingState());
