@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.0] - 2026-05-29
+
+### Other
+
+- Remove swipe navigation support (`f7dfb98`)
+
 ## [2.5.0] - 2026-05-29
 
 ### Features
