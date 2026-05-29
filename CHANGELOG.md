@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.0] - 2026-05-29
+
+### Features
+
+- Add synonyms management UI (COP-644) (`ac40e82`)
+
 ## [2.3.0] - 2026-05-29
 
 ### Features
