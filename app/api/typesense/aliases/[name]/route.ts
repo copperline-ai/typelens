@@ -4,18 +4,47 @@ import { extractProfile, proxyToTypesense } from "@/lib/api/proxy-typesense";
 
 type Params = { params: Promise<{ name: string }> };
 
-// Used by the collection schema-migration flow to point an alias at a new collection.
-export async function PUT(request: NextRequest, { params }: Params) {
+async function requireAliasContext(request: NextRequest) {
   const authError = await requireAuth(request);
-  if (authError) return authError;
+  if (authError) return { error: authError };
 
   const profile = extractProfile(request);
-  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
+  if (!profile) {
+    return {
+      error: NextResponse.json({ error: "Missing connection headers" }, { status: 400 }),
+    };
+  }
+
+  return { profile };
+}
+
+// Used by the collection schema-migration flow to point an alias at a new collection.
+export async function PUT(request: NextRequest, { params }: Params) {
+  const context = await requireAliasContext(request);
+  if ("error" in context) return context.error;
 
   const { name } = await params;
   const body = await request.text();
-  return proxyToTypesense(profile, `/aliases/${encodeURIComponent(name)}`, undefined, {
+  return proxyToTypesense(context.profile, `/aliases/${encodeURIComponent(name)}`, undefined, {
     method: "PUT",
     body,
+  });
+}
+
+export async function GET(request: NextRequest, { params }: Params) {
+  const context = await requireAliasContext(request);
+  if ("error" in context) return context.error;
+
+  const { name } = await params;
+  return proxyToTypesense(context.profile, `/aliases/${encodeURIComponent(name)}`);
+}
+
+export async function DELETE(request: NextRequest, { params }: Params) {
+  const context = await requireAliasContext(request);
+  if ("error" in context) return context.error;
+
+  const { name } = await params;
+  return proxyToTypesense(context.profile, `/aliases/${encodeURIComponent(name)}`, undefined, {
+    method: "DELETE",
   });
 }
