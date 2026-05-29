@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   selectActiveProfile,
   selectLastCollectionCount,
-  selectStatus,
   useConnectionStore,
 } from "@/lib/stores/connection";
 import {
@@ -23,7 +22,6 @@ import {
 export function OnboardingCheckpoint() {
   const pathname = usePathname();
   const activeProfile = useConnectionStore(selectActiveProfile);
-  const connectionStatus = useConnectionStore(selectStatus);
   const lastCollectionCount = useConnectionStore(selectLastCollectionCount);
   const [state, setState] = useState<LegacyOnboardingData | null>(null);
 
@@ -48,7 +46,6 @@ export function OnboardingCheckpoint() {
     }
 
     if (
-      connectionStatus === "connected" &&
       lastCollectionCount !== null &&
       lastCollectionCount > 0 &&
       !next.steps.createCollection
@@ -64,7 +61,7 @@ export function OnboardingCheckpoint() {
         setState(next);
       }
     }
-  }, [activeProfile, pathname, connectionStatus, lastCollectionCount, state]);
+  }, [activeProfile, pathname, lastCollectionCount, state]);
 
   const allDone = useMemo(
     () =>
