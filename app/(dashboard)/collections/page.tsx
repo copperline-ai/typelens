@@ -127,7 +127,7 @@ export default function CollectionsPage() {
         </div>
       )}
 
-      {activeProfile && status === "connecting" && !(collections && collections.length > 0) && (
+      {activeProfile && status === "connecting" && (
         <ConnectingState profile={activeProfile} />
       )}
 
