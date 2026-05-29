@@ -91,6 +91,16 @@ export function completeOnboarding(): LegacyOnboardingData {
   return updated;
 }
 
+export function dismissOnboarding(): LegacyOnboardingData {
+  const current = getLegacyState();
+  const updated: LegacyOnboardingData = {
+    ...current,
+    completed: true,
+  };
+  setLegacyState(updated);
+  return updated;
+}
+
 export function resetOnboarding(): LegacyOnboardingData {
   const reset: LegacyOnboardingData = {
     steps: { ...DEFAULT_STEPS },

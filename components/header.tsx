@@ -107,62 +107,63 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
             <Settings className="h-4 w-4" />
           </button>
         </PopoverTrigger>
-          <PopoverContent
-            side="bottom"
-            align="end"
-            className="w-44 p-1"
-            onOpenAutoFocus={(e) => e.preventDefault()}
-          >
-            {(() => {
-              const onboardingState = getOnboardingState();
-              const completedCount = Object.values(onboardingState.steps).filter(Boolean).length;
-              return (
-                <button
-                  onClick={() => {
-                    useOnboardingChecklistStore.getState().setForceOpen(true);
-                    setSettingsOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <ListChecks className="h-4 w-4 shrink-0" />
-                  <span className="flex-1 text-left">Getting started</span>
-                  <span className="text-xs tabular-nums">{completedCount}/3</span>
-                </button>
-              );
-            })()}
-            <Link
-              href="/settings"
-              onClick={() => setSettingsOpen(false)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Settings className="h-4 w-4 shrink-0" />
-              <span>Settings</span>
-            </Link>
-            {authEnabled && (
+        <PopoverContent
+          side="bottom"
+          align="end"
+          className="w-44 p-1"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          {(() => {
+            const onboardingState = getOnboardingState();
+            if (onboardingState.completed) return null;
+            const completedCount = Object.values(onboardingState.steps).filter(Boolean).length;
+            return (
               <button
                 onClick={() => {
-                  handleLogout();
+                  useOnboardingChecklistStore.getState().setForceOpen(true);
                   setSettingsOpen(false);
                 }}
                 className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                <LogOut className="h-4 w-4 shrink-0" />
-                <span>Log out</span>
+                <ListChecks className="h-4 w-4 shrink-0" />
+                <span className="flex-1 text-left">Getting started</span>
+                <span className="text-xs tabular-nums">{completedCount}/3</span>
               </button>
-            )}
-            <div className="border-t mt-1 pt-1 px-2 pb-0.5">
-              <button
-                onClick={() => {
-                  setReleaseNotesOpen(true);
-                  setSettingsOpen(false);
-                }}
-                className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-                title="View release notes"
-              >
-                {appVersion ? `v${appVersion}` : ""}
-              </button>
-            </div>
-          </PopoverContent>
+            );
+          })()}
+          <Link
+            href="/settings"
+            onClick={() => setSettingsOpen(false)}
+            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Settings className="h-4 w-4 shrink-0" />
+            <span>Settings</span>
+          </Link>
+          {authEnabled && (
+            <button
+              onClick={() => {
+                handleLogout();
+                setSettingsOpen(false);
+              }}
+              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Log out</span>
+            </button>
+          )}
+          <div className="border-t mt-1 pt-1 px-2 pb-0.5">
+            <button
+              onClick={() => {
+                setReleaseNotesOpen(true);
+                setSettingsOpen(false);
+              }}
+              className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+              title="View release notes"
+            >
+              {appVersion ? `v${appVersion}` : ""}
+            </button>
+          </div>
+        </PopoverContent>
       </Popover>
       <ReleaseNotesModal open={releaseNotesOpen} onOpenChange={setReleaseNotesOpen} />
     </header>

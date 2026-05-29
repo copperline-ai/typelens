@@ -78,4 +78,53 @@ describe("OnboardingCheckpoint", () => {
     expect(stored.completed).toBe(true);
     expect(container.innerHTML).toBe("");
   });
+
+  it("stays hidden after dismiss even if the checklist is force-opened later", async () => {
+    render(<OnboardingCheckpoint />);
+
+    await screen.findByText("Getting started");
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText("Getting started")).toBeNull();
+    });
+
+    useOnboardingChecklistStore.getState().setForceOpen(true);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Getting started")).toBeNull();
+    });
+  });
+
+  it("does not offer collection creation while the connection is still connecting", async () => {
+    localStorage.setItem(
+      ONBOARDING_STORAGE_KEY,
+      JSON.stringify({
+        steps: { connectTypesense: true, createCollection: false, openSearch: false },
+        completed: false,
+      }),
+    );
+
+    useConnectionStore.setState({
+      profiles: [
+        {
+          id: "profile-1",
+          name: "Primary",
+          host: "localhost",
+          port: 8108,
+          protocol: "http",
+          apiKey: "xyz",
+        },
+      ],
+      activeProfileId: "profile-1",
+      status: "connecting",
+    });
+
+    render(<OnboardingCheckpoint />);
+
+    await screen.findByText("Getting started");
+
+    expect(screen.queryByRole("link", { name: "Create a Collection" })).toBeNull();
+  });
 });

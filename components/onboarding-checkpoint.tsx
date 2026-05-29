@@ -14,6 +14,7 @@ import {
 } from "@/lib/stores/connection";
 import {
   completeOnboarding,
+  dismissOnboarding,
   getOnboardingState,
   markOnboardingStep,
   useOnboardingChecklistStore,
@@ -39,7 +40,7 @@ export function OnboardingCheckpoint() {
     let changed = false;
     let next = state;
 
-    if (activeProfile && !state.steps.connectTypesense) {
+    if (activeProfile && connectionStatus === "connected" && !state.steps.connectTypesense) {
       next = markOnboardingStep("connectTypesense", true);
       changed = true;
     }
@@ -72,9 +73,7 @@ export function OnboardingCheckpoint() {
   );
 
   if (!state) return null;
-  if (!forceOpen && state.completed) return null;
-
-  const isCompletedView = forceOpen && state.completed;
+  if (state.completed) return null;
 
   return (
     <Card className="mb-4 border-brand-blue/30 bg-brand-blue/[0.04]">
@@ -120,44 +119,51 @@ export function OnboardingCheckpoint() {
           }
         />
 
-        {!isCompletedView && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {!state.steps.connectTypesense && (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {!state.steps.connectTypesense &&
+            (activeProfile && connectionStatus === "connecting" ? (
+              <Button size="sm" variant="outline" disabled>
+                Waiting for connection
+              </Button>
+            ) : (
               <Button asChild size="sm" variant="outline">
                 <Link href="/settings/connection">Go to Connections</Link>
               </Button>
-            )}
-            {state.steps.connectTypesense && !state.steps.createCollection && (
+            ))}
+          {state.steps.connectTypesense &&
+            !state.steps.createCollection &&
+            connectionStatus === "connected" && (
               <Button asChild size="sm" variant="outline">
                 <Link href="/collections">Create a Collection</Link>
               </Button>
             )}
-            {state.steps.createCollection && !state.steps.openSearch && (
-              <Button asChild size="sm" variant="outline">
-                <Link href="/search">Open Search</Link>
-              </Button>
-            )}
-            {allDone && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  setState(completeOnboarding());
-                }}
-              >
-                Complete onboarding
-              </Button>
-            )}
+          {state.steps.createCollection && !state.steps.openSearch && (
+            <Button asChild size="sm" variant="outline">
+              <Link href="/search">Open Search</Link>
+            </Button>
+          )}
+          {allDone && (
             <Button
               size="sm"
-              variant="ghost"
               onClick={() => {
                 setState(completeOnboarding());
+                setForceOpen(false);
               }}
             >
-              Dismiss
+              Complete onboarding
             </Button>
-          </div>
-        )}
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setState(dismissOnboarding());
+              setForceOpen(false);
+            }}
+          >
+            Dismiss
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
