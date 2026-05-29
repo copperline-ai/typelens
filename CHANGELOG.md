@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.0] - 2026-05-29
+
+### Features
+
+- Add onboarding skip and dismiss actions (`09f7cbc`)
+
 ## [3.0.0] - 2026-05-29
 
 ### Other
