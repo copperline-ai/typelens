@@ -13,7 +13,6 @@ import {
   FileJson,
   Layers,
   Pencil,
-  Plus,
   Trash2,
 } from "lucide-react";
 import { useConnectionStore, selectActiveProfile, selectStatus } from "@/lib/stores/connection";
@@ -51,6 +50,7 @@ import { ImportRecordsDialog } from "@/components/collections/import-records-dia
 import { AddEmbeddingDialog } from "@/components/collections/add-embedding-dialog";
 import { SynonymsSection } from "@/components/collections/synonyms-section";
 import { DocumentEditorDialog } from "@/components/collections/document-editor-dialog";
+import { AddDocumentButton } from "@/components/collections/add-document-button";
 import { cn } from "@/lib/utils";
 import { CopyButton, FieldValue } from "@/components/field-value";
 
@@ -663,15 +663,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
                 <Pencil className="h-4 w-4" />
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCreateDocumentOpen(true)}
-                title="Add document"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Document
-              </Button>
+              <AddDocumentButton onClick={() => setCreateDocumentOpen(true)} />
 
               <Button
                 variant="outline"
