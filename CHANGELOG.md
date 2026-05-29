@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.0] - 2026-05-29
+
+### Features
+
+- Document create and edit functionality added (`dbab9a1`)
+
 ## [2.4.0] - 2026-05-29
 
 ### Features
