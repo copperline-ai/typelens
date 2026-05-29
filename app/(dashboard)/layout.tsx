@@ -7,6 +7,7 @@ import { KeepAlive } from "@/components/keep-alive";
 import { SwipeNav } from "@/components/swipe-nav";
 import { DemoSessionBanner } from "@/components/demo-session-banner";
 import { OnboardingCheckpoint } from "@/components/onboarding-checkpoint";
+import { FirstRunOnboardingDialog } from "@/components/onboarding/first-run-dialog";
 import { decodeSessionToken, SESSION_COOKIE } from "@/lib/auth-session";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="flex flex-1 flex-col overflow-hidden">
             <Header authEnabled={authEnabled} />
             <main className="flex-1 overflow-auto p-4 sm:p-6">
+              <FirstRunOnboardingDialog />
               <OnboardingCheckpoint />
               {children}
             </main>

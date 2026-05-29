@@ -6,19 +6,24 @@ import { usePathname } from "next/navigation";
 import { CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { selectActiveProfile, useConnectionStore } from "@/lib/stores/connection";
+import {
+  selectActiveProfile,
+  selectLastCollectionCount,
+  useConnectionStore,
+} from "@/lib/stores/connection";
 import {
   completeOnboarding,
   getOnboardingState,
   markOnboardingStep,
   resetOnboarding,
-  type OnboardingState,
+  type LegacyOnboardingData,
 } from "@/lib/stores/onboarding";
 
 export function OnboardingCheckpoint() {
   const pathname = usePathname();
   const activeProfile = useConnectionStore(selectActiveProfile);
-  const [state, setState] = useState<OnboardingState | null>(null);
+  const lastCollectionCount = useConnectionStore(selectLastCollectionCount);
+  const [state, setState] = useState<LegacyOnboardingData | null>(null);
 
   useEffect(() => {
     setState(getOnboardingState());
@@ -40,17 +45,29 @@ export function OnboardingCheckpoint() {
       changed = true;
     }
 
+    if (
+      lastCollectionCount !== null &&
+      lastCollectionCount > 0 &&
+      !next.steps.createCollection
+    ) {
+      next = markOnboardingStep("createCollection", true);
+      changed = true;
+    }
+
     if (changed) {
-      if (next.steps.connectTypesense && next.steps.openSearch) {
+      if (next.steps.connectTypesense && next.steps.openSearch && next.steps.createCollection) {
         setState(completeOnboarding());
       } else {
         setState(next);
       }
     }
-  }, [activeProfile, pathname, state]);
+  }, [activeProfile, pathname, lastCollectionCount, state]);
 
   const allDone = useMemo(
-    () => !!state?.steps.connectTypesense && !!state?.steps.openSearch,
+    () =>
+      !!state?.steps.connectTypesense &&
+      !!state?.steps.openSearch &&
+      !!state?.steps.createCollection,
     [state],
   );
 
@@ -63,6 +80,7 @@ export function OnboardingCheckpoint() {
       </CardHeader>
       <CardContent className="space-y-3">
         <Step done={state.steps.connectTypesense} label="Add and activate a Typesense connection" />
+        <Step done={state.steps.createCollection} label="Create your first collection" />
         <Step done={state.steps.openSearch} label="Open Search and run your first query" />
 
         <div className="flex flex-wrap gap-2 pt-1">
@@ -71,7 +89,12 @@ export function OnboardingCheckpoint() {
               <Link href="/settings/connection">Go to Connections</Link>
             </Button>
           )}
-          {!state.steps.openSearch && (
+          {state.steps.connectTypesense && !state.steps.createCollection && (
+            <Button asChild size="sm" variant="outline">
+              <Link href="/collections">Create a Collection</Link>
+            </Button>
+          )}
+          {state.steps.createCollection && !state.steps.openSearch && (
             <Button asChild size="sm" variant="outline">
               <Link href="/search">Open Search</Link>
             </Button>

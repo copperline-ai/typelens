@@ -748,7 +748,7 @@ function SearchPageContent() {
   }
 
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || status !== "connected") return;
     setLoading(true);
     setCollectionsError(null);
     listCollections(profile)
@@ -769,7 +769,7 @@ function SearchPageContent() {
         setCollectionsError(err);
       })
       .finally(() => setLoading(false));
-  }, [profile]);
+  }, [profile, status]);
 
   const [searchMode, setSearchMode] = useState<SearchMode>("auto");
   const [customQueryFields, setCustomQueryFields] = useState<string[]>([]);
@@ -868,7 +868,7 @@ function SearchPageContent() {
     );
   }
 
-  if (status === "connecting" && collections.length === 0 && !collectionsError) {
+  if (status === "connecting") {
     return <ConnectingState profile={profile} fullPage />;
   }
 
@@ -977,12 +977,6 @@ function SearchPageContent() {
           />
           <div className="flex min-h-0 flex-1 flex-col gap-4">
             <SearchError />
-            {status === "connecting" && (
-              <div className="flex items-center gap-2 rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-300">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-500" />
-                <span>Connection lost — retrying…</span>
-              </div>
-            )}
             {status === "error" && (
               <div className="flex items-center gap-2 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-2 text-sm text-destructive">
                 <span className="flex-1">Connection unavailable</span>
