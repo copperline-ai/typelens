@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.3.0] - 2026-05-29
+
+### Features
+- Add aliases management UI (`5de4146`, `7102e8b`)
+
 ## [2.2.1] - 2026-05-29
 
 ### Bug Fixes
