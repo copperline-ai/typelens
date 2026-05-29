@@ -25,6 +25,16 @@ export type Collection = {
   created_at?: number;
 };
 
+export type SynonymDefinition = {
+  id: string;
+  root?: string;
+  synonyms: string[];
+};
+
+export type SynonymListResponse = {
+  synonyms: SynonymDefinition[];
+};
+
 const RETRY_DELAYS_MS = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -337,6 +347,10 @@ export function truncateDocuments(profile: Profile, collectionName: string) {
 
 export type CollectionAlias = { name: string; collection_name: string };
 
+export function listAliases(profile: Profile) {
+  return typesenseFetch<{ aliases: CollectionAlias[] }>(profile, "/aliases");
+}
+
 // Used by the collection schema-migration flow to point an alias at a new collection.
 export function upsertAlias(profile: Profile, aliasName: string, collectionName: string) {
   return typesenseFetch<CollectionAlias>(
@@ -344,6 +358,15 @@ export function upsertAlias(profile: Profile, aliasName: string, collectionName:
     `/aliases/${encodeURIComponent(aliasName)}`,
     undefined,
     { method: "PUT", body: JSON.stringify({ collection_name: collectionName }) },
+  );
+}
+
+export function deleteAlias(profile: Profile, aliasName: string) {
+  return typesenseFetch<{ name: string }>(
+    profile,
+    `/aliases/${encodeURIComponent(aliasName)}`,
+    undefined,
+    { method: "DELETE" },
   );
 }
 
@@ -360,10 +383,70 @@ export function getDocument(
   );
 }
 
+export function createDocument(
+  profile: Profile,
+  collectionName: string,
+  document: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  return typesenseFetch<Record<string, unknown>>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/documents`,
+    undefined,
+    { method: "POST", body: JSON.stringify(document) },
+  );
+}
+
+export function updateDocument(
+  profile: Profile,
+  collectionName: string,
+  documentId: string,
+  document: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  return typesenseFetch<Record<string, unknown>>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(documentId)}`,
+    undefined,
+    { method: "PATCH", body: JSON.stringify(document) },
+  );
+}
+
 export function deleteDocument(profile: Profile, collectionName: string, documentId: string) {
   return typesenseFetch<Record<string, unknown>>(
     profile,
     `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(documentId)}`,
+    undefined,
+    { method: "DELETE" },
+  );
+}
+
+export function listSynonyms(profile: Profile, collectionName: string) {
+  return typesenseFetch<SynonymListResponse>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms`,
+  );
+}
+
+export function upsertSynonym(
+  profile: Profile,
+  collectionName: string,
+  id: string,
+  body: Omit<SynonymDefinition, "id">,
+) {
+  return typesenseFetch<SynonymDefinition>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms/${encodeURIComponent(id)}`,
+    undefined,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function deleteSynonym(profile: Profile, collectionName: string, id: string) {
+  return typesenseFetch<SynonymDefinition>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms/${encodeURIComponent(id)}`,
     undefined,
     { method: "DELETE" },
   );

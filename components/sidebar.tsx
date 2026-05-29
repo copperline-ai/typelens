@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Database,
+  Link as LinkIcon,
   ListChecks,
   LogOut,
   PanelLeftClose,
@@ -29,6 +30,7 @@ import {
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/collections", label: "Collections", icon: Database },
+  { href: "/aliases", label: "Aliases", icon: LinkIcon },
   { href: "/settings/connection", label: "Connections", icon: Server },
 ];
 
