@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { searchSwipeConsumedRef } from "@/hooks/use-swipe-navigation";
 import {
   Configure,
   InstantSearch,
@@ -537,48 +536,8 @@ function KeyboardShortcuts({
     }
     window.addEventListener("keydown", onKey);
 
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    function onTouchStart(e: TouchEvent) {
-      const touch = e.touches[0];
-      if (!touch) return;
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    }
-
-    function onTouchEnd(e: TouchEvent) {
-      if (!isMobileRef.current) return;
-      const touch = e.changedTouches[0];
-      if (!touch) return;
-      const dx = touch.clientX - touchStartX;
-      const dy = touch.clientY - touchStartY;
-      if (Math.abs(dx) < 50 || Math.abs(dx) <= Math.abs(dy)) {
-        if (isMobileRef.current && Math.abs(dy) > Math.abs(dx)) {
-          if (dy < -80) {
-            if (!collapsedRef.current) toggleRef.current();
-          } else if (dy > 80) {
-            if (collapsedRef.current) toggleRef.current();
-          }
-        }
-        return;
-      }
-      searchSwipeConsumedRef.current = true;
-      if (dx < 0) {
-        if (pageRef.current.current < pageRef.current.total - 1)
-          pageRef.current.refine(pageRef.current.current + 1);
-      } else {
-        if (pageRef.current.current > 0) pageRef.current.refine(pageRef.current.current - 1);
-      }
-    }
-
-    window.addEventListener("touchstart", onTouchStart, { passive: true, capture: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true, capture: true });
-
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchend", onTouchEnd);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

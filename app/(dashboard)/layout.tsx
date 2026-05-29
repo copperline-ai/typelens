@@ -4,7 +4,6 @@ import { Header } from "@/components/header";
 import { ToastProvider } from "@/components/async-boundary";
 import { HydrateStore } from "@/components/hydrate-store";
 import { KeepAlive } from "@/components/keep-alive";
-import { SwipeNav } from "@/components/swipe-nav";
 import { DemoSessionBanner } from "@/components/demo-session-banner";
 import { OnboardingCheckpoint } from "@/components/onboarding-checkpoint";
 import { FirstRunOnboardingDialog } from "@/components/onboarding/first-run-dialog";
@@ -22,7 +21,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex h-dvh flex-col overflow-hidden">
         {session?.isDemo && <DemoSessionBanner expiresAt={session.exp * 1000} />}
         <div className="flex flex-1 overflow-hidden">
-          <SwipeNav />
           <Sidebar authEnabled={authEnabled} />
           <div className="flex flex-1 flex-col overflow-hidden">
             <Header authEnabled={authEnabled} />
