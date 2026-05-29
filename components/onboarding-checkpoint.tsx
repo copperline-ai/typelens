@@ -50,11 +50,7 @@ export function OnboardingCheckpoint() {
       changed = true;
     }
 
-    if (
-      lastCollectionCount !== null &&
-      lastCollectionCount > 0 &&
-      !next.steps.createCollection
-    ) {
+    if (lastCollectionCount !== null && lastCollectionCount > 0 && !next.steps.createCollection) {
       next = markOnboardingStep("createCollection", true);
       changed = true;
     }
@@ -76,9 +72,10 @@ export function OnboardingCheckpoint() {
     [state],
   );
 
-  if (!forceOpen && (!state || state.completed)) return null;
+  if (!state) return null;
+  if (!forceOpen && state.completed) return null;
 
-  const isCompletedView = forceOpen && state?.completed;
+  const isCompletedView = forceOpen && state.completed;
 
   return (
     <Card className="mb-4 border-brand-blue/30 bg-brand-blue/[0.04]">
