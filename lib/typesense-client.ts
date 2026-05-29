@@ -25,6 +25,16 @@ export type Collection = {
   created_at?: number;
 };
 
+export type SynonymDefinition = {
+  id: string;
+  root?: string;
+  synonyms: string[];
+};
+
+export type SynonymListResponse = {
+  synonyms: SynonymDefinition[];
+};
+
 const RETRY_DELAYS_MS = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000, 35_000];
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -364,6 +374,39 @@ export function deleteDocument(profile: Profile, collectionName: string, documen
   return typesenseFetch<Record<string, unknown>>(
     profile,
     `/collections/${encodeURIComponent(collectionName)}/documents/${encodeURIComponent(documentId)}`,
+    undefined,
+    { method: "DELETE" },
+  );
+}
+
+export function listSynonyms(profile: Profile, collectionName: string) {
+  return typesenseFetch<SynonymListResponse>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms`,
+  );
+}
+
+export function upsertSynonym(
+  profile: Profile,
+  collectionName: string,
+  id: string,
+  body: Omit<SynonymDefinition, "id">,
+) {
+  return typesenseFetch<SynonymDefinition>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms/${encodeURIComponent(id)}`,
+    undefined,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function deleteSynonym(profile: Profile, collectionName: string, id: string) {
+  return typesenseFetch<SynonymDefinition>(
+    profile,
+    `/collections/${encodeURIComponent(collectionName)}/synonyms/${encodeURIComponent(id)}`,
     undefined,
     { method: "DELETE" },
   );
