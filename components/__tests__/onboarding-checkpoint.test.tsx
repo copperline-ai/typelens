@@ -1,20 +1,19 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OnboardingCheckpoint } from "../onboarding-checkpoint";
 import { useConnectionStore } from "@/lib/stores/connection";
-import {
-  ONBOARDING_STORAGE_KEY,
-  useOnboardingChecklistStore,
-} from "@/lib/stores/onboarding";
+import { ONBOARDING_STORAGE_KEY, useOnboardingChecklistStore } from "@/lib/stores/onboarding";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children: ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 function mockStorage() {
@@ -31,6 +30,8 @@ function mockStorage() {
 }
 
 describe("OnboardingCheckpoint", () => {
+  afterEach(cleanup);
+
   beforeEach(() => {
     (globalThis as unknown as { localStorage: Storage }).localStorage = mockStorage() as never;
     useConnectionStore.setState({
@@ -50,16 +51,16 @@ describe("OnboardingCheckpoint", () => {
 
     await screen.findByText("Getting started");
 
-    expect(screen.getAllByRole("button", { name: "Skip" })).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: "Skip" })).toHaveLength(2);
 
     fireEvent.click(screen.getAllByRole("button", { name: "Skip" })[0]!);
 
     await waitFor(() => {
-      expect(screen.getAllByRole("button", { name: "Skip" })).toHaveLength(2);
+      expect(screen.getAllByRole("button", { name: "Skip" })).toHaveLength(1);
     });
 
     const stored = JSON.parse(localStorage.getItem(ONBOARDING_STORAGE_KEY) ?? "{}");
-    expect(stored.steps.connectTypesense).toBe(true);
+    expect(stored.steps.createCollection).toBe(true);
     expect(stored.completed).toBe(false);
   });
 
@@ -68,7 +69,9 @@ describe("OnboardingCheckpoint", () => {
 
     await screen.findByText("Getting started");
 
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hide guide" }));
+    await screen.findByText("Hide the onboarding guide?");
+    fireEvent.click(screen.getByRole("button", { name: "Hide guide" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Getting started")).toBeNull();
@@ -84,7 +87,9 @@ describe("OnboardingCheckpoint", () => {
 
     await screen.findByText("Getting started");
 
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hide guide" }));
+    await screen.findByText("Hide the onboarding guide?");
+    fireEvent.click(screen.getByRole("button", { name: "Hide guide" }));
 
     await waitFor(() => {
       expect(screen.queryByText("Getting started")).toBeNull();

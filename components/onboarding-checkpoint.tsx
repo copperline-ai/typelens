@@ -7,6 +7,17 @@ import { CheckCircle2, Circle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   selectActiveProfile,
   selectLastCollectionCount,
   selectStatus,
@@ -76,30 +87,44 @@ export function OnboardingCheckpoint() {
   if (state.completed) return null;
 
   return (
-    <Card className="mb-4 border-brand-blue/30 bg-brand-blue/[0.04]">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg">Getting started</CardTitle>
-        {forceOpen && (
+    <Card className="relative mb-4 border-brand-blue/30 bg-brand-blue/[0.04]">
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
           <Button
             size="sm"
-            variant="ghost"
-            className="h-6 w-6 p-0"
-            onClick={() => setForceOpen(false)}
+            variant="outline"
+            className="absolute -right-3 -top-3 h-6 w-6 rounded-full bg-background p-0"
+            aria-label="Hide guide"
           >
             <X className="h-3 w-3" />
           </Button>
-        )}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hide the onboarding guide?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently hide the Getting started guide. You can always revisit the steps
+              from the documentation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setState(dismissOnboarding());
+                setForceOpen(false);
+              }}
+            >
+              Hide guide
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Getting started</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Step
-          done={state.steps.connectTypesense}
-          label="Add and activate a Typesense connection"
-          onSkip={
-            state.steps.connectTypesense
-              ? undefined
-              : () => setState(markOnboardingStep("connectTypesense", true))
-          }
-        />
+        <Step done={state.steps.connectTypesense} label="Add and activate a Typesense connection" />
         <Step
           done={state.steps.createCollection}
           label="Create your first collection"
@@ -153,31 +178,13 @@ export function OnboardingCheckpoint() {
               Complete onboarding
             </Button>
           )}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              setState(dismissOnboarding());
-              setForceOpen(false);
-            }}
-          >
-            Dismiss
-          </Button>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function Step({
-  done,
-  label,
-  onSkip,
-}: {
-  done: boolean;
-  label: string;
-  onSkip?: () => void;
-}) {
+function Step({ done, label, onSkip }: { done: boolean; label: string; onSkip?: () => void }) {
   return (
     <div className="flex items-center justify-between gap-3 text-sm">
       <div className="flex items-center gap-2">
