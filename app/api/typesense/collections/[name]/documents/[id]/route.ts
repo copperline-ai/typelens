@@ -33,3 +33,20 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     { method: "DELETE" },
   );
 }
+
+export async function PATCH(request: NextRequest, { params }: Params) {
+  const authError = await requireAuth(request);
+  if (authError) return authError;
+
+  const profile = extractProfile(request);
+  if (!profile) return NextResponse.json({ error: "Missing connection headers" }, { status: 400 });
+
+  const { name, id } = await params;
+  const body = await request.text();
+  return proxyToTypesense(
+    profile,
+    `/collections/${encodeURIComponent(name)}/documents/${encodeURIComponent(id)}`,
+    undefined,
+    { method: "PATCH", body },
+  );
+}

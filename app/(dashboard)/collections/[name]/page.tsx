@@ -20,6 +20,7 @@ import { ConnectingState } from "@/components/connecting-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCollection } from "@/lib/hooks/use-collection";
 import {
+  createDocument,
   TypesenseAuthError,
   deleteCollection,
   deleteDocument,
@@ -48,6 +49,8 @@ import { EditSchemaDialog } from "@/components/collections/edit-schema-dialog";
 import { ImportRecordsDialog } from "@/components/collections/import-records-dialog";
 import { AddEmbeddingDialog } from "@/components/collections/add-embedding-dialog";
 import { SynonymsSection } from "@/components/collections/synonyms-section";
+import { DocumentEditorDialog } from "@/components/collections/document-editor-dialog";
+import { AddDocumentButton } from "@/components/collections/add-document-button";
 import { cn } from "@/lib/utils";
 import { CopyButton, FieldValue } from "@/components/field-value";
 
@@ -486,8 +489,10 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
   const [editSchemaOpen, setEditSchemaOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [addEmbeddingOpen, setAddEmbeddingOpen] = useState(false);
+  const [createDocumentOpen, setCreateDocumentOpen] = useState(false);
   const [truncating, setTruncating] = useState(false);
   const [truncateError, setTruncateError] = useState<unknown>(null);
+  const [documentsRefreshToken, setDocumentsRefreshToken] = useState(0);
 
   const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -657,6 +662,8 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               >
                 <Pencil className="h-4 w-4" />
               </Button>
+
+              <AddDocumentButton onClick={() => setCreateDocumentOpen(true)} />
 
               <Button
                 variant="outline"
@@ -844,6 +851,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               onFirstOpen={() => {}}
             >
               <DocumentsSection
+                key={documentsRefreshToken}
                 profile={activeProfile}
                 collectionName={collection.name}
                 fields={collection.fields}
@@ -879,6 +887,20 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
           onOpenChange={setEditSchemaOpen}
           onUpdated={() => refetch()}
           onRenamed={(newName) => router.push(`/collections/${encodeURIComponent(newName)}`)}
+        />
+      )}
+
+      {collection && activeProfile && (
+        <DocumentEditorDialog
+          open={createDocumentOpen}
+          mode="create"
+          collection={collection}
+          onOpenChange={setCreateDocumentOpen}
+          onSaved={() => {
+            refetch();
+            setDocumentsRefreshToken((value) => value + 1);
+          }}
+          onSubmit={(document) => createDocument(activeProfile, collection.name, document)}
         />
       )}
 

@@ -3,10 +3,19 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clipboard, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Clipboard,
+  Pencil,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useConnectionStore, selectActiveProfile } from "@/lib/stores/connection";
 import {
   getCollection,
+  updateDocument,
   getDocument,
   deleteDocument,
   TypesenseAuthError,
@@ -27,6 +36,7 @@ import {
 import { Skeleton } from "@/components/async-boundary";
 import { CopyButton, FieldValue } from "@/components/field-value";
 import { TruncatedFieldName } from "@/components/ui/truncated-field-name";
+import { DocumentEditorDialog } from "@/components/collections/document-editor-dialog";
 
 export default function DocumentViewPage({
   params,
@@ -49,6 +59,7 @@ export default function DocumentViewPage({
   const [error, setError] = useState<unknown>(null);
   const [deleteError, setDeleteError] = useState<unknown>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   async function handleDelete() {
     if (!activeProfile) return;
@@ -115,6 +126,15 @@ export default function DocumentViewPage({
           </Link>
           <div className="ml-auto shrink-0 flex items-center gap-1.5">
             <CopyButton text={documentId} label="Copy ID" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditOpen(true)}
+              disabled={!document || !collection}
+              title="Edit document"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -283,6 +303,23 @@ export default function DocumentViewPage({
             );
           })}
         </div>
+      )}
+
+      {collection && document && activeProfile && (
+        <DocumentEditorDialog
+          open={editOpen}
+          mode="edit"
+          collection={collection}
+          document={document}
+          onOpenChange={setEditOpen}
+          onSaved={(savedDocument) => {
+            setDocument(savedDocument);
+            fetchData();
+          }}
+          onSubmit={(payload) =>
+            updateDocument(activeProfile, collection.name, documentId, payload)
+          }
+        />
       )}
     </div>
   );
