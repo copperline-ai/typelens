@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.2.0] - 2026-05-29
+
+### Features
+
+- Add alert dialog for hiding onboarding guide in OnboardingCheckpoint (`92fe5b9`)
+
 ## [3.1.0] - 2026-05-29
 
 ### Features
