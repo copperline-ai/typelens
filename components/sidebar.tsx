@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Database,
+  ListChecks,
   LogOut,
   PanelLeftClose,
   Search,
@@ -20,6 +21,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAppVersion } from "@/lib/hooks/use-app-version";
 import { ReleaseNotesModal } from "@/components/release-notes-modal";
+import {
+  getOnboardingState,
+  useOnboardingChecklistStore,
+} from "@/lib/stores/onboarding";
 
 const navItems = [
   { href: "/search", label: "Search", icon: Search },
@@ -141,6 +146,23 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
             className="w-44 p-1"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
+            {(() => {
+              const onboardingState = getOnboardingState();
+              const completedCount = Object.values(onboardingState.steps).filter(Boolean).length;
+              return (
+                <button
+                  onClick={() => {
+                    useOnboardingChecklistStore.getState().setForceOpen(true);
+                    setSettingsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ListChecks className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 text-left">Getting started</span>
+                  <span className="text-xs tabular-nums">{completedCount}/3</span>
+                </button>
+              );
+            })()}
             <Link
               href="/settings"
               onClick={() => setSettingsOpen(false)}

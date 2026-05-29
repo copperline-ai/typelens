@@ -3,12 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Database, LogOut, Search, Server, Settings } from "lucide-react";
+import { Database, ListChecks, LogOut, Search, Server, Settings } from "lucide-react";
 import {
   useConnectionStore,
   selectActiveProfile,
   type ConnectionStatus,
 } from "@/lib/stores/connection";
+import {
+  getOnboardingState,
+  useOnboardingChecklistStore,
+} from "@/lib/stores/onboarding";
 import { StatusPopover } from "@/components/status-popover";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -109,6 +113,23 @@ export function Header({ authEnabled = false }: { authEnabled?: boolean }) {
             className="w-44 p-1"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
+            {(() => {
+              const onboardingState = getOnboardingState();
+              const completedCount = Object.values(onboardingState.steps).filter(Boolean).length;
+              return (
+                <button
+                  onClick={() => {
+                    useOnboardingChecklistStore.getState().setForceOpen(true);
+                    setSettingsOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <ListChecks className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 text-left">Getting started</span>
+                  <span className="text-xs tabular-nums">{completedCount}/3</span>
+                </button>
+              );
+            })()}
             <Link
               href="/settings"
               onClick={() => setSettingsOpen(false)}

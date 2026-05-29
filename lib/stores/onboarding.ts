@@ -256,3 +256,13 @@ export const useOnboardingStore = create<OnboardingState & Actions>((set, get) =
 export const selectOnboardingState = (s: ReturnType<typeof useOnboardingStore.getState>) => s;
 export const selectShowOnboarding = (s: ReturnType<typeof useOnboardingStore.getState>) =>
   s.currentStep !== "complete" && !s.dismissedAt;
+
+/* ---- Non-persisted force-open store for programmatic checklist open ---- */
+
+export const useOnboardingChecklistStore = create<{
+  forceOpen: boolean;
+  setForceOpen: (v: boolean) => void;
+}>((set) => ({
+  forceOpen: false,
+  setForceOpen: (v) => set({ forceOpen: v }),
+}));
