@@ -16,7 +16,6 @@ import {
   completeOnboarding,
   getOnboardingState,
   markOnboardingStep,
-  resetOnboarding,
   useOnboardingChecklistStore,
   type LegacyOnboardingData,
 } from "@/lib/stores/onboarding";
@@ -93,9 +92,33 @@ export function OnboardingCheckpoint() {
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        <Step done={state.steps.connectTypesense} label="Add and activate a Typesense connection" />
-        <Step done={state.steps.createCollection} label="Create your first collection" />
-        <Step done={state.steps.openSearch} label="Open Search and run your first query" />
+        <Step
+          done={state.steps.connectTypesense}
+          label="Add and activate a Typesense connection"
+          onSkip={
+            state.steps.connectTypesense
+              ? undefined
+              : () => setState(markOnboardingStep("connectTypesense", true))
+          }
+        />
+        <Step
+          done={state.steps.createCollection}
+          label="Create your first collection"
+          onSkip={
+            state.steps.createCollection
+              ? undefined
+              : () => setState(markOnboardingStep("createCollection", true))
+          }
+        />
+        <Step
+          done={state.steps.openSearch}
+          label="Open Search and run your first query"
+          onSkip={
+            state.steps.openSearch
+              ? undefined
+              : () => setState(markOnboardingStep("openSearch", true))
+          }
+        />
 
         {!isCompletedView && (
           <div className="flex flex-wrap gap-2 pt-1">
@@ -128,10 +151,10 @@ export function OnboardingCheckpoint() {
               size="sm"
               variant="ghost"
               onClick={() => {
-                setState(resetOnboarding());
+                setState(completeOnboarding());
               }}
             >
-              Reset checklist
+              Dismiss
             </Button>
           </div>
         )}
@@ -140,15 +163,34 @@ export function OnboardingCheckpoint() {
   );
 }
 
-function Step({ done, label }: { done: boolean; label: string }) {
+function Step({
+  done,
+  label,
+  onSkip,
+}: {
+  done: boolean;
+  label: string;
+  onSkip?: () => void;
+}) {
   return (
-    <div className="flex items-center gap-2 text-sm">
-      {done ? (
-        <CheckCircle2 className="h-4 w-4 text-brand-blue" aria-hidden="true" />
-      ) : (
-        <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <div className="flex items-center gap-2">
+        {done ? (
+          <CheckCircle2 className="h-4 w-4 text-brand-blue" aria-hidden="true" />
+        ) : (
+          <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        )}
+        <span className={done ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+      </div>
+      {!done && onSkip && (
+        <button
+          type="button"
+          className="text-xs text-muted-foreground underline underline-offset-2"
+          onClick={onSkip}
+        >
+          Skip
+        </button>
       )}
-      <span className={done ? "text-foreground" : "text-muted-foreground"}>{label}</span>
     </div>
   );
 }
