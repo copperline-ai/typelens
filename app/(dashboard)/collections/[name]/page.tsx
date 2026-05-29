@@ -47,6 +47,7 @@ import { CloneCollectionDialog } from "@/components/collections/clone-collection
 import { EditSchemaDialog } from "@/components/collections/edit-schema-dialog";
 import { ImportRecordsDialog } from "@/components/collections/import-records-dialog";
 import { AddEmbeddingDialog } from "@/components/collections/add-embedding-dialog";
+import { SynonymsSection } from "@/components/collections/synonyms-section";
 import { cn } from "@/lib/utils";
 import { CopyButton, FieldValue } from "@/components/field-value";
 
@@ -849,6 +850,16 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
               />
             </CollapsibleSection>
           )}
+
+          {activeProfile && (
+            <CollapsibleSection
+              title="Synonyms"
+              summary={`${synonymsSummaryLabel(collection.name)}`}
+              onFirstOpen={() => {}}
+            >
+              <SynonymsSection profile={activeProfile} collectionName={collection.name} />
+            </CollapsibleSection>
+          )}
         </>
       )}
 
@@ -890,4 +901,8 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ nam
       )}
     </div>
   );
+}
+
+function synonymsSummaryLabel(collectionName: string) {
+  return `Manage synonyms for ${collectionName}`;
 }
