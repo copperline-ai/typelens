@@ -1,7 +1,8 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DELETE } from "../route";
+import { DELETE, POST } from "../route";
 
+vi.stubEnv("AUTH_USERNAME", "admin");
 vi.stubEnv("AUTH_PASSWORD", "test-secret");
 
 async function makeAuthCookie(): Promise<string> {
@@ -42,5 +43,43 @@ describe("DELETE /api/typesense/collections/:name/documents (truncate)", () => {
     const calledUrl = String(vi.mocked(fetch).mock.calls[0][0]);
     expect(calledUrl).toContain("/collections/products/documents");
     expect(calledUrl).toContain("truncate=true");
+  });
+});
+
+describe("POST /api/typesense/collections/:name/documents", () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it("returns 401 without session cookie", async () => {
+    const req = new NextRequest("http://localhost/api/typesense/collections/products/documents", {
+      method: "POST",
+      headers: { ...validProfileHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "doc-1", title: "Hello" }),
+    });
+    const res = await POST(req, { params: Promise.resolve({ name: "products" }) });
+    expect(res.status).toBe(401);
+  });
+
+  it("proxies POST body to Typesense documents endpoint", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: "doc-1", title: "Hello" }), { status: 201 }),
+    );
+    const body = JSON.stringify({ id: "doc-1", title: "Hello" });
+    const req = new NextRequest("http://localhost/api/typesense/collections/products/documents", {
+      method: "POST",
+      headers: {
+        Cookie: await makeAuthCookie(),
+        ...validProfileHeaders,
+        "Content-Type": "application/json",
+      },
+      body,
+    });
+    const res = await POST(req, { params: Promise.resolve({ name: "products" }) });
+    expect(res.status).toBe(201);
+    expect(String(vi.mocked(fetch).mock.calls[0][0])).toContain("/collections/products/documents");
+    expect(vi.mocked(fetch).mock.calls[0][1]).toMatchObject({
+      method: "POST",
+      body,
+      headers: expect.objectContaining({ "Content-Type": "application/json" }),
+    });
   });
 });
