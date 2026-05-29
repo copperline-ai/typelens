@@ -9,6 +9,7 @@ import {
   selectStatus,
   selectProfiles,
 } from "@/lib/stores/connection";
+import { writeProfiles } from "@/lib/storage/profile-storage";
 import { getOnboardingState, markOnboardingStep } from "@/lib/stores/onboarding";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,7 +103,10 @@ export function FirstRunOnboardingDialog() {
       return;
     }
 
-    // Connection succeeded — persist profile, set active, redirect
+    // Connection succeeded — persist profile and set active without re-running testConnection.
+    // setActiveProfile always triggers testConnection (retry loop), which resets status to
+    // "connecting" — defeating the just-verified "connected" state. Instead we set store state
+    // directly and persist via writeProfiles so the status dot stays green on redirect.
     actions.addProfile({
       name: formData.name,
       host: formData.host,
@@ -113,7 +117,12 @@ export function FirstRunOnboardingDialog() {
     const saved = useConnectionStore.getState().profiles;
     const newProfile = saved[saved.length - 1];
     if (newProfile) {
-      actions.setActiveProfile(newProfile.id);
+      useConnectionStore.setState({
+        activeProfileId: newProfile.id,
+        status: "connected",
+        lastTestedAt: new Date(),
+      });
+      await writeProfiles({ profiles: saved, activeProfileId: newProfile.id });
     }
     markOnboardingStep("connectTypesense", true);
     router.push("/collections");
