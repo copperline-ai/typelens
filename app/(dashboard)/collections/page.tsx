@@ -79,7 +79,7 @@ export default function CollectionsPage() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {activeProfile && (
+            {activeProfile && status === "connected" && (
               <Button size="icon" onClick={() => setCreateOpen(true)} title="New Collection">
                 <Plus className="h-4 w-4" />
               </Button>
