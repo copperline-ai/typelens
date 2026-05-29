@@ -148,6 +148,7 @@ export function Sidebar({ authEnabled = false }: { authEnabled?: boolean }) {
           >
             {(() => {
               const onboardingState = getOnboardingState();
+              if (onboardingState.completed) return null;
               const completedCount = Object.values(onboardingState.steps).filter(Boolean).length;
               return (
                 <button
