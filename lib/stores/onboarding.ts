@@ -22,6 +22,7 @@ export type OnboardingState = {
 export type LegacyOnboardingSteps = {
   connectTypesense: boolean;
   openSearch: boolean;
+  createCollection: boolean;
 };
 
 export type LegacyOnboardingData = {
@@ -29,28 +30,38 @@ export type LegacyOnboardingData = {
   completed: boolean;
 };
 
-const ONBOARDING_STORAGE_KEY = "typesense:onboarding-v2";
-const LEGACY_STORAGE_KEY = "typesense:onboarding";
+export const ONBOARDING_STORAGE_KEY = "typesense:onboarding";
+const LEGACY_STORAGE_KEY = ONBOARDING_STORAGE_KEY;
+
+const DEFAULT_STEPS: LegacyOnboardingSteps = {
+  connectTypesense: false,
+  openSearch: false,
+  createCollection: false,
+};
 
 function getLegacyState(): LegacyOnboardingData {
-  if (typeof window === "undefined") {
-    return { steps: { connectTypesense: false, openSearch: false }, completed: false };
+  if (typeof localStorage === "undefined") {
+    return { steps: { ...DEFAULT_STEPS }, completed: false };
   }
 
   try {
     const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) {
-      return { steps: { connectTypesense: false, openSearch: false }, completed: false };
+      return { steps: { ...DEFAULT_STEPS }, completed: false };
     }
-    const parsed = JSON.parse(raw);
-    return parsed;
+    const parsed = JSON.parse(raw) as LegacyOnboardingData;
+    // Migrate: fill in any missing step keys (e.g. createCollection added later)
+    return {
+      ...parsed,
+      steps: { ...DEFAULT_STEPS, ...parsed.steps },
+    };
   } catch {
-    return { steps: { connectTypesense: false, openSearch: false }, completed: false };
+    return { steps: { ...DEFAULT_STEPS }, completed: false };
   }
 }
 
 function setLegacyState(data: LegacyOnboardingData): void {
-  if (typeof window === "undefined") return;
+  if (typeof localStorage === "undefined") return;
   localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(data));
 }
 
@@ -73,7 +84,7 @@ export function markOnboardingStep(
 
 export function completeOnboarding(): LegacyOnboardingData {
   const updated: LegacyOnboardingData = {
-    steps: { connectTypesense: true, openSearch: true },
+    steps: { connectTypesense: true, openSearch: true, createCollection: true },
     completed: true,
   };
   setLegacyState(updated);
@@ -82,7 +93,7 @@ export function completeOnboarding(): LegacyOnboardingData {
 
 export function resetOnboarding(): LegacyOnboardingData {
   const reset: LegacyOnboardingData = {
-    steps: { connectTypesense: false, openSearch: false },
+    steps: { ...DEFAULT_STEPS },
     completed: false,
   };
   setLegacyState(reset);
